@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}AI चैटबॉट - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+{% endblock %}
+{% block content %}
+<div class="chatbot-page-wrap">
+    <div class="chatbot-header">
+        <div class="chatbot-avatar">
+            <i class="fa-solid fa-robot"></i>
+            <div class="chatbot-online-dot"></div>
+        </div>
+        <div class="chatbot-title-info">
+            <h2>Krishi AI सहायक</h2>
+            <span class="chatbot-status"><i class="fa-solid fa-circle"></i> Online — हमेशा उपलब्ध</span>
+        </div>
+        <button class="chatbot-clear-btn" id="clearChat" title="Clear chat"><i class="fa-solid fa-trash"></i></button>
+    </div>
+
+    <!-- Chat Window -->
+    <div class="chat-window" id="chatWindow">
+        <!-- Welcome Message -->
+        <div class="chat-bubble bot-bubble welcome-bubble">
+            <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="bubble-content">
+                <p>नमस्ते! 🌾 मैं आपका AI कृषि सहायक हूं।</p>
+                <p>आप मुझसे पूछ सकते हैं:</p>
+                <ul>
+                    <li>🌱 फसल रोग और इलाज</li>
+                    <li>💧 सिंचाई और खाद</li>
+                    <li>💰 मंडी भाव और बेचने की सलाह</li>
+                    <li>☁️ मौसम और खेती टिप्स</li>
+                    <li>📋 सरकारी योजनाएं</li>
+                </ul>
+            </div>
+            <span class="bubble-time">अभी</span>
+        </div>
+
+        {% if chat_history %}
+        {% for msg in chat_history %}
+        <div class="chat-bubble {{ 'user-bubble' if msg.role == 'user' else 'bot-bubble' }}">
+            {% if msg.role == 'bot' %}
+            <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+            {% endif %}
+            <div class="bubble-content">{{ msg.message }}</div>
+            {% if msg.role == 'user' %}
+            <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+            {% endif %}
+            <span class="bubble-time">{{ msg.time }}</span>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- Quick Suggestions -->
+    <div class="quick-suggestions" id="quickSuggestions">
+        <button class="suggestion-chip" onclick="sendSuggestion(this)">गेहूं में पीलापन क्यों?</button>
+        <button class="suggestion-chip" onclick="sendSuggestion(this)">आज का मंडी भाव</button>
+        <button class="suggestion-chip" onclick="sendSuggestion(this)">PM Kisan कैसे मिलेगा?</button>
+        <button class="suggestion-chip" onclick="sendSuggestion(this)">धान में कौन सी खाद डालें?</button>
+    </div>
+
+    <!-- Chat Input Bar -->
+    <div class="chat-input-bar">
+        <button class="mic-input-btn" id="micInputBtn" title="Voice input">
+            <i class="fa-solid fa-microphone"></i>
+        </button>
+        <input type="text" class="chat-text-input" id="chatInput" placeholder="संदेश लिखें... (Hindi / English)" autocomplete="off">
+        <button class="send-btn" id="sendBtn">
+            <i class="fa-solid fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+<script>
+function sendSuggestion(btn) {
+    document.getElementById('chatInput').value = btn.textContent;
+    document.getElementById('quickSuggestions').style.display = 'none';
+    sendMessage();
+}
+</script>
+{% endblock %}

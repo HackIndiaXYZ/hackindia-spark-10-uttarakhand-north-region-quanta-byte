@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}मशीनरी किराया - Krishi AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">{% endblock %}
+{% block content %}
+<div class="krishi-container">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-tractor"></i> मशीनरी किराया</h1>
+        <p class="page-sub">अपने नज़दीक ट्रैक्टर, हार्वेस्टर और अन्य मशीनें किराए पर लें</p>
+    </div>
+    <!-- Search + Filter -->
+    <div class="krishi-card search-filter-bar fade-in-up">
+        <form method="GET" action="{{ url_for('machinery') }}" class="search-form">
+            <div class="search-input-wrap">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" name="q" class="krishi-input" placeholder="मशीन खोजें..." value="{{ request.args.get('q','') }}">
+            </div>
+            <select name="type" class="krishi-input mini-select">
+                <option value="">सभी मशीनें</option>
+                <option>ट्रैक्टर</option><option>हार्वेस्टर</option>
+                <option>रोटावेटर</option><option>स्प्रेयर</option>
+                <option>थ्रेशर</option>
+            </select>
+            <button type="submit" class="btn-krishi-primary">खोजें</button>
+        </form>
+    </div>
+
+    <!-- Machinery Cards Grid -->
+    <div class="machinery-grid fade-in-up delay-1">
+        {% if machinery_list %}
+        {% for m in machinery_list %}
+        <div class="machinery-card">
+            <div class="machinery-img-wrap">
+                <img src="{{ m.image_url if m.image_url else url_for('static', filename='img/tractor-placeholder.png') }}" alt="{{ m.name }}" class="machinery-img">
+                <span class="machinery-availability {{ 'avail-yes' if m.available else 'avail-no' }}">
+                    {{ 'उपलब्ध' if m.available else 'बुक' }}
+                </span>
+            </div>
+            <div class="machinery-info">
+                <h3 class="machinery-name">{{ m.name }}</h3>
+                <div class="machinery-meta">
+                    <span><i class="fa-solid fa-location-dot"></i> {{ m.location }}</span>
+                    <span><i class="fa-solid fa-star"></i> {{ m.rating }}</span>
+                </div>
+                <div class="machinery-price">
+                    <span class="price-amount">₹{{ m.price_per_day }}</span>
+                    <span class="price-unit">/दिन</span>
+                </div>
+                <div class="machinery-owner">
+                    <i class="fa-solid fa-user"></i> {{ m.owner_name }}
+                    <a href="tel:{{ m.mobile }}" class="machinery-call-btn">
+                        <i class="fa-solid fa-phone"></i> {{ m.mobile }}
+                    </a>
+                </div>
+                <div class="machinery-actions">
+                    <a href="{{ url_for('book_machinery', id=m.id) }}" class="btn-krishi-primary {% if not m.available %}btn-disabled{% endif %}">
+                        <i class="fa-solid fa-calendar-check"></i> Rent Now
+                    </a>
+                    <button class="btn-krishi-secondary" onclick="navigator.share({title:'{{ m.name }}', text:'{{ m.location }} - ₹{{ m.price_per_day }}/day', url: window.location.href})">
+                        <i class="fa-solid fa-share"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state full-width">
+            <i class="fa-solid fa-tractor"></i>
+            <p>आपके क्षेत्र में कोई मशीन नहीं मिली</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Floating Add Button -->
+    <a href="{{ url_for('add_machinery') }}" class="fab-add-btn" title="मशीन जोड़ें">
+        <i class="fa-solid fa-plus"></i>
+        <span>मशीन जोड़ें</span>
+    </a>
+</div>
+{% endblock %}

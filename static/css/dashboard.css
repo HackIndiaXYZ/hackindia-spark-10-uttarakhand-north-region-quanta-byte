@@ -1,0 +1,241 @@
+/* =====================================================
+   dashboard.css — Krishi AI Dashboard & Analytics
+   ===================================================== */
+
+.dashboard-wrap { padding: 0 0 3rem; }
+
+/* --- Summary Grid --- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(46,125,50,0.08);
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+.summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.summary-card::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    opacity: 0.08;
+    transform: translate(20px, -20px);
+}
+.summary-card.status-safe::after { background: var(--color-success); }
+.summary-card.status-warning::after { background: var(--color-warning); }
+.summary-card.status-danger::after { background: var(--color-danger); }
+
+.summary-icon {
+    width: 46px; height: 46px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.status-safe .summary-icon { background: var(--color-success-light); color: var(--color-success); }
+.status-warning .summary-icon { background: var(--color-warning-light); color: #E65100; }
+.status-danger .summary-icon { background: var(--color-danger-light); color: var(--color-danger); }
+
+.summary-info { flex: 1; min-width: 0; }
+.summary-label { display: block; font-size: 0.76rem; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.summary-value { display: block; font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; color: var(--color-text); }
+.summary-sub { display: block; font-size: 0.76rem; color: var(--color-text-muted); margin-top: 2px; }
+
+.summary-badge {
+    padding: 0.3rem 0.6rem;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.summary-badge.safe { background: var(--color-success-light); color: var(--color-success); }
+.summary-badge.warning { background: var(--color-warning-light); color: #E65100; }
+.summary-badge.danger { background: var(--color-danger-light); color: var(--color-danger); }
+
+/* --- Charts Row --- */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.chart-card { padding: 1.25rem; }
+
+/* --- Dashboard Mid Row --- */
+.dash-mid-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Advisory Card */
+.advisory-card { }
+
+/* Disease Status Card */
+.disease-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+.disease-row:last-child { border-bottom: none; }
+.disease-thumb {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #F0F0F0;
+}
+.disease-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.disease-info { flex: 1; min-width: 0; }
+.disease-info strong { display: block; font-size: 0.88rem; font-weight: 700; }
+.disease-name { display: block; font-size: 0.78rem; color: var(--color-text-muted); }
+.disease-info small { color: var(--color-text-muted); font-size: 0.72rem; }
+
+/* --- Bottom Row --- */
+.dash-bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+/* Weather Mini */
+.weather-mini-row {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+.weather-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 60px;
+    padding: 0.75rem 0.5rem;
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    font-size: 0.78rem;
+}
+.weather-day:first-child { background: var(--color-success-light); }
+.weather-day i { font-size: 1.3rem; color: var(--color-info); }
+.weather-day b { font-weight: 700; font-size: 0.9rem; }
+.weather-day span { color: var(--color-text-muted); font-size: 0.72rem; }
+
+/* Yield Progress */
+.yield-progress-list { display: flex; flex-direction: column; gap: 0.9rem; }
+.yield-progress-item { }
+.yield-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+/* Header Date */
+.header-date {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--color-text-muted);
+    font-size: 0.82rem;
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    padding: 0.4rem 0.8rem;
+    border-radius: var(--radius-full);
+}
+
+/* --- Before/After (Yield Page) --- */
+.before-after-card { margin-bottom: 1.5rem; }
+.before-after-grid {
+    display: flex;
+    gap: 1rem;
+    align-items: stretch;
+}
+.before-col, .after-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.before-col h4, .after-col h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+.after-col h4 { color: var(--color-primary); }
+.comparison-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    font-size: 0.85rem;
+}
+.comparison-stat strong { font-weight: 700; font-size: 0.9rem; }
+.comparison-stat.highlight { background: var(--color-success-light); }
+.comparison-stat .up { color: var(--color-success); }
+.comparison-stat .down { color: var(--color-danger); }
+
+.vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    flex-shrink: 0;
+}
+.vs-divider span {
+    background: var(--color-warning);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.8rem;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.improvement-banner {
+    margin-top: 1.25rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.improvement-banner strong { color: #FFD54F; }
+
+@media (max-width: 768px) {
+    .charts-row, .dash-mid-row, .dash-bottom-row { grid-template-columns: 1fr; }
+    .before-after-grid { flex-direction: column; }
+    .vs-divider { width: 100%; height: 30px; }
+}

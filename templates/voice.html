@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Voice Advisory - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+{% endblock %}
+{% block content %}
+<div class="krishi-container voice-page-wrap">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-microphone"></i> Voice Advisory</h1>
+        <p class="page-sub">बोलकर पूछें — AI हिंदी में जवाब देगा</p>
+    </div>
+
+    <div class="voice-center-layout fade-in-up delay-1">
+        <!-- Big Mic Button -->
+        <div class="voice-mic-section">
+            <div class="voice-wave-wrap" id="voiceWaveWrap">
+                <div class="voice-wave-ring ring1"></div>
+                <div class="voice-wave-ring ring2"></div>
+                <div class="voice-wave-ring ring3"></div>
+                <button class="voice-big-mic" id="voiceMicBtn">
+                    <i class="fa-solid fa-microphone" id="micIcon"></i>
+                </button>
+            </div>
+            <p class="voice-instruction" id="voiceInstruction">माइक बटन दबाएं और बोलें</p>
+            <div class="voice-status-bar" id="voiceStatusBar" style="display:none;">
+                <div class="voice-bars">
+                    <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                    <div class="v-bar"></div><div class="v-bar"></div><div class="v-bar"></div>
+                    <div class="v-bar"></div>
+                </div>
+                <span>सुन रहा हूं...</span>
+            </div>
+        </div>
+
+        <!-- Transcript Display -->
+        <div class="krishi-card voice-transcript-card" id="transcriptCard" style="display:none;">
+            <div class="transcript-label"><i class="fa-solid fa-quote-left"></i> आपने कहा:</div>
+            <p class="transcript-text" id="transcriptText"></p>
+        </div>
+
+        <!-- AI Response Card -->
+        <div class="krishi-card voice-response-card" id="voiceResponseCard" style="display:none;">
+            <div class="response-header">
+                <div class="response-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div>
+                    <h3>AI का जवाब</h3>
+                    <button class="speak-again-btn" id="speakAgainBtn"><i class="fa-solid fa-volume-high"></i> फिर से सुनें</button>
+                </div>
+            </div>
+            <div class="response-text" id="responseText"></div>
+        </div>
+
+        <!-- Tips -->
+        <div class="voice-tips fade-in-up delay-2">
+            <h4>🎙️ ऐसे पूछें:</h4>
+            <div class="voice-tip-chips">
+                <span class="voice-chip">"मेरी गेहूं में पीले दाग हैं"</span>
+                <span class="voice-chip">"आज धान का भाव क्या है?"</span>
+                <span class="voice-chip">"PM Kisan का पैसा कब आएगा?"</span>
+                <span class="voice-chip">"कल बारिश होगी क्या?"</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const micBtn = document.getElementById('voiceMicBtn');
+const statusBar = document.getElementById('voiceStatusBar');
+const instruction = document.getElementById('voiceInstruction');
+const transcriptCard = document.getElementById('transcriptCard');
+const transcriptText = document.getElementById('transcriptText');
+const responseCard = document.getElementById('voiceResponseCard');
+const responseText = document.getElementById('responseText');
+let isRecording = false;
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+if (recognition) {
+    recognition.lang = 'hi-IN';
+    recognition.interimResults = false;
+
+    recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        transcriptText.textContent = text;
+        transcriptCard.style.display = 'block';
+        stopRecording();
+        // Send to backend
+        fetch('/voice/query', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({query: text}) })
+            .then(r => r.json()).then(d => {
+                responseText.textContent = d.response;
+                responseCard.style.display = 'block';
+                speak(d.response);
+            });
+    };
+    recognition.onend = () => stopRecording();
+}
+
+micBtn.addEventListener('click', () => {
+    if (!isRecording) {
+        isRecording = true;
+        micBtn.classList.add('recording');
+        statusBar.style.display = 'flex';
+        instruction.textContent = 'बोल रहे हैं... रुकें नहीं';
+        if (recognition) recognition.start();
+    } else {
+        stopRecording();
+        if (recognition) recognition.stop();
+    }
+});
+
+function stopRecording() {
+    isRecording = false;
+    micBtn.classList.remove('recording');
+    statusBar.style.display = 'none';
+    instruction.textContent = 'माइक बटन दबाएं और बोलें';
+}
+
+function speak(text) {
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = 'hi-IN';
+    speechSynthesis.speak(utter);
+}
+
+document.getElementById('speakAgainBtn')?.addEventListener('click', () => speak(responseText.textContent));
+</script>
+{% endblock %}

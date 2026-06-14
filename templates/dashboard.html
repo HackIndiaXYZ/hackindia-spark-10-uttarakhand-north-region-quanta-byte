@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="krishi-container dashboard-wrap">
+
+    <!-- Page Header -->
+    <div class="page-header fade-in-up">
+        <div>
+            <h1 class="page-title"><i class="fa-solid fa-chart-line"></i> मेरा डैशबोर्ड</h1>
+            <p class="page-sub">नमस्ते, {{ current_user.name if current_user else 'किसान जी' }}! आज का सारांश देखें।</p>
+        </div>
+        <div class="header-date">
+            <i class="fa-solid fa-calendar"></i>
+            <span id="currentDate"></span>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-grid fade-in-up delay-1">
+        <div class="summary-card status-safe">
+            <div class="summary-icon"><i class="fa-solid fa-seedling"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">फसल स्वास्थ्य</span>
+                <span class="summary-value">Good</span>
+                <span class="summary-sub">85% healthy</span>
+            </div>
+            <div class="summary-badge safe">✓ सुरक्षित</div>
+        </div>
+        <div class="summary-card status-warning">
+            <div class="summary-icon"><i class="fa-solid fa-cloud-rain"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">मौसम</span>
+                <span class="summary-value">28°C</span>
+                <span class="summary-sub">बादल + बारिश संभव</span>
+            </div>
+            <div class="summary-badge warning">⚠ सावधान</div>
+        </div>
+        <div class="summary-card status-safe">
+            <div class="summary-icon"><i class="fa-solid fa-rupee-sign"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">आज मंडी भाव</span>
+                <span class="summary-value">₹2,150</span>
+                <span class="summary-sub">गेहूं / क्विंटल</span>
+            </div>
+            <div class="summary-badge safe">↑ +3%</div>
+        </div>
+        <div class="summary-card status-danger">
+            <div class="summary-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">अलर्ट</span>
+                <span class="summary-value">2 New</span>
+                <span class="summary-sub">Pest warning nearby</span>
+            </div>
+            <div class="summary-badge danger">! देखें</div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="charts-row fade-in-up delay-2">
+        <div class="krishi-card chart-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-bar"></i> फसल उत्पादन (Quintal)</h3>
+                <select class="krishi-input mini-select" id="cropSelect">
+                    <option>गेहूं</option><option>धान</option><option>मक्का</option>
+                </select>
+            </div>
+            <canvas id="yieldChart" height="200"></canvas>
+        </div>
+        <div class="krishi-card chart-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-rupee-sign"></i> कमाई vs खर्च</h3>
+            </div>
+            <canvas id="profitChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Advisory + Disease Row -->
+    <div class="dash-mid-row fade-in-up delay-3">
+        <!-- AI Advisory -->
+        <div class="krishi-card advisory-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-robot"></i> AI सलाह — आज की</h3>
+                <span class="badge-green">Fresh</span>
+            </div>
+            <ul class="advisory-list">
+                <li class="advisory-item safe">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>आज सिंचाई करना सही रहेगा — मौसम साफ है</span>
+                </li>
+                <li class="advisory-item warning">
+                    <i class="fa-solid fa-exclamation-triangle"></i>
+                    <span>गेहूं में पीलापन दिख रहा हो तो Urea spray करें</span>
+                </li>
+                <li class="advisory-item danger">
+                    <i class="fa-solid fa-times-circle"></i>
+                    <span>कल बारिश संभव — कटाई रोकें</span>
+                </li>
+                <li class="advisory-item safe">
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>मंडी में गेहूं का भाव अच्छा है — बेचने का समय</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Disease Status -->
+        <div class="krishi-card disease-status-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-microscope"></i> हालिया जांच</h3>
+                <a href="{{ url_for('disease') }}" class="btn-krishi-secondary btn-sm">नई जांच</a>
+            </div>
+            {% if recent_diseases %}
+            {% for d in recent_diseases %}
+            <div class="disease-row">
+                <div class="disease-thumb">
+                    <img src="{{ d.image_url }}" alt="crop">
+                </div>
+                <div class="disease-info">
+                    <strong>{{ d.crop }}</strong>
+                    <span class="disease-name">{{ d.disease }}</span>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" style="width: {{ d.confidence }}%"></div>
+                    </div>
+                    <small>{{ d.confidence }}% confidence</small>
+                </div>
+                <span class="status-{{ 'danger' if d.severity == 'High' else 'warning' if d.severity == 'Medium' else 'safe' }}">{{ d.severity }}</span>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-camera"></i>
+                <p>अभी तक कोई जांच नहीं हुई</p>
+                <a href="{{ url_for('disease') }}" class="btn-krishi-primary btn-sm">जांच करें</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Weather + Yield Progress -->
+    <div class="dash-bottom-row fade-in-up delay-4">
+        <!-- Weather Mini -->
+        <div class="krishi-card weather-mini-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-cloud-sun"></i> मौसम — 5 दिन</h3>
+                <a href="{{ url_for('weather') }}" class="btn-krishi-secondary btn-sm">विस्तार</a>
+            </div>
+            <div class="weather-mini-row">
+                <div class="weather-day"><span>आज</span><i class="fa-solid fa-cloud-rain"></i><b>28°</b></div>
+                <div class="weather-day"><span>कल</span><i class="fa-solid fa-cloud"></i><b>26°</b></div>
+                <div class="weather-day"><span>परसों</span><i class="fa-solid fa-sun"></i><b>31°</b></div>
+                <div class="weather-day"><span>Thu</span><i class="fa-solid fa-sun"></i><b>32°</b></div>
+                <div class="weather-day"><span>Fri</span><i class="fa-solid fa-cloud-sun"></i><b>29°</b></div>
+            </div>
+        </div>
+
+        <!-- Yield Progress -->
+        <div class="krishi-card yield-progress-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-seedling"></i> फसल प्रगति</h3>
+                <a href="{{ url_for('yield_page') }}" class="btn-krishi-secondary btn-sm">पूरी रिपोर्ट</a>
+            </div>
+            <div class="yield-progress-list">
+                <div class="yield-progress-item">
+                    <div class="yield-label"><span>गेहूं</span><span>72%</span></div>
+                    <div class="progress-bar"><div class="progress-fill safe" style="width:72%"></div></div>
+                </div>
+                <div class="yield-progress-item">
+                    <div class="yield-label"><span>धान</span><span>45%</span></div>
+                    <div class="progress-bar"><div class="progress-fill warning" style="width:45%"></div></div>
+                </div>
+                <div class="yield-progress-item">
+                    <div class="yield-label"><span>मक्का</span><span>88%</span></div>
+                    <div class="progress-bar"><div class="progress-fill safe" style="width:88%"></div></div>
+                </div>
+                <div class="yield-progress-item">
+                    <div class="yield-label"><span>सरसों</span><span>30%</span></div>
+                    <div class="progress-bar"><div class="progress-fill danger" style="width:30%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+// Set date
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('hi-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+// Yield Chart
+const yieldCtx = document.getElementById('yieldChart').getContext('2d');
+new Chart(yieldCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+            label: 'उत्पादन (Q)',
+            data: [30,45,28,60,75,50,80,65,90,70,55,85],
+            backgroundColor: 'rgba(46,125,50,0.7)',
+            borderRadius: 8,
+            borderSkipped: false
+        }]
+    },
+    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+});
+
+// Profit Chart
+const profitCtx = document.getElementById('profitChart').getContext('2d');
+new Chart(profitCtx, {
+    type: 'line',
+    data: {
+        labels: ['Jan','Mar','May','Jul','Sep','Nov'],
+        datasets: [
+            { label: 'कमाई', data: [20000,35000,28000,45000,38000,55000], borderColor: '#43A047', backgroundColor: 'rgba(67,160,71,0.1)', fill: true, tension: 0.4 },
+            { label: 'खर्च', data: [12000,18000,15000,22000,19000,25000], borderColor: '#E53935', backgroundColor: 'rgba(229,57,53,0.1)', fill: true, tension: 0.4 }
+        ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}

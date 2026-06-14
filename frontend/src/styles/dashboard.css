@@ -1,0 +1,210 @@
+/* =====================================================
+   dashboard.css — Krishi AI Dashboard & Analytics
+   ===================================================== */
+
+.dashboard-wrap {
+    padding-bottom: 5rem;
+}
+
+/* Page Header Extra */
+.header-date {
+    background: #fff;
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(46,125,50,0.12);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Summary Grid */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.summary-card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(46,125,50,0.08);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-slow);
+}
+.summary-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+
+.summary-icon {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-success-light);
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.status-warning .summary-icon { background: var(--color-warning-light); color: var(--color-warning); }
+.status-danger .summary-icon { background: var(--color-danger-light); color: var(--color-danger); }
+
+.summary-info { display: flex; flex-direction: column; }
+.summary-label { font-size: 0.78rem; color: var(--color-text-muted); font-weight: 500; }
+.summary-value { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; color: var(--color-text); line-height: 1.2; margin: 2px 0; }
+.summary-sub { font-size: 0.72rem; color: var(--color-text-muted); }
+
+.summary-badge {
+    position: absolute;
+    top: 0.75rem; right: 0.75rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border-radius: var(--radius-full);
+}
+.summary-badge.safe { background: var(--color-success-light); color: var(--color-success); }
+.summary-badge.warning { background: var(--color-warning-light); color: #E65100; }
+.summary-badge.danger { background: var(--color-danger-light); color: var(--color-danger); }
+
+/* Charts Row */
+.charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+.chart-card { min-height: 280px; }
+
+/* Mid Row (Advisory + Disease) */
+.dash-mid-row {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.advisory-card { display: flex; flex-direction: column; }
+.disease-status-card { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.disease-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #F0F0F0;
+}
+.disease-row:last-child { border-bottom: none; }
+.disease-thumb { width: 44px; height: 44px; border-radius: var(--radius-sm); overflow: hidden; flex-shrink: 0; background: #e0e0e0; }
+.disease-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.disease-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.disease-info strong { font-size: 0.88rem; }
+.disease-name { font-size: 0.78rem; color: var(--color-text-muted); }
+.disease-info small { font-size: 0.7rem; color: var(--color-text-muted); }
+
+.disease-row span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-full);
+}
+.disease-row span.status-danger { background: var(--color-danger-light); color: var(--color-danger); border-left: none !important; }
+.disease-row span.status-warning { background: var(--color-warning-light); color: #E65100; border-left: none !important; }
+.disease-row span.status-safe { background: var(--color-success-light); color: var(--color-success); border-left: none !important; }
+
+/* Bottom Row (Weather + Yield Progress) */
+.dash-bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+
+/* Weather Mini */
+.weather-mini-card { }
+.weather-mini-row {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 0.5rem;
+}
+.weather-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+.weather-day span { font-size: 0.75rem; color: var(--color-text-muted); font-weight: 600; }
+.weather-day i { font-size: 1.2rem; color: var(--color-info); }
+.weather-day b { font-size: 0.88rem; color: var(--color-text); }
+
+/* Yield Progress */
+.yield-progress-card { }
+.yield-progress-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.yield-progress-item { display: flex; flex-direction: column; gap: 3px; }
+.yield-label { display: flex; justify-content: space-between; font-size: 0.82rem; font-weight: 600; color: var(--color-text); }
+
+/* Before vs After Card (Yield page) */
+.before-after-card { margin-bottom: 1.5rem; }
+.before-after-grid {
+    display: flex;
+    align-items: stretch;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+.before-col, .after-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+}
+.before-col { background: #F5F5F5; }
+.after-col { background: var(--color-success-light); border: 1.5px solid var(--color-secondary); }
+
+.before-after-grid h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; display: flex; align-items: center; gap: 0.4rem; }
+.before-col h4 { color: var(--color-text-muted); }
+.after-col h4 { color: var(--color-primary); }
+
+.comparison-stat {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.06);
+}
+.comparison-stat:last-child { border-bottom: none; }
+.comparison-stat strong { font-weight: 700; }
+.comparison-stat strong.up { color: var(--color-success); }
+.comparison-stat strong.down { color: var(--color-danger); }
+.comparison-stat.highlight { font-weight: 700; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.6rem; margin-top: 0.2rem; }
+.before-col .comparison-stat.highlight strong { color: var(--color-text); }
+.after-col .comparison-stat.highlight strong { color: var(--color-primary); font-size: 1.05rem; }
+
+.vs-divider {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: var(--color-text-muted);
+    font-size: 1.1rem;
+}
+
+.improvement-banner {
+    margin-top: 1.25rem;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    color: #fff;
+    padding: 0.8rem 1.25rem;
+    border-radius: var(--radius-md);
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    box-shadow: var(--shadow-green);
+}
