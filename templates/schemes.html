@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}सरकारी योजनाएं - Krishi AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">{% endblock %}
+{% block content %}
+<div class="krishi-container">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-file-invoice-dollar"></i> सरकारी योजनाएं</h1>
+        <p class="page-sub">किसानों के लिए सरकारी योजनाएं — सब एक जगह</p>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="scheme-tabs fade-in-up">
+        <button class="scheme-tab active" data-cat="all">सभी</button>
+        <button class="scheme-tab" data-cat="financial">💰 वित्तीय</button>
+        <button class="scheme-tab" data-cat="insurance">🛡️ बीमा</button>
+        <button class="scheme-tab" data-cat="organic">🌿 जैविक</button>
+        <button class="scheme-tab" data-cat="technology">📱 तकनीकी</button>
+    </div>
+
+    <!-- Schemes Grid -->
+    <div class="schemes-grid fade-in-up delay-1">
+        <div class="scheme-card" data-cat="financial">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #43A047, #1B5E20);">
+                <i class="fa-solid fa-hand-holding-dollar"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag financial">वित्तीय सहायता</span>
+                <h3>PM Kisan Samman Nidhi</h3>
+                <p>₹6,000 प्रति वर्ष, तीन किस्तों में सभी किसानों को</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-rupee-sign"></i> ₹6,000/साल</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="https://pmkisan.gov.in" target="_blank" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+
+        <div class="scheme-card" data-cat="insurance">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #1E88E5, #0D47A1);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag insurance">फसल बीमा</span>
+                <h3>PM Fasal Bima Yojana</h3>
+                <p>प्राकृतिक आपदा से फसल नुकसान पर बीमा — बहुत कम प्रीमियम</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-shield"></i> फसल सुरक्षा</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="https://pmfby.gov.in" target="_blank" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+
+        <div class="scheme-card" data-cat="organic">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #66BB6A, #2E7D32);">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag organic">जैविक खेती</span>
+                <h3>Paramparagat Krishi Vikas Yojana</h3>
+                <p>जैविक खेती अपनाने पर ₹50,000 प्रति हेक्टेयर की सहायता</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-rupee-sign"></i> ₹50,000/हेक्टेयर</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="#" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+
+        <div class="scheme-card" data-cat="technology">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #AB47BC, #6A1B9A);">
+                <i class="fa-solid fa-tractor"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag technology">तकनीकी</span>
+                <h3>कृषि यंत्रीकरण योजना</h3>
+                <p>कृषि उपकरण खरीदने पर 50% तक सब्सिडी</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-percent"></i> 50% सब्सिडी</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="#" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+
+        <div class="scheme-card" data-cat="financial">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #FFA726, #E65100);">
+                <i class="fa-solid fa-piggy-bank"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag financial">ऋण सहायता</span>
+                <h3>Kisan Credit Card (KCC)</h3>
+                <p>4% ब्याज पर ₹3 लाख तक का फसल ऋण</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-percent"></i> सिर्फ 4% ब्याज</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="#" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+
+        <div class="scheme-card" data-cat="organic">
+            <div class="scheme-icon-wrap" style="background: linear-gradient(135deg, #26C6DA, #00838F);">
+                <i class="fa-solid fa-seedling"></i>
+            </div>
+            <div class="scheme-content">
+                <span class="scheme-category-tag organic">बागवानी</span>
+                <h3>National Horticulture Mission</h3>
+                <p>फल, सब्जी, फूल उगाने पर विशेष अनुदान</p>
+                <div class="scheme-benefit"><i class="fa-solid fa-star"></i> विशेष अनुदान</div>
+            </div>
+            <div class="scheme-actions">
+                <a href="#" class="btn-krishi-primary btn-sm">Apply करें</a>
+                <button class="btn-krishi-secondary btn-sm">और जानें</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.scheme-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.scheme-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const cat = this.dataset.cat;
+        document.querySelectorAll('.scheme-card').forEach(card => {
+            card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'flex' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}मिट्टी जांच - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+{% endblock %}
+{% block content %}
+<div class="krishi-container upload-page-wrap">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-mountain"></i> मिट्टी जांच</h1>
+        <p class="page-sub">मिट्टी की photo से जानें — कौन सी फसल सबसे अच्छी होगी</p>
+    </div>
+    <div class="upload-layout">
+        <div class="krishi-card upload-card fade-in-up">
+            <form method="POST" action="{{ url_for('soil') }}" enctype="multipart/form-data" id="soilForm">
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-inner" id="dropInner">
+                        <div class="drop-icon soil-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <h3>मिट्टी की Photo डालें</h3>
+                        <p>या camera से सीधे लें</p>
+                        <label for="soilImage" class="btn-krishi-primary upload-btn">
+                            <i class="fa-solid fa-camera"></i> Photo चुनें
+                        </label>
+                        <input type="file" id="soilImage" name="image" accept="image/*" capture="environment" hidden>
+                    </div>
+                    <div class="image-preview-wrap" id="previewWrap" style="display:none;">
+                        <img id="imagePreview" src="" alt="Preview">
+                        <button type="button" class="remove-image-btn" id="removeImage"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fa-solid fa-location-dot"></i> जिला / स्थान</label>
+                    <input type="text" name="location" class="krishi-input" placeholder="जैसे: वाराणसी, UP">
+                </div>
+                <button type="submit" class="btn-krishi-primary full-btn">
+                    <i class="fa-solid fa-brain"></i> मिट्टी जांचें
+                </button>
+            </form>
+        </div>
+        <div class="result-section fade-in-up delay-1">
+            {% if result %}
+            <div class="krishi-card soil-result-card">
+                <div class="soil-color-display" style="background: {{ result.soil_color_hex }};">
+                    <span class="soil-color-label">{{ result.soil_color }}</span>
+                </div>
+                <div class="soil-info-grid">
+                    <div class="soil-info-item">
+                        <i class="fa-solid fa-flask"></i>
+                        <span>मिट्टी का प्रकार</span>
+                        <strong>{{ result.soil_type }}</strong>
+                    </div>
+                    <div class="soil-info-item">
+                        <i class="fa-solid fa-vial"></i>
+                        <span>pH Level</span>
+                        <strong>{{ result.ph }}</strong>
+                    </div>
+                    <div class="soil-info-item">
+                        <i class="fa-solid fa-droplet"></i>
+                        <span>नमी</span>
+                        <strong>{{ result.moisture }}</strong>
+                    </div>
+                    <div class="soil-info-item">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <span>उर्वरता</span>
+                        <strong>{{ result.fertility }}</strong>
+                    </div>
+                </div>
+                <div class="recommended-crops">
+                    <h4><i class="fa-solid fa-seedling"></i> अनुशंसित फसलें</h4>
+                    <div class="crop-tags">
+                        {% for crop in result.recommended_crops %}
+                        <span class="crop-tag">{{ crop }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="result-section-block treatment-block">
+                    <h4><i class="fa-solid fa-flask"></i> उर्वरक सलाह</h4>
+                    <p>{{ result.fertilizer_advice }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="krishi-card placeholder-result-card">
+                <div class="placeholder-inner">
+                    <i class="fa-solid fa-layer-group placeholder-icon" style="color:#8D6E63;"></i>
+                    <h3>मिट्टी की जांच करें</h3>
+                    <p>Photo upload करें और जानें अपनी मिट्टी के बारे में सब कुछ</p>
+                    <ul class="placeholder-tips">
+                        <li><i class="fa-solid fa-hand"></i> मिट्टी को हाथ में लेकर photo लें</li>
+                        <li><i class="fa-solid fa-sun"></i> धूप में photo लें</li>
+                        <li><i class="fa-solid fa-ruler"></i> 10-15cm गहरी मिट्टी लें</li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}<script src="{{ url_for('static', filename='js/upload.js') }}"></script>{% endblock %}

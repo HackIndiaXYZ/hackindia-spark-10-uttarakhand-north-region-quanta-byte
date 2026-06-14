@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}मौसम - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">
+{% endblock %}
+{% block content %}
+<div class="krishi-container">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-cloud-sun"></i> मौसम जानकारी</h1>
+        <p class="page-sub">अपने खेत का मौसम देखें और खेती की सही योजना बनाएं</p>
+    </div>
+
+    <!-- Location Bar -->
+    <div class="krishi-card location-bar fade-in-up">
+        <form method="POST" action="{{ url_for('weather') }}" class="location-form">
+            <div class="location-input-wrap">
+                <i class="fa-solid fa-location-dot"></i>
+                <input type="text" name="location" class="krishi-input" placeholder="शहर या जिला टाइप करें..." value="{{ location if location else '' }}">
+            </div>
+            <button type="submit" class="btn-krishi-primary">
+                <i class="fa-solid fa-search"></i> खोजें
+            </button>
+            <button type="button" class="btn-krishi-secondary" id="autoLocBtn">
+                <i class="fa-solid fa-crosshairs"></i> Auto
+            </button>
+        </form>
+    </div>
+
+    {% if weather %}
+    <!-- Current Weather Big Card -->
+    <div class="krishi-card current-weather-card fade-in-up delay-1">
+        <div class="weather-main">
+            <div class="weather-location-info">
+                <h2><i class="fa-solid fa-location-dot"></i> {{ weather.location }}</h2>
+                <p>{{ weather.date }}</p>
+            </div>
+            <div class="weather-temp-display">
+                <div class="weather-big-icon">
+                    {% if 'rain' in weather.condition|lower %}
+                    <i class="fa-solid fa-cloud-rain"></i>
+                    {% elif 'cloud' in weather.condition|lower %}
+                    <i class="fa-solid fa-cloud"></i>
+                    {% elif 'storm' in weather.condition|lower %}
+                    <i class="fa-solid fa-cloud-bolt"></i>
+                    {% else %}
+                    <i class="fa-solid fa-sun"></i>
+                    {% endif %}
+                </div>
+                <div class="temp-big">{{ weather.temp }}<sup>°C</sup></div>
+                <div class="condition-text">{{ weather.condition }}</div>
+            </div>
+        </div>
+        <div class="weather-details-row">
+            <div class="weather-detail-item">
+                <i class="fa-solid fa-droplet"></i>
+                <span>नमी</span>
+                <strong>{{ weather.humidity }}%</strong>
+            </div>
+            <div class="weather-detail-item">
+                <i class="fa-solid fa-wind"></i>
+                <span>हवा</span>
+                <strong>{{ weather.wind_speed }} km/h</strong>
+            </div>
+            <div class="weather-detail-item">
+                <i class="fa-solid fa-gauge"></i>
+                <span>दबाव</span>
+                <strong>{{ weather.pressure }} hPa</strong>
+            </div>
+            <div class="weather-detail-item">
+                <i class="fa-solid fa-eye"></i>
+                <span>Visibility</span>
+                <strong>{{ weather.visibility }} km</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7-Day Forecast -->
+    <div class="krishi-card forecast-card fade-in-up delay-2">
+        <h3 class="card-section-title"><i class="fa-solid fa-calendar-week"></i> 7-दिन का पूर्वानुमान</h3>
+        <div class="forecast-row">
+            {% for day in weather.forecast %}
+            <div class="forecast-day-card">
+                <span class="forecast-day-name">{{ day.day }}</span>
+                <div class="forecast-icon">
+                    {% if 'rain' in day.condition|lower %}
+                    <i class="fa-solid fa-cloud-rain"></i>
+                    {% elif 'cloud' in day.condition|lower %}
+                    <i class="fa-solid fa-cloud"></i>
+                    {% else %}
+                    <i class="fa-solid fa-sun"></i>
+                    {% endif %}
+                </div>
+                <span class="forecast-temp">{{ day.high }}° / {{ day.low }}°</span>
+                <span class="forecast-rain"><i class="fa-solid fa-umbrella"></i> {{ day.rain_chance }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Farming Advisory based on weather -->
+    <div class="krishi-card weather-advisory-card fade-in-up delay-3">
+        <h3 class="card-section-title"><i class="fa-solid fa-robot"></i> मौसम के अनुसार खेती सलाह</h3>
+        <div class="advisory-list">
+            {% for tip in weather.farming_tips %}
+            <div class="advisory-item {{ tip.type }}">
+                <i class="fa-solid {{ 'fa-check-circle' if tip.type == 'safe' else 'fa-exclamation-triangle' if tip.type == 'warning' else 'fa-times-circle' }}"></i>
+                <span>{{ tip.text }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="krishi-card weather-empty-card fade-in-up delay-1">
+        <div class="placeholder-inner">
+            <i class="fa-solid fa-cloud-sun placeholder-icon" style="color:#29B6F6;"></i>
+            <h3>अपना मौसम देखें</h3>
+            <p>ऊपर अपना शहर या जिला डालें और "Auto" बटन से automatic location भी detect हो सकती है</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('autoLocBtn').addEventListener('click', () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            fetch(`/weather/auto?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+                .then(r => r.json()).then(d => { document.querySelector('[name=location]').value = d.city; document.querySelector('.location-form').submit(); });
+        });
+    }
+});
+</script>
+{% endblock %}

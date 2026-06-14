@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2E7D32">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>{% block title %}Krishi AI - किसान सुविधा{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="krishi-navbar" id="mainNavbar">
+        <div class="navbar-inner">
+            <a href="{{ url_for('home') }}" class="navbar-brand">
+                <div class="brand-icon"><i class="fa-solid fa-seedling"></i></div>
+                <span class="brand-text">Krishi <span>AI</span></span>
+            </a>
+
+            <ul class="navbar-links" id="navLinks">
+                <li><a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> होम</a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> डैशबोर्ड</a></li>
+                <li><a href="{{ url_for('disease') }}" class="nav-link {% if request.endpoint == 'disease' %}active{% endif %}"><i class="fa-solid fa-microscope"></i> रोग पहचान</a></li>
+                <li><a href="{{ url_for('weather') }}" class="nav-link {% if request.endpoint == 'weather' %}active{% endif %}"><i class="fa-solid fa-cloud-sun"></i> मौसम</a></li>
+                <li><a href="{{ url_for('market') }}" class="nav-link {% if request.endpoint == 'market' %}active{% endif %}"><i class="fa-solid fa-store"></i> मंडी भाव</a></li>
+                <li><a href="{{ url_for('schemes') }}" class="nav-link {% if request.endpoint == 'schemes' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> योजनाएं</a></li>
+                <li><a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> प्रोफाइल</a></li>
+            </ul>
+
+            <div class="navbar-actions">
+                <a href="{{ url_for('alerts') }}" class="nav-alert-btn" title="Alerts">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="alert-dot"></span>
+                </a>
+                <button class="hamburger" id="hamburger" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Overlay -->
+    <div class="nav-overlay" id="navOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="krishi-footer">
+        <div class="footer-inner krishi-container">
+            <div class="footer-brand">
+                <div class="brand-icon small"><i class="fa-solid fa-seedling"></i></div>
+                <span>Krishi AI</span>
+            </div>
+            <p class="footer-tagline">किसान की हर ज़रूरत, एक जगह।</p>
+            <div class="footer-links">
+                <a href="#">Privacy</a>
+                <a href="#">Help</a>
+                <a href="#">Contact</a>
+            </div>
+            <p class="footer-copy">&copy; 2026 Krishi AI. Designed for Indian Farmers 🌾</p>
+        </div>
+    </footer>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+        <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+            <i class="fa-solid fa-house"></i><span>होम</span>
+        </a>
+        <a href="{{ url_for('dashboard') }}" class="mobile-nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-chart-pie"></i><span>डैशबोर्ड</span>
+        </a>
+        <a href="{{ url_for('disease') }}" class="mobile-nav-item {% if request.endpoint == 'disease' %}active{% endif %}">
+            <i class="fa-solid fa-microscope"></i><span>रोग</span>
+        </a>
+        <a href="{{ url_for('market') }}" class="mobile-nav-item {% if request.endpoint == 'market' %}active{% endif %}">
+            <i class="fa-solid fa-store"></i><span>मंडी</span>
+        </a>
+        <a href="{{ url_for('profile') }}" class="mobile-nav-item {% if request.endpoint == 'profile' %}active{% endif %}">
+            <i class="fa-solid fa-user"></i><span>मैं</span>
+        </a>
+    </nav>
+
+    <!-- Floating AI Assistant Button -->
+    <button class="floating-ai-btn" id="floatingAI" onclick="window.location='{{ url_for('chatbot') }}'" title="AI सहायक">
+        <div class="ai-pulse"></div>
+        <i class="fa-solid fa-robot"></i>
+        <span class="ai-label">AI Help</span>
+    </button>
+
+    <!-- Floating Voice Button -->
+    <button class="floating-voice-btn" id="floatingVoice" onclick="window.location='{{ url_for('voice') }}'" title="Voice Advisory">
+        <i class="fa-solid fa-microphone"></i>
+    </button>
+
+    <!-- Global JS -->
+    <script src="{{ url_for('static', filename='js/global.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

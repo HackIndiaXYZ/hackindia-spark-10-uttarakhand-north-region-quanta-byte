@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Yield Analysis - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+{% block content %}
+<div class="krishi-container dashboard-wrap">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-chart-simple"></i> Yield & Profit Analysis</h1>
+        <p class="page-sub">अपनी फसल के उत्पादन और मुनाफ़े का पूरा विश्लेषण</p>
+    </div>
+
+    <!-- Yield Summary Cards -->
+    <div class="summary-grid fade-in-up delay-1">
+        <div class="summary-card status-safe">
+            <div class="summary-icon"><i class="fa-solid fa-weight-scale"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">कुल उत्पादन</span>
+                <span class="summary-value">{{ yield_data.total_yield if yield_data else '245 Q' }}</span>
+                <span class="summary-sub">इस सीजन</span>
+            </div>
+            <div class="summary-badge safe">↑ +18%</div>
+        </div>
+        <div class="summary-card status-safe">
+            <div class="summary-icon"><i class="fa-solid fa-rupee-sign"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">कुल कमाई</span>
+                <span class="summary-value">{{ yield_data.revenue if yield_data else '₹5.2L' }}</span>
+                <span class="summary-sub">मंडी से</span>
+            </div>
+            <div class="summary-badge safe">↑ +22%</div>
+        </div>
+        <div class="summary-card status-warning">
+            <div class="summary-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">कुल खर्च</span>
+                <span class="summary-value">{{ yield_data.expenses if yield_data else '₹1.8L' }}</span>
+                <span class="summary-sub">बीज, खाद, मज़दूरी</span>
+            </div>
+            <div class="summary-badge warning">↓ -5%</div>
+        </div>
+        <div class="summary-card status-safe">
+            <div class="summary-icon"><i class="fa-solid fa-coins"></i></div>
+            <div class="summary-info">
+                <span class="summary-label">शुद्ध मुनाफ़ा</span>
+                <span class="summary-value">{{ yield_data.profit if yield_data else '₹3.4L' }}</span>
+                <span class="summary-sub">Net Profit</span>
+            </div>
+            <div class="summary-badge safe">65% Margin</div>
+        </div>
+    </div>
+
+    <!-- Before vs After -->
+    <div class="krishi-card before-after-card fade-in-up delay-2">
+        <h3 class="card-section-title"><i class="fa-solid fa-arrows-left-right"></i> पिछले साल vs इस साल</h3>
+        <div class="before-after-grid">
+            <div class="before-col">
+                <h4><i class="fa-solid fa-clock-rotate-left"></i> पिछला साल</h4>
+                <div class="comparison-stat"><span>उत्पादन</span><strong>208 Q</strong></div>
+                <div class="comparison-stat"><span>कमाई</span><strong>₹4.27L</strong></div>
+                <div class="comparison-stat"><span>खर्च</span><strong>₹1.89L</strong></div>
+                <div class="comparison-stat highlight"><span>मुनाफ़ा</span><strong>₹2.38L</strong></div>
+            </div>
+            <div class="vs-divider"><span>VS</span></div>
+            <div class="after-col">
+                <h4><i class="fa-solid fa-star"></i> इस साल (AI के साथ)</h4>
+                <div class="comparison-stat"><span>उत्पादन</span><strong class="up">245 Q ↑</strong></div>
+                <div class="comparison-stat"><span>कमाई</span><strong class="up">₹5.2L ↑</strong></div>
+                <div class="comparison-stat"><span>खर्च</span><strong class="down">₹1.8L ↓</strong></div>
+                <div class="comparison-stat highlight"><span>मुनाफ़ा</span><strong class="up">₹3.4L ↑</strong></div>
+            </div>
+        </div>
+        <div class="improvement-banner">
+            <i class="fa-solid fa-rocket"></i>
+            Krishi AI की मदद से <strong>₹1.02 लाख अतिरिक्त मुनाफ़ा</strong> इस साल!
+        </div>
+    </div>
+
+    <!-- Yield Chart -->
+    <div class="charts-row fade-in-up delay-3">
+        <div class="krishi-card chart-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-bar"></i> महीनेवार उत्पादन</h3>
+            </div>
+            <canvas id="yieldMonthChart" height="220"></canvas>
+        </div>
+        <div class="krishi-card chart-card">
+            <div class="card-header">
+                <h3><i class="fa-solid fa-chart-pie"></i> फसल योगदान</h3>
+            </div>
+            <canvas id="cropShareChart" height="220"></canvas>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+const ymCtx = document.getElementById('yieldMonthChart').getContext('2d');
+new Chart(ymCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'],
+        datasets: [
+            { label: 'इस साल', data: [20,35,15,40,55,38,65,48,72,60,45,80], backgroundColor: 'rgba(46,125,50,0.8)', borderRadius: 6 },
+            { label: 'पिछला साल', data: [15,28,12,32,42,30,55,40,60,48,38,65], backgroundColor: 'rgba(102,187,106,0.4)', borderRadius: 6 }
+        ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+});
+
+const csCtx = document.getElementById('cropShareChart').getContext('2d');
+new Chart(csCtx, {
+    type: 'doughnut',
+    data: {
+        labels: ['गेहूं', 'धान', 'मक्का', 'सरसों', 'अन्य'],
+        datasets: [{ data: [40, 25, 18, 12, 5], backgroundColor: ['#2E7D32','#66BB6A','#FFA726','#29B6F6','#AB47BC'], borderWidth: 0 }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'right' } }, cutout: '65%' }
+});
+</script>
+{% endblock %}

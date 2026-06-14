@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}अलर्ट - Krishi AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">{% endblock %}
+{% block content %}
+<div class="krishi-container">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-bell"></i> अलर्ट & सूचनाएं</h1>
+        <p class="page-sub">ज़रूरी जानकारी जो आपको जाननी चाहिए</p>
+    </div>
+
+    <!-- Alert Filter Tabs -->
+    <div class="alert-tabs fade-in-up">
+        <button class="alert-tab active" data-filter="all">सभी</button>
+        <button class="alert-tab" data-filter="danger">🔴 ख़तरा</button>
+        <button class="alert-tab" data-filter="warning">🟡 सावधान</button>
+        <button class="alert-tab" data-filter="info">🔵 जानकारी</button>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="alerts-list fade-in-up delay-1" id="alertsList">
+        {% if alerts %}
+        {% for alert in alerts %}
+        <div class="alert-notification-card alert-{{ alert.type }}" data-type="{{ alert.type }}">
+            <div class="alert-icon-wrap">
+                {% if alert.type == 'danger' %}
+                <div class="alert-pulse-icon danger"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                {% elif alert.type == 'warning' %}
+                <div class="alert-pulse-icon warning"><i class="fa-solid fa-circle-exclamation"></i></div>
+                {% else %}
+                <div class="alert-pulse-icon info"><i class="fa-solid fa-circle-info"></i></div>
+                {% endif %}
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title">{{ alert.title }}</h4>
+                <p class="alert-msg">{{ alert.message }}</p>
+                <div class="alert-meta">
+                    <span><i class="fa-solid fa-clock"></i> {{ alert.time }}</span>
+                    {% if alert.area %}<span><i class="fa-solid fa-location-dot"></i> {{ alert.area }}</span>{% endif %}
+                </div>
+            </div>
+            <button class="alert-dismiss-btn" onclick="this.closest('.alert-notification-card').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        {% endfor %}
+        {% else %}
+        <!-- Demo alerts -->
+        <div class="alert-notification-card alert-danger" data-type="danger">
+            <div class="alert-icon-wrap">
+                <div class="alert-pulse-icon danger"><i class="fa-solid fa-bug"></i></div>
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title">🐛 कीट अलर्ट — टिड्डी दल</h4>
+                <p class="alert-msg">पूर्वी उत्तर प्रदेश में टिड्डी दल की सूचना मिली है। अपनी फसलों की रक्षा करें।</p>
+                <div class="alert-meta">
+                    <span><i class="fa-solid fa-clock"></i> 2 घंटे पहले</span>
+                    <span><i class="fa-solid fa-location-dot"></i> पूर्वी UP</span>
+                </div>
+                <a href="{{ url_for('disease') }}" class="alert-action-btn">और जानें</a>
+            </div>
+            <button class="alert-dismiss-btn" onclick="this.closest('.alert-notification-card').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="alert-notification-card alert-warning" data-type="warning">
+            <div class="alert-icon-wrap">
+                <div class="alert-pulse-icon warning"><i class="fa-solid fa-cloud-bolt"></i></div>
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title">🌧️ भारी बारिश की चेतावनी</h4>
+                <p class="alert-msg">अगले 48 घंटों में भारी बारिश का अनुमान है। फसल कटाई रोकें, सिंचाई बंद करें।</p>
+                <div class="alert-meta">
+                    <span><i class="fa-solid fa-clock"></i> 5 घंटे पहले</span>
+                    <span><i class="fa-solid fa-location-dot"></i> UP, Bihar</span>
+                </div>
+            </div>
+            <button class="alert-dismiss-btn" onclick="this.closest('.alert-notification-card').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="alert-notification-card alert-info" data-type="info">
+            <div class="alert-icon-wrap">
+                <div class="alert-pulse-icon info"><i class="fa-solid fa-rupee-sign"></i></div>
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title">💰 PM Kisan नई किस्त जारी</h4>
+                <p class="alert-msg">PM Kisan Samman Nidhi की 16वीं किस्त जारी कर दी गई है। अपना खाता चेक करें।</p>
+                <div class="alert-meta">
+                    <span><i class="fa-solid fa-clock"></i> 1 दिन पहले</span>
+                </div>
+                <a href="{{ url_for('schemes') }}" class="alert-action-btn">चेक करें</a>
+            </div>
+            <button class="alert-dismiss-btn" onclick="this.closest('.alert-notification-card').style.display='none'">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.querySelectorAll('.alert-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.alert-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.alert-notification-card').forEach(card => {
+            card.style.display = (filter === 'all' || card.dataset.type === filter) ? 'flex' : 'none';
+        });
+    });
+});
+</script>
+{% endblock %}
