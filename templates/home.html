@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+{% block title %}Krishi AI - किसान का डिजिटल साथी{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="hero-content krishi-container">
+        <div class="hero-badge fade-in-up">
+            <i class="fa-solid fa-leaf"></i> AI-Powered Farming Platform
+        </div>
+        <h1 class="hero-title fade-in-up delay-1">
+            खेती को बनाएं<br>
+            <span class="hero-highlight">Smart & Profitable</span>
+        </h1>
+        <p class="hero-subtitle fade-in-up delay-2">
+            रोग पहचान · मौसम जानकारी · मंडी भाव · AI सलाह — सब कुछ एक जगह।
+        </p>
+        <div class="hero-actions fade-in-up delay-3">
+            <a href="{{ url_for('dashboard') }}" class="btn-krishi-primary hero-cta">
+                <i class="fa-solid fa-rocket"></i> Start Farming Smart
+            </a>
+            <a href="{{ url_for('chatbot') }}" class="btn-krishi-secondary hero-cta-2">
+                <i class="fa-solid fa-comments"></i> AI से पूछें
+            </a>
+        </div>
+        <div class="hero-stats fade-in-up delay-4">
+            <div class="hero-stat">
+                <span class="stat-num" data-target="50000">0</span><span>+</span>
+                <small>किसान जुड़े</small>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="stat-num" data-target="95">0</span><span>%</span>
+                <small>Accuracy</small>
+            </div>
+            <div class="hero-stat-divider"></div>
+            <div class="hero-stat">
+                <span class="stat-num" data-target="200">0</span><span>+</span>
+                <small>फसलें Cover</small>
+            </div>
+        </div>
+    </div>
+    <div class="hero-scroll-hint">
+        <i class="fa-solid fa-chevron-down"></i>
+    </div>
+</section>
+
+<!-- Alert Banner Slider -->
+<section class="alert-banner-section">
+    <div class="alert-ticker">
+        <div class="alert-ticker-label"><i class="fa-solid fa-bell"></i> ताज़ा अपडेट</div>
+        <div class="alert-ticker-content" id="alertTicker">
+            <span>🌧️ अगले 3 दिन बारिश की संभावना — सिंचाई रोकें</span>
+            <span>💰 PM Kisan की नई किस्त जारी — अभी चेक करें</span>
+            <span>🐛 पूर्वी UP में टिड्डी अलर्ट — सावधान रहें</span>
+            <span>📈 गेहूं का MSP ₹2,275/क्विंटल — बेचने का सही समय</span>
+        </div>
+    </div>
+</section>
+
+<!-- Services Grid -->
+<section class="services-section krishi-container">
+    <h2 class="section-title fade-in-up">हमारी सेवाएं <span>🌾</span></h2>
+    <p class="section-subtitle fade-in-up">किसान की हर ज़रूरत के लिए AI-powered tools</p>
+    <div class="services-grid">
+        <a href="{{ url_for('disease') }}" class="service-card fade-in-up">
+            <div class="service-icon" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
+                <i class="fa-solid fa-microscope"></i>
+            </div>
+            <h3>रोग पहचान</h3>
+            <p>फोटो से तुरंत पहचानें फसल की बीमारी</p>
+            <span class="service-tag">AI Powered</span>
+        </a>
+        <a href="{{ url_for('soil') }}" class="service-card fade-in-up delay-1">
+            <div class="service-icon" style="background: linear-gradient(135deg, #8D6E63, #5D4037);">
+                <i class="fa-solid fa-mountain"></i>
+            </div>
+            <h3>मिट्टी जांच</h3>
+            <p>मिट्टी का प्रकार और उर्वरता जानें</p>
+            <span class="service-tag">Image Analysis</span>
+        </a>
+        <a href="{{ url_for('weather') }}" class="service-card fade-in-up delay-2">
+            <div class="service-icon" style="background: linear-gradient(135deg, #29B6F6, #0277BD);">
+                <i class="fa-solid fa-cloud-sun-rain"></i>
+            </div>
+            <h3>मौसम सलाह</h3>
+            <p>7-दिन का मौसम और खेती सलाह</p>
+            <span class="service-tag">Real-time</span>
+        </a>
+        <a href="{{ url_for('chatbot') }}" class="service-card fade-in-up delay-3">
+            <div class="service-icon" style="background: linear-gradient(135deg, #AB47BC, #6A1B9A);">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <h3>AI सहायक</h3>
+            <p>24/7 कृषि विशेषज्ञ AI चैटबॉट</p>
+            <span class="service-tag">24/7 Available</span>
+        </a>
+        <a href="{{ url_for('market') }}" class="service-card fade-in-up delay-1">
+            <div class="service-icon" style="background: linear-gradient(135deg, #FFA726, #E65100);">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <h3>मंडी भाव</h3>
+            <p>लाइव मंडी भाव और ट्रेंड्स</p>
+            <span class="service-tag">Live Prices</span>
+        </a>
+        <a href="{{ url_for('machinery') }}" class="service-card fade-in-up delay-2">
+            <div class="service-icon" style="background: linear-gradient(135deg, #26C6DA, #00838F);">
+                <i class="fa-solid fa-tractor"></i>
+            </div>
+            <h3>मशीनरी किराया</h3>
+            <p>नज़दीकी ट्रैक्टर और मशीन बुक करें</p>
+            <span class="service-tag">Near You</span>
+        </a>
+        <a href="{{ url_for('schemes') }}" class="service-card fade-in-up delay-3">
+            <div class="service-icon" style="background: linear-gradient(135deg, #66BB6A, #2E7D32);">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+            </div>
+            <h3>सरकारी योजनाएं</h3>
+            <p>PM Kisan, Fasal Bima सब एक जगह</p>
+            <span class="service-tag">Government</span>
+        </a>
+        <a href="{{ url_for('voice') }}" class="service-card fade-in-up delay-1">
+            <div class="service-icon" style="background: linear-gradient(135deg, #EF5350, #B71C1C);">
+                <i class="fa-solid fa-microphone"></i>
+            </div>
+            <h3>Voice Advisory</h3>
+            <p>बोलकर पूछें, AI जवाब देगा</p>
+            <span class="service-tag">Hindi Voice</span>
+        </a>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="how-section">
+    <div class="krishi-container">
+        <h2 class="section-title fade-in-up">कैसे करें Use? <span>🤔</span></h2>
+        <div class="steps-row">
+            <div class="step-item fade-in-up">
+                <div class="step-circle">1</div>
+                <div class="step-line"></div>
+                <i class="fa-solid fa-camera step-icon"></i>
+                <h4>फोटो लें</h4>
+                <p>फसल या मिट्टी की photo खींचें</p>
+            </div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="step-item fade-in-up delay-1">
+                <div class="step-circle">2</div>
+                <i class="fa-solid fa-upload step-icon"></i>
+                <h4>Upload करें</h4>
+                <p>Photo हमारे AI को भेजें</p>
+            </div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="step-item fade-in-up delay-2">
+                <div class="step-circle">3</div>
+                <i class="fa-solid fa-brain step-icon"></i>
+                <h4>AI Analyze</h4>
+                <p>AI कुछ सेकंड में analyze करता है</p>
+            </div>
+            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+            <div class="step-item fade-in-up delay-3">
+                <div class="step-circle">4</div>
+                <i class="fa-solid fa-lightbulb step-icon"></i>
+                <h4>सलाह पाएं</h4>
+                <p>इलाज और सुझाव हिंदी में पाएं</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section krishi-container">
+    <h2 class="section-title fade-in-up">किसानों की बात <span>💬</span></h2>
+    <div class="testimonials-grid">
+        <div class="testimonial-card fade-in-up">
+            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
+            <p>"Krishi AI ने मेरी गेहूं की फसल बचाई। रोग पहचान से 3 दिन पहले ही पता चल गया।"</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">रS</div>
+                <div>
+                    <strong>रमेश सिंह</strong>
+                    <small>किसान, UP</small>
+                </div>
+                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            </div>
+        </div>
+        <div class="testimonial-card fade-in-up delay-1">
+            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
+            <p>"मंडी भाव feature से पता चला कि मेरे धान को 20% ज़्यादा rate मिल सकता है।"</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">सK</div>
+                <div>
+                    <strong>सुनीता कुमारी</strong>
+                    <small>किसान, Bihar</small>
+                </div>
+                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            </div>
+        </div>
+        <div class="testimonial-card fade-in-up delay-2">
+            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
+            <p>"Voice feature बहुत अच्छा है, पढ़ना नहीं आता तो बोलकर पूछ लेता हूं।"</p>
+            <div class="testimonial-author">
+                <div class="author-avatar">मP</div>
+                <div>
+                    <strong>मोहन पटेल</strong>
+                    <small>किसान, MP</small>
+                </div>
+                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-banner fade-in-up">
+    <div class="krishi-container cta-inner">
+        <div>
+            <h2>आज ही शुरू करें — <span>मुफ़्त में!</span></h2>
+            <p>50,000+ किसान पहले से use कर रहे हैं</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn-krishi-primary cta-btn">
+            <i class="fa-solid fa-rocket"></i> अभी शुरू करें
+        </a>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script>
+// Counter animation
+document.querySelectorAll('.stat-num').forEach(el => {
+    const target = parseInt(el.dataset.target);
+    let count = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+        count += step;
+        if (count >= target) { el.textContent = target.toLocaleString('en-IN'); clearInterval(timer); }
+        else el.textContent = Math.floor(count).toLocaleString('en-IN');
+    }, 30);
+});
+
+// Alert Ticker
+const tickerItems = document.querySelectorAll('.alert-ticker-content span');
+let tickerIndex = 0;
+function rotateTicker() {
+    tickerItems.forEach((el, i) => {
+        el.style.display = i === tickerIndex ? 'inline' : 'none';
+    });
+    tickerIndex = (tickerIndex + 1) % tickerItems.length;
+}
+rotateTicker();
+setInterval(rotateTicker, 3500);
+</script>
+{% endblock %}

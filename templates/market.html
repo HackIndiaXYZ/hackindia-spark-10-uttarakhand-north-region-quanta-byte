@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}मंडी भाव - Krishi AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">{% endblock %}
+{% block content %}
+<div class="krishi-container">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-store"></i> मंडी भाव</h1>
+        <p class="page-sub">आज के लाइव बाज़ार भाव — सही समय पर बेचें और कमाएं</p>
+    </div>
+
+    <!-- Market Search -->
+    <div class="krishi-card search-filter-bar fade-in-up">
+        <form method="GET" action="{{ url_for('market') }}" class="search-form">
+            <div class="search-input-wrap">
+                <i class="fa-solid fa-search"></i>
+                <input type="text" name="crop" class="krishi-input" placeholder="फसल खोजें..." value="{{ request.args.get('crop','') }}">
+            </div>
+            <select name="state" class="krishi-input mini-select">
+                <option value="">सभी राज्य</option>
+                <option>Uttar Pradesh</option><option>Punjab</option>
+                <option>Haryana</option><option>Bihar</option>
+                <option>Madhya Pradesh</option><option>Rajasthan</option>
+            </select>
+            <button type="submit" class="btn-krishi-primary">देखें</button>
+        </form>
+    </div>
+
+    <!-- Last Updated -->
+    <div class="market-update-bar fade-in-up">
+        <i class="fa-solid fa-clock"></i> अंतिम अपडेट: {{ last_updated if last_updated else 'आज सुबह 9:00 बजे' }}
+        <span class="live-dot"></span> Live
+    </div>
+
+    <!-- Price Cards Grid -->
+    <div class="market-grid fade-in-up delay-1">
+        {% if prices %}
+        {% for crop in prices %}
+        <div class="price-card {% if crop.is_best %}price-card-best{% endif %}">
+            {% if crop.is_best %}
+            <div class="best-price-badge"><i class="fa-solid fa-trophy"></i> Best Price</div>
+            {% endif %}
+            <div class="price-card-header">
+                <div class="crop-emoji">{{ crop.emoji }}</div>
+                <div>
+                    <h3 class="crop-name">{{ crop.name }}</h3>
+                    <span class="crop-market">{{ crop.market }}, {{ crop.state }}</span>
+                </div>
+            </div>
+            <div class="price-main">
+                <span class="price-value">₹{{ crop.price }}</span>
+                <span class="price-unit">/क्विंटल</span>
+                <span class="price-change {{ 'price-up' if crop.change > 0 else 'price-down' if crop.change < 0 else 'price-flat' }}">
+                    {{ '↑' if crop.change > 0 else '↓' if crop.change < 0 else '→' }} {{ crop.change|abs }}%
+                </span>
+            </div>
+            <div class="price-meta-row">
+                <span>Min: ₹{{ crop.min_price }}</span>
+                <span>Max: ₹{{ crop.max_price }}</span>
+                <span>MSP: ₹{{ crop.msp }}</span>
+            </div>
+            <div class="price-mini-trend">
+                <canvas id="trendChart_{{ loop.index }}" height="50"></canvas>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <!-- Demo fallback cards -->
+        {% set demo_prices = [
+            {'name':'गेहूं','emoji':'🌾','market':'Lucknow','state':'UP','price':2150,'min_price':2100,'max_price':2200,'msp':2275,'change':3,'is_best':false},
+            {'name':'धान','emoji':'🌾','market':'Patna','state':'Bihar','price':2050,'min_price':2000,'max_price':2100,'msp':2183,'change':-1,'is_best':false},
+            {'name':'मक्का','emoji':'🌽','market':'Bhopal','state':'MP','price':1850,'min_price':1800,'max_price':1920,'msp':1962,'change':5,'is_best':true},
+            {'name':'सरसों','emoji':'🌻','market':'Jaipur','state':'RJ','price':5200,'min_price':5100,'max_price':5400,'msp':5650,'change':2,'is_best':false},
+            {'name':'चना','emoji':'🟡','market':'Indore','state':'MP','price':5100,'min_price':5000,'max_price':5250,'msp':5440,'change':-2,'is_best':false},
+            {'name':'प्याज','emoji':'🧅','market':'Nasik','state':'MH','price':1200,'min_price':1100,'max_price':1350,'msp':0,'change':8,'is_best':false}
+        ] %}
+        {% for crop in demo_prices %}
+        <div class="price-card {% if crop.is_best %}price-card-best{% endif %}">
+            {% if crop.is_best %}
+            <div class="best-price-badge"><i class="fa-solid fa-trophy"></i> Best Price</div>
+            {% endif %}
+            <div class="price-card-header">
+                <div class="crop-emoji">{{ crop.emoji }}</div>
+                <div>
+                    <h3 class="crop-name">{{ crop.name }}</h3>
+                    <span class="crop-market">{{ crop.market }}, {{ crop.state }}</span>
+                </div>
+            </div>
+            <div class="price-main">
+                <span class="price-value">₹{{ crop.price }}</span>
+                <span class="price-unit">/क्विंटल</span>
+                <span class="price-change {{ 'price-up' if crop.change > 0 else 'price-down' }}">
+                    {{ '↑' if crop.change > 0 else '↓' }} {{ crop.change|abs }}%
+                </span>
+            </div>
+            <div class="price-meta-row">
+                <span>Min: ₹{{ crop.min_price }}</span>
+                <span>Max: ₹{{ crop.max_price }}</span>
+                {% if crop.msp %}<span>MSP: ₹{{ crop.msp }}</span>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

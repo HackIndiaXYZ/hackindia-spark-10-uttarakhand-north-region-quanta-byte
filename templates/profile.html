@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}मेरी प्रोफाइल - Krishi AI{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">{% endblock %}
+{% block content %}
+<div class="krishi-container profile-page-wrap">
+    <div class="page-header fade-in-up">
+        <h1 class="page-title"><i class="fa-solid fa-user-circle"></i> मेरी प्रोफाइल</h1>
+        <p class="page-sub">अपनी जानकारी अपडेट करें</p>
+    </div>
+
+    <!-- Step Progress -->
+    <div class="step-progress-bar fade-in-up">
+        <div class="step-progress-item active" data-step="1">
+            <div class="step-num">1</div><span>व्यक्तिगत</span>
+        </div>
+        <div class="step-progress-line"></div>
+        <div class="step-progress-item" data-step="2">
+            <div class="step-num">2</div><span>खेत की जानकारी</span>
+        </div>
+        <div class="step-progress-line"></div>
+        <div class="step-progress-item" data-step="3">
+            <div class="step-num">3</div><span>फसलें</span>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data" id="profileForm">
+
+        <!-- Step 1: Personal -->
+        <div class="profile-step" id="step1">
+            <div class="krishi-card fade-in-up">
+                <h3 class="card-section-title">व्यक्तिगत जानकारी</h3>
+
+                <!-- Avatar Upload -->
+                <div class="avatar-upload-section">
+                    <div class="avatar-preview" id="avatarPreview">
+                        {% if current_user and current_user.avatar %}
+                        <img src="{{ current_user.avatar }}" alt="Profile">
+                        {% else %}
+                        <i class="fa-solid fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <label for="avatarInput" class="avatar-change-btn">
+                        <i class="fa-solid fa-camera"></i> Photo Change करें
+                    </label>
+                    <input type="file" id="avatarInput" name="avatar" accept="image/*" hidden>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-user"></i> पूरा नाम</label>
+                        <input type="text" name="name" class="krishi-input" placeholder="आपका नाम" value="{{ current_user.name if current_user else '' }}" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-phone"></i> मोबाइल नंबर</label>
+                        <input type="tel" name="mobile" class="krishi-input" placeholder="10 अंक का नंबर" value="{{ current_user.mobile if current_user else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-location-dot"></i> गाँव / शहर</label>
+                        <input type="text" name="village" class="krishi-input" placeholder="गाँव का नाम" value="{{ current_user.village if current_user else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-map"></i> जिला</label>
+                        <input type="text" name="district" class="krishi-input" placeholder="जिला" value="{{ current_user.district if current_user else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-flag"></i> राज्य</label>
+                        <select name="state" class="krishi-input">
+                            <option>Uttar Pradesh</option><option>Punjab</option><option>Haryana</option>
+                            <option>Bihar</option><option>Madhya Pradesh</option><option>Rajasthan</option>
+                            <option>Maharashtra</option><option>Gujarat</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-language"></i> भाषा</label>
+                        <select name="language" class="krishi-input">
+                            <option value="hi">हिंदी</option>
+                            <option value="pa">ਪੰਜਾਬੀ</option>
+                            <option value="mr">मराठी</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="step-nav-btns">
+                    <button type="button" class="btn-krishi-primary" onclick="goToStep(2)">अगला <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Farm Info -->
+        <div class="profile-step" id="step2" style="display:none;">
+            <div class="krishi-card fade-in-up">
+                <h3 class="card-section-title">खेत की जानकारी</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-ruler-combined"></i> जमीन (एकड़ में)</label>
+                        <input type="number" name="land_acres" class="krishi-input" placeholder="जैसे: 5" value="{{ current_user.land_acres if current_user else '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-droplet"></i> सिंचाई का तरीका</label>
+                        <select name="irrigation" class="krishi-input">
+                            <option>नहर (Canal)</option>
+                            <option>बोरवेल (Borewell)</option>
+                            <option>वर्षा (Rainwater)</option>
+                            <option>Drip Irrigation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-layer-group"></i> मिट्टी का प्रकार</label>
+                        <select name="soil_type" class="krishi-input">
+                            <option>काली मिट्टी</option>
+                            <option>लाल मिट्टी</option>
+                            <option>बलुई मिट्टी</option>
+                            <option>दोमट मिट्टी</option>
+                            <option>जलोढ़ मिट्टी</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-tractor"></i> खुद का ट्रैक्टर है?</label>
+                        <div class="radio-group">
+                            <label class="radio-option"><input type="radio" name="own_tractor" value="yes"> हाँ</label>
+                            <label class="radio-option"><input type="radio" name="own_tractor" value="no"> नहीं</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="step-nav-btns">
+                    <button type="button" class="btn-krishi-secondary" onclick="goToStep(1)"><i class="fa-solid fa-arrow-left"></i> पिछला</button>
+                    <button type="button" class="btn-krishi-primary" onclick="goToStep(3)">अगला <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Crops -->
+        <div class="profile-step" id="step3" style="display:none;">
+            <div class="krishi-card fade-in-up">
+                <h3 class="card-section-title">मुख्य फसलें</h3>
+                <div class="crop-select-grid">
+                    {% for crop in ['गेहूं','धान','मक्का','सरसों','गन्ना','टमाटर','आलू','प्याज','मिर्च','चना','सोयाबीन','कपास'] %}
+                    <label class="crop-check-item">
+                        <input type="checkbox" name="crops" value="{{ crop }}"
+                               {% if current_user and crop in current_user.crops %}checked{% endif %}>
+                        <span class="crop-check-label">{{ crop }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+                <div class="step-nav-btns">
+                    <button type="button" class="btn-krishi-secondary" onclick="goToStep(2)"><i class="fa-solid fa-arrow-left"></i> पिछला</button>
+                    <button type="submit" class="btn-krishi-primary">
+                        <i class="fa-solid fa-save"></i> सेव करें
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function goToStep(step) {
+    document.querySelectorAll('.profile-step').forEach((s,i) => s.style.display = (i+1 === step) ? 'block' : 'none');
+    document.querySelectorAll('.step-progress-item').forEach((s,i) => {
+        s.classList.toggle('active', i+1 <= step);
+        s.classList.toggle('completed', i+1 < step);
+    });
+}
+// Avatar preview
+document.getElementById('avatarInput').addEventListener('change', function() {
+    const reader = new FileReader();
+    reader.onload = e => { document.getElementById('avatarPreview').innerHTML = `<img src="${e.target.result}" alt="Avatar">`; };
+    reader.readAsDataURL(this.files[0]);
+});
+</script>
+{% endblock %}
