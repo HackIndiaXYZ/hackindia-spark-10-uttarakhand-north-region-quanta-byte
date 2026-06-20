@@ -9,8 +9,23 @@
     const chatInput   = document.getElementById('chatInput');
     const sendBtn     = document.getElementById('sendBtn');
     const micInputBtn = document.getElementById('micInputBtn');
+    const uploadBtn   = document.getElementById('uploadBtn');
+    const imageUpload = document.getElementById('imageUpload');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const removeImageBtn = document.getElementById('removeImageBtn');
     const clearBtn    = document.getElementById('clearChat');
     const suggestions = document.getElementById('quickSuggestions');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const chatSidebar = document.getElementById('chatSidebar');
+
+    let currentImageData = null;
+
+    if (sidebarToggle && chatSidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            chatSidebar.classList.toggle('open');
+        });
+    }
 
     if (!chatWindow || !chatInput) return;
 
@@ -22,14 +37,22 @@
     // ==============================
     window.sendMessage = function () {
         const message = chatInput.value.trim();
-        if (!message || isTyping) return;
+        if ((!message && !currentImageData) || isTyping) return;
 
         // Hide suggestions
         if (suggestions) suggestions.style.display = 'none';
 
         // Add user bubble
-        appendBubble(message, 'user');
+        appendBubble(message, 'user', false, currentImageData);
+        
+        const payloadData = { 
+            message: message, 
+            session_id: window.ACTIVE_SESSION_ID,
+            image_data: currentImageData 
+        };
+
         chatInput.value = '';
+        removeImageBtn?.click(); // Clear image preview
         sendBtn.disabled = true;
 
         // Show typing
@@ -39,7 +62,7 @@
         fetch('/chatbot/query', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message, session_id: getSessionId() })
+            body: JSON.stringify(payloadData)
         })
         .then(r => {
             if (!r.ok) throw new Error('Network error');
@@ -47,6 +70,9 @@
         })
         .then(data => {
             hideTyping();
+            if (data.session_id) {
+                window.ACTIVE_SESSION_ID = data.session_id;
+            }
             const response = data.response || 'माफ़ कीजिए, कुछ गड़बड़ हुई। दोबारा कोशिश करें।';
             appendBubble(response, 'bot');
         })
@@ -57,34 +83,45 @@
         .finally(() => {
             sendBtn.disabled = false;
             chatInput.focus();
+            checkInputState();
         });
     };
 
     // ==============================
     // APPEND CHAT BUBBLE
     // ==============================
-    function appendBubble(text, role, isError = false) {
+    function appendBubble(text, role, isError = false, imageData = null) {
         const bubble = document.createElement('div');
         bubble.className = `chat-bubble ${role === 'user' ? 'user-bubble' : 'bot-bubble'}`;
 
         const now = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
 
         if (role === 'bot') {
-            const rawText = text.replace(/<[^>]*>?/gm, ''); // Remove HTML tags for speech
+            const rawText = text.replace(/<[^>]*>?/gm, '').replace(/[*#]/g, ''); // Remove HTML tags and markdown symbols for speech
             bubble.innerHTML = `
                 <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
                 <div class="bubble-content ${isError ? 'error-bubble' : ''}">
                     ${formatBotMessage(text)}
-                    <button class="tts-btn" onclick="playVoice('${rawText.replace(/'/g, "\\'")}')" title="Listen to response">
+                    <button class="tts-btn" title="Listen to response">
                         <i class="fa-solid fa-volume-high"></i>
                     </button>
                 </div>
                 <span class="bubble-time">${now}</span>
             `;
+            const btn = bubble.querySelector('.tts-btn');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    playVoice(rawText, this);
+                });
+            }
         } else {
+            let imgHtml = '';
+            if (imageData) {
+                imgHtml = `<img src="${imageData}" class="chat-image" alt="Uploaded Image">`;
+            }
             bubble.innerHTML = `
-                <div class="bubble-content">${escapeHtml(text)}</div>
                 <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+                <div class="bubble-content">${imgHtml}${escapeHtml(text)}</div>
                 <span class="bubble-time">${now}</span>
             `;
         }
@@ -158,8 +195,12 @@
     }
 
     // ==============================
-    // EVENT LISTENERS
+    // EVENT LISTENERS & IMAGE UPLOAD
     // ==============================
+    function checkInputState() {
+        sendBtn.disabled = !(chatInput.value.trim() || currentImageData);
+    }
+
     if (sendBtn) {
         sendBtn.addEventListener('click', sendMessage);
     }
@@ -171,21 +212,49 @@
                 sendMessage();
             }
         });
+        chatInput.addEventListener('input', checkInputState);
+    }
 
-        chatInput.addEventListener('input', function () {
-            sendBtn.disabled = !this.value.trim();
+    if (uploadBtn && imageUpload) {
+        uploadBtn.addEventListener('click', () => imageUpload.click());
+        
+        imageUpload.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImageData = e.target.result;
+                    if (imagePreview && imagePreviewContainer) {
+                        imagePreview.src = currentImageData;
+                        imagePreviewContainer.style.display = 'flex';
+                    }
+                    checkInputState();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    if (removeImageBtn) {
+        removeImageBtn.addEventListener('click', () => {
+            currentImageData = null;
+            if (imageUpload) imageUpload.value = '';
+            if (imagePreviewContainer) imagePreviewContainer.style.display = 'none';
+            checkInputState();
         });
     }
 
     if (clearBtn) {
         clearBtn.addEventListener('click', () => {
-            if (!confirm('Chat history clear करें?')) return;
-            // Remove all bubbles except welcome
-            const bubbles = chatWindow.querySelectorAll('.chat-bubble:not(.welcome-bubble)');
-            bubbles.forEach(b => b.remove());
-            if (suggestions) suggestions.style.display = 'flex';
+            if (!confirm('Clear this chat?')) return;
             // Clear server session
-            fetch('/chatbot/clear', { method: 'POST' }).catch(() => {});
+            fetch('/chatbot/clear', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: window.ACTIVE_SESSION_ID })
+            }).then(() => {
+                window.location.href = '/chatbot'; // Reload to start fresh
+            }).catch(() => {});
         });
     }
 
@@ -247,17 +316,7 @@
         micInputBtn.disabled = true;
     }
 
-    // ==============================
-    // SESSION ID
-    // ==============================
-    function getSessionId() {
-        let id = sessionStorage.getItem('krishi_chat_session');
-        if (!id) {
-            id = 'sess_' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem('krishi_chat_session', id);
-        }
-        return id;
-    }
+    // Session handling is now purely server-side with ACTIVE_SESSION_ID
 
     // ==============================
     // AUTO SCROLL ON LOAD
@@ -290,10 +349,30 @@ window.sendSuggestion = function (btn) {
 // ==============================
 // TEXT TO SPEECH (Voice Playback)
 // ==============================
-window.playVoice = function(text) {
+window.playVoice = function(text, btnElement) {
+    if (!window.speechSynthesis) return;
+
+    if (btnElement && btnElement.classList.contains('playing')) {
+        window.speechSynthesis.cancel();
+        return;
+    }
+
     // Cancel any ongoing speech
     window.speechSynthesis.cancel();
     
+    // Reset all buttons
+    document.querySelectorAll('.tts-btn').forEach(btn => {
+        btn.classList.remove('playing');
+        const icon = btn.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-volume-high';
+    });
+
+    if (btnElement) {
+        btnElement.classList.add('playing');
+        const icon = btnElement.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-spinner fa-spin'; // Loading state
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'hi-IN'; // Default to Hindi
     utterance.rate = 1.0;
@@ -305,6 +384,29 @@ window.playVoice = function(text) {
     if (hindiVoice) {
         utterance.voice = hindiVoice;
     }
+    
+    utterance.onstart = function() {
+        if (btnElement) {
+            const icon = btnElement.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-stop';
+        }
+    };
+    
+    utterance.onend = function() {
+        if (btnElement) {
+            btnElement.classList.remove('playing');
+            const icon = btnElement.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-volume-high';
+        }
+    };
+
+    utterance.onerror = function() {
+        if (btnElement) {
+            btnElement.classList.remove('playing');
+            const icon = btnElement.querySelector('i');
+            if (icon) icon.className = 'fa-solid fa-volume-high';
+        }
+    };
     
     window.speechSynthesis.speak(utterance);
 };

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Voice Advisory - Krishi AI{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}?v=4.0">
 {% endblock %}
 {% block content %}
 <div class="krishi-container voice-page-wrap">
@@ -87,11 +87,17 @@ if (recognition) {
         transcriptCard.style.display = 'block';
         stopRecording();
         // Send to backend
-        fetch('/voice/query', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({query: text}) })
+        fetch('/chatbot/query', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({message: text}) })
             .then(r => r.json()).then(d => {
-                responseText.textContent = d.response;
+                // Convert simple markdown for display
+                const htmlResponse = d.response
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                responseText.innerHTML = htmlResponse;
                 responseCard.style.display = 'block';
-                speak(d.response);
+                // Remove markdown symbols for speech
+                const rawSpeechText = d.response.replace(/[*#]/g, '');
+                speak(rawSpeechText);
             });
     };
     recognition.onend = () => stopRecording();

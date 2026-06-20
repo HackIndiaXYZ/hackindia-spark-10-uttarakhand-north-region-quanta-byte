@@ -1,79 +1,126 @@
 {% extends "base.html" %}
 {% block title %}AI चैटबॉट - Krishi AI{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chatbot.css') }}?v=6.0">
 {% endblock %}
 {% block content %}
-<div class="chatbot-page-wrap">
-    <div class="chatbot-header">
-        <div class="chatbot-avatar">
-            <i class="fa-solid fa-robot"></i>
-            <div class="chatbot-online-dot"></div>
+<div class="chat-layout">
+    <!-- Sidebar for Chat History -->
+    <aside class="chat-sidebar" id="chatSidebar">
+        <div class="sidebar-header">
+            <h3>पुरानी चैट्स</h3>
+            <a href="{{ url_for('chatbot', new=1) }}" class="new-chat-btn"><i class="fa-solid fa-plus"></i> नई चैट</a>
         </div>
-        <div class="chatbot-title-info">
-            <h2>Krishi AI सहायक</h2>
-            <span class="chatbot-status"><i class="fa-solid fa-circle"></i> Online — हमेशा उपलब्ध</span>
+        <div class="session-list">
+            {% if sessions %}
+                {% for session in sessions %}
+                <a href="{{ url_for('chatbot', session_id=session.session_id) }}" class="session-item {% if active_session and active_session.id == session.id %}active{% endif %}">
+                    <i class="fa-regular fa-message"></i> {{ session.title }}
+                </a>
+                {% endfor %}
+            {% else %}
+                <p class="no-history">अभी कोई चैट नहीं है।</p>
+            {% endif %}
         </div>
-        <button class="chatbot-clear-btn" id="clearChat" title="Clear chat"><i class="fa-solid fa-trash"></i></button>
-    </div>
+    </aside>
 
-    <!-- Chat Window -->
-    <div class="chat-window" id="chatWindow">
-        <!-- Welcome Message -->
-        <div class="chat-bubble bot-bubble welcome-bubble">
-            <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
-            <div class="bubble-content">
-                <p>नमस्ते! 🌾 मैं आपका AI कृषि सहायक हूं।</p>
-                <p>आप मुझसे पूछ सकते हैं:</p>
-                <ul>
-                    <li>🌱 फसल रोग और इलाज</li>
-                    <li>💧 सिंचाई और खाद</li>
-                    <li>💰 मंडी भाव और बेचने की सलाह</li>
-                    <li>☁️ मौसम और खेती टिप्स</li>
-                    <li>📋 सरकारी योजनाएं</li>
-                </ul>
+    <div class="chatbot-page-wrap">
+        <div class="chatbot-header">
+            <button class="sidebar-toggle-btn" id="sidebarToggle" title="Toggle Sidebar">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="chatbot-avatar">
+                <i class="fa-solid fa-robot"></i>
+                <div class="chatbot-online-dot"></div>
             </div>
-            <span class="bubble-time">अभी</span>
+            <div class="chatbot-title-info">
+                <h2>Krishi AI सहायक</h2>
+                <span class="chatbot-status"><i class="fa-solid fa-circle"></i> Online — हमेशा उपलब्ध</span>
+            </div>
+            <button class="chatbot-clear-btn" id="clearChat" title="Clear current chat"><i class="fa-solid fa-trash"></i></button>
         </div>
 
-        {% if chat_history %}
-        {% for msg in chat_history %}
-        <div class="chat-bubble {{ 'user-bubble' if msg.role == 'user' else 'bot-bubble' }}">
-            {% if msg.role == 'bot' %}
-            <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+        <!-- Chat Window -->
+        <div class="chat-window" id="chatWindow">
+            {% if not chat_history %}
+            <!-- Welcome Message (Only show if new chat) -->
+            <div class="chat-bubble bot-bubble welcome-bubble">
+                <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="bubble-content">
+                    <p>नमस्ते! 🌾 मैं आपका AI कृषि सहायक हूं।</p>
+                    <p>आप मुझसे पूछ सकते हैं:</p>
+                    <ul>
+                        <li>🌱 फसल रोग और इलाज</li>
+                        <li>💧 सिंचाई और खाद</li>
+                        <li>💰 मंडी भाव और बेचने की सलाह</li>
+                        <li>☁️ मौसम और खेती टिप्स</li>
+                        <li>📋 सरकारी योजनाएं</li>
+                    </ul>
+                    <p><em>आप कैमरे 📸 के बटन पर क्लिक करके फसल या कीड़ों की फोटो भी भेज सकते हैं!</em></p>
+                </div>
+                <span class="bubble-time">अभी</span>
+            </div>
             {% endif %}
-            <div class="bubble-content">{{ msg.message }}</div>
-            {% if msg.role == 'user' %}
-            <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+
+            {% if chat_history %}
+            {% for msg in chat_history %}
+            <div class="chat-bubble {{ 'user-bubble' if msg.role == 'user' else 'bot-bubble' }}">
+                {% if msg.role == 'bot' %}
+                <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+                {% elif msg.role == 'user' %}
+                <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+                {% endif %}
+                <div class="bubble-content">
+                    {% if msg.image_data %}
+                    <img src="{{ msg.image_data }}" class="chat-image" alt="Uploaded Image">
+                    {% endif %}
+                    {{ msg.message }}
+                </div>
+                <span class="bubble-time">{{ msg.time }}</span>
+            </div>
+            {% endfor %}
             {% endif %}
-            <span class="bubble-time">{{ msg.time }}</span>
         </div>
-        {% endfor %}
+
+        <!-- Quick Suggestions -->
+        {% if not chat_history %}
+        <div class="quick-suggestions" id="quickSuggestions">
+            <button class="suggestion-chip" onclick="sendSuggestion(this)">गेहूं में पीलापन क्यों?</button>
+            <button class="suggestion-chip" onclick="sendSuggestion(this)">आज का मंडी भाव</button>
+            <button class="suggestion-chip" onclick="sendSuggestion(this)">PM Kisan कैसे मिलेगा?</button>
+            <button class="suggestion-chip" onclick="sendSuggestion(this)">धान में कौन सी खाद डालें?</button>
+        </div>
         {% endif %}
-    </div>
 
-    <!-- Quick Suggestions -->
-    <div class="quick-suggestions" id="quickSuggestions">
-        <button class="suggestion-chip" onclick="sendSuggestion(this)">गेहूं में पीलापन क्यों?</button>
-        <button class="suggestion-chip" onclick="sendSuggestion(this)">आज का मंडी भाव</button>
-        <button class="suggestion-chip" onclick="sendSuggestion(this)">PM Kisan कैसे मिलेगा?</button>
-        <button class="suggestion-chip" onclick="sendSuggestion(this)">धान में कौन सी खाद डालें?</button>
-    </div>
+        <!-- Image Preview Container -->
+        <div id="imagePreviewContainer" style="display: none;">
+            <img id="imagePreview" src="" alt="Preview">
+            <button id="removeImageBtn" title="Remove image"><i class="fa-solid fa-times"></i></button>
+        </div>
 
-    <!-- Chat Input Bar -->
-    <div class="chat-input-bar">
-        <button class="mic-input-btn" id="micInputBtn" title="Voice input">
-            <i class="fa-solid fa-microphone"></i>
-        </button>
-        <input type="text" class="chat-text-input" id="chatInput" placeholder="संदेश लिखें... (Hindi / English)" autocomplete="off">
-        <button class="send-btn" id="sendBtn">
-            <i class="fa-solid fa-paper-plane"></i>
-        </button>
+        <!-- Chat Input Bar -->
+        <div class="chat-input-bar">
+            <button class="mic-input-btn" id="micInputBtn" title="Voice input">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button class="upload-btn" id="uploadBtn" title="Upload Image">
+                <i class="fa-solid fa-camera"></i>
+            </button>
+            <input type="file" id="imageUpload" accept="image/*" style="display:none">
+            <input type="text" class="chat-text-input" id="chatInput" placeholder="संदेश लिखें... (Hindi / English)" autocomplete="off">
+            <button class="send-btn" id="sendBtn">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
     </div>
 </div>
+<!-- Global variable for session ID -->
+<script>
+    window.ACTIVE_SESSION_ID = "{{ active_session.session_id if active_session else '' }}";
+</script>
 {% endblock %}
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}?v=5.0"></script>
 <script>
 function sendSuggestion(btn) {
     document.getElementById('chatInput').value = btn.textContent;

@@ -1,7 +1,10 @@
 import logging
 import random
 import string
-from datetime import datetime
+import os
+import uuid
+import base64
+from datetime import datetime, timedelta
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -60,6 +63,23 @@ class Farmer(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+class ChatSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    farmer_id = db.Column(db.Integer, db.ForeignKey('farmer.id'), nullable=False)
+    session_id = db.Column(db.String(50), unique=True, nullable=False)
+    title = db.Column(db.String(100), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    messages = db.relationship('ChatMessage', backref='session', lazy=True, cascade="all, delete-orphan")
+
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('chat_session.id'), nullable=False)
+    role = db.Column(db.String(10), nullable=False) # 'user' or 'bot'
+    content = db.Column(db.Text, nullable=False)
+    image_data = db.Column(db.Text, nullable=True) # Base64 string
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -198,38 +218,110 @@ def weather():
 @login_required
 def chatbot():
     logger.info("Accessed Chatbot page")
-    return render_template('chatbot.html')
+    sessions = ChatSession.query.filter_by(farmer_id=current_user.id).order_by(ChatSession.created_at.desc()).all()
+    
+    active_session = None
+    chat_history = []
+    
+    session_id_param = request.args.get('session_id')
+    is_new = request.args.get('new')
+    
+    if is_new:
+        active_session = None
+    elif session_id_param:
+        active_session = ChatSession.query.filter_by(session_id=session_id_param, farmer_id=current_user.id).first()
+    elif sessions:
+        active_session = sessions[0]
+        
+    if active_session:
+        messages = ChatMessage.query.filter_by(session_id=active_session.id).order_by(ChatMessage.created_at.asc()).all()
+        for msg in messages:
+            ist_time = msg.created_at + timedelta(hours=5, minutes=30)
+            time_str = ist_time.strftime('%I:%M %p')
+            chat_history.append({
+                'role': msg.role,
+                'message': msg.content,
+                'time': time_str,
+                'image_data': msg.image_data
+            })
+            
+    return render_template('chatbot.html', sessions=sessions, active_session=active_session, chat_history=chat_history)
 
 @app.route('/chatbot/query', methods=['POST'])
 @login_required
 def chatbot_query():
     data = request.get_json() or {}
-    message = data.get('message', '').lower()
+    message = data.get('message', '').strip()
+    client_session_id = data.get('session_id')
+    image_data = data.get('image_data')
     
-    # Check for empty message
-    if not message:
-        return jsonify({'response': "कृपया अपना सवाल पूछें।"})
+    if not message and not image_data:
+        return jsonify({'response': "कृपया अपना सवाल पूछें या फोटो भेजें।"})
         
+    chat_session = None
+    if client_session_id:
+        chat_session = ChatSession.query.filter_by(session_id=client_session_id, farmer_id=current_user.id).first()
+        
+    if not chat_session:
+        if not client_session_id:
+            client_session_id = str(uuid.uuid4())
+            
+        title = message[:30] + "..." if len(message) > 30 else message
+        if not message and image_data:
+            title = "Image Upload"
+            
+        chat_session = ChatSession(farmer_id=current_user.id, session_id=client_session_id, title=title)
+        db.session.add(chat_session)
+        db.session.commit()
+        
+    user_msg = ChatMessage(session_id=chat_session.id, role='user', content=message, image_data=image_data)
+    db.session.add(user_msg)
+    db.session.commit()
+    
     try:
         api_key = os.environ.get("GEMINI_API_KEY")
         if api_key:
             genai.configure(api_key=api_key)
         else:
             logger.warning("GEMINI_API_KEY not found in environment variables.")
+            
         model = genai.GenerativeModel('gemini-3.5-flash')
         prompt = f"You are Krishi AI, an AI assistant for Indian farmers. Answer the following question helpfully and concisely in the language it was asked (mostly Hindi or English). Focus on agriculture, weather, crops, market prices, and government schemes. Keep answers brief (2-4 sentences max) and do not use markdown except for basic bolding. Question: {message}"
         
-        response = model.generate_content(prompt)
+        contents = []
+        if image_data:
+            try:
+                mime_type, base64_data = image_data.split(';base64,')
+                mime_type = mime_type.replace('data:', '')
+                image_bytes = base64.b64decode(base64_data)
+                contents.append({'mime_type': mime_type, 'data': image_bytes})
+            except Exception as e:
+                logger.error(f"Error decoding image data: {e}")
+                
+        contents.append(prompt)
+        
+        response = model.generate_content(contents)
         ai_response = response.text
     except Exception as e:
         logger.error(f"Gemini API Error: {e}")
         ai_response = "माफ़ कीजिए, अभी AI जवाब देने में असमर्थ है। कृपया थोड़ी देर बाद प्रयास करें।"
         
-    return jsonify({'response': ai_response})
+    bot_msg = ChatMessage(session_id=chat_session.id, role='bot', content=ai_response)
+    db.session.add(bot_msg)
+    db.session.commit()
+        
+    return jsonify({'response': ai_response, 'session_id': chat_session.session_id})
 
 @app.route('/chatbot/clear', methods=['POST'])
 @login_required
 def chatbot_clear():
+    data = request.get_json() or {}
+    client_session_id = data.get('session_id')
+    if client_session_id:
+        chat_session = ChatSession.query.filter_by(session_id=client_session_id, farmer_id=current_user.id).first()
+        if chat_session:
+            db.session.delete(chat_session)
+            db.session.commit()
     return jsonify({'status': 'success'})
 
 @app.route('/voice')
