@@ -99,7 +99,7 @@
         if (role === 'bot') {
             const rawText = text.replace(/<[^>]*>?/gm, '').replace(/[*#]/g, ''); // Remove HTML tags and markdown symbols for speech
             bubble.innerHTML = `
-                <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="bubble-avatar"><img src="/static/img/robot.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>
                 <div class="bubble-content ${isError ? 'error-bubble' : ''}">
                     ${formatBotMessage(text)}
                     <button class="tts-btn" title="Listen to response">
@@ -119,8 +119,9 @@
             if (imageData) {
                 imgHtml = `<img src="${imageData}" class="chat-image" alt="Uploaded Image">`;
             }
+            let userAvatarHtml = window.USER_AVATAR ? `<img src="${window.USER_AVATAR}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : `<i class="fa-solid fa-user"></i>`;
             bubble.innerHTML = `
-                <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+                <div class="bubble-avatar user-av">${userAvatarHtml}</div>
                 <div class="bubble-content">${imgHtml}${escapeHtml(text)}</div>
                 <span class="bubble-time">${now}</span>
             `;
@@ -148,7 +149,7 @@
         typingBubble.className = 'chat-bubble bot-bubble typing-bubble';
         typingBubble.id = 'typingIndicator';
         typingBubble.innerHTML = `
-            <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+            <div class="bubble-avatar"><img src="/static/img/robot.jpg" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>
             <div class="bubble-content">
                 <div class="typing-dots">
                     <span></span><span></span><span></span>
@@ -317,6 +318,32 @@
     }
 
     // Session handling is now purely server-side with ACTIVE_SESSION_ID
+
+    // ==============================
+    // FORMAT EXISTING HISTORY
+    // ==============================
+    document.querySelectorAll('.bot-bubble .bubble-content[data-raw]').forEach(contentDiv => {
+        const rawText = contentDiv.getAttribute('data-raw');
+        const cleanText = rawText.replace(/<[^>]*>?/gm, '').replace(/[*#]/g, '');
+        
+        const img = contentDiv.querySelector('img');
+        const imgHtml = img ? img.outerHTML : '';
+        
+        contentDiv.innerHTML = `
+            ${imgHtml}
+            ${formatBotMessage(rawText)}
+            <button class="tts-btn" title="Listen to response">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+        `;
+        
+        const btn = contentDiv.querySelector('.tts-btn');
+        if (btn) {
+            btn.addEventListener('click', function() {
+                playVoice(cleanText, this);
+            });
+        }
+    });
 
     // ==============================
     // AUTO SCROLL ON LOAD

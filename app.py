@@ -12,6 +12,7 @@ load_dotenv()
 import google.generativeai as genai
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 # Configure basic logging
 logging.basicConfig(
@@ -45,6 +46,8 @@ class Farmer(UserMixin, db.Model):
     village = db.Column(db.String(100), nullable=True)
     district = db.Column(db.String(100), nullable=True)
     state = db.Column(db.String(100), nullable=True)
+    pincode = db.Column(db.String(10), nullable=True)
+    avatar = db.Column(db.String(255), nullable=True)
     language = db.Column(db.String(20), nullable=True)
     
     # Farm Info
@@ -348,10 +351,19 @@ def profile():
     if request.method == 'POST':
         # Update user details
         current_user.name = request.form.get('name', current_user.name)
-        current_user.mobile_no = request.form.get('mobile', current_user.mobile_no)
+        
+        new_mobile = request.form.get('mobile')
+        if new_mobile and new_mobile != current_user.mobile_no:
+            existing = Farmer.query.filter_by(mobile_no=new_mobile).first()
+            if existing:
+                flash('यह मोबाइल नंबर पहले से किसी और अकाउंट से जुड़ा है। कृपया दूसरा नंबर दर्ज करें।', 'danger')
+                return redirect(url_for('profile'))
+            current_user.mobile_no = new_mobile
+            
         current_user.village = request.form.get('village', current_user.village)
         current_user.district = request.form.get('district', current_user.district)
         current_user.state = request.form.get('state', current_user.state)
+        current_user.pincode = request.form.get('pincode', current_user.pincode)
         current_user.language = request.form.get('language', current_user.language)
         
         land_acres = request.form.get('land_acres')
@@ -366,23 +378,30 @@ def profile():
         crops_list = request.form.getlist('crops')
         current_user.crops = ",".join(crops_list) if crops_list else ""
         
+        # Handle avatar upload
+        avatar_file = request.files.get('avatar')
+        if avatar_file and avatar_file.filename != '':
+            filename = secure_filename(f"{current_user.id}_{avatar_file.filename}")
+            filepath = os.path.join(app.root_path, 'static', 'uploads', 'avatars')
+            os.makedirs(filepath, exist_ok=True)
+            avatar_file.save(os.path.join(filepath, filename))
+            current_user.avatar = url_for('static', filename=f'uploads/avatars/{filename}')
+            
         db.session.commit()
         flash('प्रोफाइल सफलतापूर्वक सेव हो गई!', 'success')
         return redirect(url_for('profile'))
         
     logger.info("Accessed Profile page")
+    
+    # Determine edit mode
+    edit_mode = request.args.get('edit', '0') == '1'
+    if not current_user.village or not current_user.pincode:
+        edit_mode = True
+        
     # For rendering template, ensure crops is passed as a list
     user_crops = current_user.crops.split(',') if current_user.crops else []
     
-    # We will temporarily inject user_crops to the object or pass it to template
-    # Since current_user is passed implicitly to jinja, we can just do:
-    # {% if crop in current_user.crops.split(',') %} in template. 
-    # But since the template expects current_user.crops as a list/iterable, 
-    # we can modify current_user temporarily for rendering or just update the template.
-    # The template currently uses: `if crop in current_user.crops`. 
-    # Since crops is a string "गेहूं,धान", `in` operator works! (e.g. "गेहूं" in "गेहूं,धान" is True)
-    
-    return render_template('profile.html')
+    return render_template('profile.html', edit_mode=edit_mode)
 
 @app.route('/alerts')
 @login_required

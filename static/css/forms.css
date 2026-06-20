@@ -511,3 +511,25 @@
     .location-form { flex-direction: column; }
     .weather-main { flex-direction: column; align-items: center; text-align: center; }
 }
+
+/* Input Group for Mobile */
+.input-group {
+    display: flex;
+    align-items: stretch;
+}
+.input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0 0.8rem;
+    background: #E8F5E9;
+    color: var(--color-primary);
+    border: 1px solid #D1E8D3;
+    border-right: none;
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    font-weight: 600;
+}
+.input-group .krishi-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    flex: 1;
+}

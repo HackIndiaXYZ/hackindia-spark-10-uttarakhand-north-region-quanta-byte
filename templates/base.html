@@ -95,7 +95,7 @@
 
         <div class="krishi-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 1.5rem; position: relative; z-index: 2;">
             <div>
-                <div class="brand-text" style="color: #fff; font-size: 1.5rem; margin-bottom: 1rem;"><i class="fa-solid fa-seedling" style="color: var(--color-primary);"></i> Krishi <span>AI</span></div>
+                <div class="brand-text" style="display: flex; align-items: center; color: #fff; font-size: 1.5rem; margin-bottom: 1rem;"><img src="{{ url_for('static', filename='img/logo.png') }}" style="height: 34px; width: 34px; object-fit: contain; margin-right: 10px; border-radius: 50%;"> Krishi <span style="margin-left: 5px;">AI</span></div>
                 <p style="color: #9CA3AF; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">Smarter farm monitoring for healthier crops and higher yields.</p>
                 <div style="display: flex; gap: 1rem;">
                     <a href="#" style="color: #9CA3AF;"><i class="fa-brands fa-twitter"></i></a>
@@ -166,7 +166,7 @@
     <!-- Floating AI Assistant Button -->
     <button class="floating-ai-btn" id="floatingAI" onclick="window.location='{{ url_for('chatbot') }}'" title="AI सहायक">
         <div class="ai-pulse"></div>
-        <i class="fa-solid fa-robot"></i>
+        <img src="{{ url_for('static', filename='img/robot.jpg') }}" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover; position: relative; z-index: 2;">
         <span class="ai-label">AI Help</span>
     </button>
 

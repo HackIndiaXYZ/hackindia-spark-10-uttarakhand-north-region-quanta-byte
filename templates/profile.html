@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}मेरी प्रोफाइल - Krishi AI{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}?v=2.1">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}?v=2.2">{% endblock %}
 {% block content %}
 <div class="krishi-container profile-page-wrap">
     <div class="page-header fade-in-up">
@@ -8,6 +8,80 @@
         <p class="page-sub">अपनी जानकारी अपडेट करें</p>
     </div>
 
+    {% if not edit_mode %}
+    <!-- View Profile Mode -->
+    <div class="krishi-card fade-in-up profile-smart-card" style="padding: 0; overflow: hidden; position: relative;">
+        <!-- Banner -->
+        <div style="background: url('{{ url_for('static', filename='img/farm_banner.png') }}') center/cover no-repeat; height: 160px; width: 100%;"></div>
+        
+        <!-- Header Section -->
+        <div style="padding: 0 2rem 2rem; position: relative; display: flex; flex-direction: column; align-items: center; margin-top: -60px;">
+            <div class="avatar-preview" style="width: 130px; height: 130px; border: 5px solid #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #fff; border-radius: 50%;">
+                {% if current_user and current_user.avatar %}
+                <img src="{{ current_user.avatar }}" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                {% else %}
+                <div style="width: 100%; height: 100%; background: var(--color-success-light); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--color-primary);">
+                    <i class="fa-solid fa-user" style="font-size: 4rem;"></i>
+                </div>
+                {% endif %}
+            </div>
+            <h2 style="font-size: 1.8rem; margin: 0.5rem 0 0; color: var(--color-text); font-weight: 800;">{{ current_user.name }}</h2>
+            <p style="color: var(--color-text-muted); margin: 0; font-weight: 500; font-size: 0.95rem;">
+                <i class="fa-solid fa-location-dot" style="color: var(--color-primary);"></i> {{ current_user.village }}, {{ current_user.district }}
+            </p>
+            <div style="margin-top: 1rem;">
+                <a href="{{ url_for('profile', edit=1) }}" class="btn-krishi-primary" style="padding: 0.5rem 1.5rem; border-radius: 50px; box-shadow: 0 4px 10px rgba(46,125,50,0.3);"><i class="fa-solid fa-pen"></i> प्रोफाइल एडिट करें</a>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div style="padding: 0 2rem 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            
+            <!-- Personal Info Card -->
+            <div class="smart-info-box">
+                <h4 style="margin: 0 0 1rem; color: var(--color-primary); font-size: 1rem; border-bottom: 2px solid #E8F5E9; padding-bottom: 0.5rem;"><i class="fa-solid fa-address-card"></i> व्यक्तिगत जानकारी</h4>
+                <div class="info-row"><span class="info-label">मोबाइल नंबर:</span> <span class="info-value">+91 {{ current_user.mobile_no }}</span></div>
+                <div class="info-row"><span class="info-label">राज्य:</span> <span class="info-value">{{ current_user.state }}</span></div>
+                <div class="info-row"><span class="info-label">पिनकोड:</span> <span class="info-value">{{ current_user.pincode }}</span></div>
+            </div>
+
+            <!-- Farm Info Card -->
+            <div class="smart-info-box">
+                <h4 style="margin: 0 0 1rem; color: var(--color-primary); font-size: 1rem; border-bottom: 2px solid #E8F5E9; padding-bottom: 0.5rem;"><i class="fa-solid fa-tractor"></i> खेत की जानकारी</h4>
+                <div class="info-row"><span class="info-label">जमीन:</span> <span class="info-value">{{ current_user.land_acres or '-' }} एकड़</span></div>
+                <div class="info-row"><span class="info-label">सिंचाई:</span> <span class="info-value">{{ current_user.irrigation or '-' }}</span></div>
+                <div class="info-row"><span class="info-label">मिट्टी:</span> <span class="info-value">{{ current_user.soil_type or '-' }}</span></div>
+                <div class="info-row"><span class="info-label">ट्रैक्टर:</span> <span class="info-value">{{ 'हाँ' if current_user.own_tractor == 'yes' else 'नहीं' if current_user.own_tractor == 'no' else '-' }}</span></div>
+            </div>
+
+        </div>
+
+        <!-- Crops -->
+        <div style="padding: 0 2rem 2.5rem; text-align: center;">
+            <h4 style="margin: 0 0 1rem; color: var(--color-text); font-size: 1.1rem;">मुख्य फसलें</h4>
+            <div class="crop-tags" style="justify-content: center;">
+                {% if current_user.crops %}
+                    {% for crop in current_user.crops.split(',') %}
+                        {% if crop %}
+                        <span class="crop-tag" style="font-size: 0.95rem; padding: 0.4rem 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #D1E8D3; background: #fff;">🌾 {{ crop }}</span>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span style="color: var(--color-text-muted);">कोई फसल नहीं चुनी गई</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .smart-info-box { background: #fafafa; border-radius: var(--radius-lg); padding: 1.5rem; border: 1px solid #eee; transition: transform 0.2s ease, box-shadow 0.2s ease; }
+        .smart-info-box:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.04); background: #fff; border-color: #D1E8D3; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .info-label { color: var(--color-text-muted); font-weight: 500; }
+        .info-value { color: var(--color-text); font-weight: 700; text-align: right; }
+    </style>
+
+    {% else %}
     <!-- Step Progress -->
     <div class="step-progress-bar fade-in-up">
         <div class="step-progress-item active" data-step="1">
@@ -47,28 +121,40 @@
 
                 <div class="form-grid">
                     <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-user"></i> पूरा नाम</label>
+                        <label class="form-label"><i class="fa-solid fa-user"></i> पूरा नाम <span style="color:red;">*</span></label>
                         <input type="text" name="name" class="krishi-input" placeholder="आपका नाम" value="{{ current_user.name if current_user else '' }}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-phone"></i> मोबाइल नंबर</label>
-                        <input type="tel" name="mobile" class="krishi-input" placeholder="10 अंक का नंबर" value="{{ current_user.mobile if current_user else '' }}">
+                        <label class="form-label"><i class="fa-solid fa-phone"></i> मोबाइल नंबर <span style="color:red;">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text" style="background-color: #f0f0f0; color: #666; cursor: not-allowed;">+91</span>
+                            <input type="tel" name="mobile" class="krishi-input" placeholder="10 अंकों का नंबर" pattern="[0-9]{10}" maxlength="10" value="{{ current_user.mobile_no if current_user else '' }}" readonly style="background-color: #f0f0f0; color: #666; cursor: not-allowed;" title="यह नंबर बदला नहीं जा सकता">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-location-dot"></i> गाँव / शहर</label>
-                        <input type="text" name="village" class="krishi-input" placeholder="गाँव का नाम" value="{{ current_user.village if current_user else '' }}">
+                        <label class="form-label"><i class="fa-solid fa-location-dot"></i> गाँव / शहर <span style="color:red;">*</span></label>
+                        <input type="text" name="village" class="krishi-input" placeholder="गाँव का नाम" value="{{ current_user.village if current_user else '' }}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-map"></i> जिला</label>
-                        <input type="text" name="district" class="krishi-input" placeholder="जिला" value="{{ current_user.district if current_user else '' }}">
+                        <label class="form-label"><i class="fa-solid fa-map"></i> जिला <span style="color:red;">*</span></label>
+                        <input type="text" name="district" class="krishi-input" placeholder="जिला" value="{{ current_user.district if current_user else '' }}" required>
                     </div>
                     <div class="form-group">
-                        <label class="form-label"><i class="fa-solid fa-flag"></i> राज्य</label>
-                        <select name="state" class="krishi-input">
-                            <option>Uttar Pradesh</option><option>Punjab</option><option>Haryana</option>
-                            <option>Bihar</option><option>Madhya Pradesh</option><option>Rajasthan</option>
-                            <option>Maharashtra</option><option>Gujarat</option>
+                        <label class="form-label"><i class="fa-solid fa-flag"></i> राज्य <span style="color:red;">*</span></label>
+                        <select name="state" class="krishi-input" required>
+                            <option {% if current_user and current_user.state == 'Uttar Pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+                            <option {% if current_user and current_user.state == 'Punjab' %}selected{% endif %}>Punjab</option>
+                            <option {% if current_user and current_user.state == 'Haryana' %}selected{% endif %}>Haryana</option>
+                            <option {% if current_user and current_user.state == 'Bihar' %}selected{% endif %}>Bihar</option>
+                            <option {% if current_user and current_user.state == 'Madhya Pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+                            <option {% if current_user and current_user.state == 'Rajasthan' %}selected{% endif %}>Rajasthan</option>
+                            <option {% if current_user and current_user.state == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+                            <option {% if current_user and current_user.state == 'Gujarat' %}selected{% endif %}>Gujarat</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fa-solid fa-map-pin"></i> पिनकोड <span style="color:red;">*</span></label>
+                        <input type="text" name="pincode" class="krishi-input" placeholder="6 अंकों का पिनकोड" pattern="[0-9]{6}" maxlength="6" value="{{ current_user.pincode if current_user else '' }}" required>
                     </div>
                     <div class="form-group">
                         <label class="form-label"><i class="fa-solid fa-language"></i> भाषा</label>
@@ -151,6 +237,7 @@
             </div>
         </div>
     </form>
+    {% endif %}
 </div>
 {% endblock %}
 {% block extra_js %}

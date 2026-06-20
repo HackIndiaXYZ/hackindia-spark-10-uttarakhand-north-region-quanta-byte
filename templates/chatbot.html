@@ -30,7 +30,7 @@
                 <i class="fa-solid fa-bars"></i>
             </button>
             <div class="chatbot-avatar">
-                <i class="fa-solid fa-robot"></i>
+                <img src="{{ url_for('static', filename='img/robot.jpg') }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
                 <div class="chatbot-online-dot"></div>
             </div>
             <div class="chatbot-title-info">
@@ -45,7 +45,7 @@
             {% if not chat_history %}
             <!-- Welcome Message (Only show if new chat) -->
             <div class="chat-bubble bot-bubble welcome-bubble">
-                <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="bubble-avatar"><img src="{{ url_for('static', filename='img/robot.jpg') }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>
                 <div class="bubble-content">
                     <p>नमस्ते! 🌾 मैं आपका AI कृषि सहायक हूं।</p>
                     <p>आप मुझसे पूछ सकते हैं:</p>
@@ -66,11 +66,17 @@
             {% for msg in chat_history %}
             <div class="chat-bubble {{ 'user-bubble' if msg.role == 'user' else 'bot-bubble' }}">
                 {% if msg.role == 'bot' %}
-                <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
+                <div class="bubble-avatar"><img src="{{ url_for('static', filename='img/robot.jpg') }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"></div>
                 {% elif msg.role == 'user' %}
-                <div class="bubble-avatar user-av"><i class="fa-solid fa-user"></i></div>
+                <div class="bubble-avatar user-av">
+                    {% if current_user and current_user.avatar %}
+                    <img src="{{ current_user.avatar }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    {% else %}
+                    <i class="fa-solid fa-user"></i>
+                    {% endif %}
+                </div>
                 {% endif %}
-                <div class="bubble-content">
+                <div class="bubble-content" data-raw="{{ msg.message }}">
                     {% if msg.image_data %}
                     <img src="{{ msg.image_data }}" class="chat-image" alt="Uploaded Image">
                     {% endif %}
@@ -117,10 +123,11 @@
 <!-- Global variable for session ID -->
 <script>
     window.ACTIVE_SESSION_ID = "{{ active_session.session_id if active_session else '' }}";
+    window.USER_AVATAR = "{{ current_user.avatar if current_user and current_user.avatar else '' }}";
 </script>
 {% endblock %}
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/chatbot.js') }}?v=5.0"></script>
+<script src="{{ url_for('static', filename='js/chatbot.js') }}?v=8.0"></script>
 <script>
 function sendSuggestion(btn) {
     document.getElementById('chatInput').value = btn.textContent;
