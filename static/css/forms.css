@@ -3,7 +3,7 @@
    ===================================================== */
 
 /* --- Upload Page Layout --- */
-.upload-page-wrap { padding: 0 0 3rem; }
+.upload-page-wrap { padding-bottom: 3rem; }
 .upload-layout {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -377,7 +377,7 @@
 .forecast-rain { font-size: 0.75rem; color: #29B6F6; display: flex; align-items: center; gap: 0.25rem; }
 
 /* --- Profile Page --- */
-.profile-page-wrap { padding: 0 0 3rem; }
+.profile-page-wrap { padding-bottom: 3rem; }
 
 .step-progress-bar {
     display: flex;

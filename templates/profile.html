@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}मेरी प्रोफाइल - Krishi AI{% endblock %}
-{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}?v=2.1">{% endblock %}
 {% block content %}
 <div class="krishi-container profile-page-wrap">
     <div class="page-header fade-in-up">
@@ -137,7 +137,7 @@
                     {% for crop in ['गेहूं','धान','मक्का','सरसों','गन्ना','टमाटर','आलू','प्याज','मिर्च','चना','सोयाबीन','कपास'] %}
                     <label class="crop-check-item">
                         <input type="checkbox" name="crops" value="{{ crop }}"
-                               {% if current_user and crop in current_user.crops %}checked{% endif %}>
+                               {% if current_user and current_user.crops and crop in current_user.crops %}checked{% endif %}>
                         <span class="crop-check-label">{{ crop }}</span>
                     </label>
                     {% endfor %}

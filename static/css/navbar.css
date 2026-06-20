@@ -8,22 +8,21 @@
     left: 0;
     right: 0;
     height: var(--navbar-h);
-    background: rgba(255,255,255,0.96);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(46,125,50,0.12);
+    background: #ffffff;
+    box-shadow: var(--shadow-sm);
     z-index: 1000;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
     transition: var(--transition);
+    border-bottom: 1px solid var(--color-border);
 }
 .krishi-navbar.scrolled {
-    box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-md);
 }
 
 .navbar-inner {
-    max-width: 1200px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
-    height: 100%;
+    height: var(--navbar-h);
     padding: 0 1rem;
     display: flex;
     align-items: center;
@@ -68,11 +67,12 @@
     white-space: nowrap;
 }
 .nav-link:hover, .nav-link.active {
-    background: var(--color-success-light);
-    color: var(--color-primary);
+    background: #ECFDF5;
+    color: var(--color-primary-dark);
     font-weight: 600;
+    border-left: 3px solid var(--color-primary);
 }
-.nav-link.active { background: var(--color-primary); color: #fff; }
+.nav-link.active i { color: var(--color-primary-dark); }
 .nav-link i { font-size: 0.85rem; }
 
 /* Navbar Actions */
@@ -178,9 +178,17 @@
 .mobile-nav-item:hover { color: var(--color-primary); }
 
 /* Desktop hide bottom nav, show full links */
-@media (min-width: 900px) {
+@media (min-width: 768px) {
+    .krishi-navbar {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .navbar-links { display: flex; flex-direction: row; }
+    .nav-link { justify-content: center; padding: 0.5rem 0.75rem; }
+    
     .hamburger { display: none; }
-    .navbar-links { display: flex; }
     .mobile-bottom-nav { display: none; }
     .floating-ai-btn {
         bottom: 1.5rem;
@@ -192,7 +200,11 @@
     }
 }
 
-@media (max-width: 899px) {
+@media (max-width: 767px) {
+    .sidebar-toggle-btn { display: none; }
+}
+
+@media (max-width: 767px) {
     .navbar-links {
         display: none;
         position: fixed;

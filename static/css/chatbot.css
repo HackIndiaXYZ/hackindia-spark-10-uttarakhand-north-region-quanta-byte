@@ -131,10 +131,30 @@
     box-shadow: var(--shadow-sm);
 }
 .user-bubble .bubble-content {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     color: #fff;
     border-bottom-right-radius: 4px;
     box-shadow: 0 2px 12px rgba(46,125,50,0.25);
+}
+
+.tts-btn {
+    background: rgba(46,125,50,0.1);
+    border: none;
+    color: var(--color-primary);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    vertical-align: middle;
+}
+.tts-btn:hover {
+    background: var(--color-primary);
+    color: #fff;
 }
 
 .bubble-content ul { padding-left: 1rem; margin-top: 0.4rem; }

@@ -70,9 +70,15 @@
         const now = new Date().toLocaleTimeString('hi-IN', { hour: '2-digit', minute: '2-digit' });
 
         if (role === 'bot') {
+            const rawText = text.replace(/<[^>]*>?/gm, ''); // Remove HTML tags for speech
             bubble.innerHTML = `
                 <div class="bubble-avatar"><i class="fa-solid fa-robot"></i></div>
-                <div class="bubble-content ${isError ? 'error-bubble' : ''}">${formatBotMessage(text)}</div>
+                <div class="bubble-content ${isError ? 'error-bubble' : ''}">
+                    ${formatBotMessage(text)}
+                    <button class="tts-btn" onclick="playVoice('${rawText.replace(/'/g, "\\'")}')" title="Listen to response">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
                 <span class="bubble-time">${now}</span>
             `;
         } else {
@@ -279,4 +285,26 @@ window.sendSuggestion = function (btn) {
     if (suggestions) suggestions.style.display = 'none';
 
     window.sendMessage();
+};
+
+// ==============================
+// TEXT TO SPEECH (Voice Playback)
+// ==============================
+window.playVoice = function(text) {
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'hi-IN'; // Default to Hindi
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    
+    // Find a Hindi voice if available
+    const voices = window.speechSynthesis.getVoices();
+    const hindiVoice = voices.find(voice => voice.lang.includes('hi') || voice.lang.includes('HI'));
+    if (hindiVoice) {
+        utterance.voice = hindiVoice;
+    }
+    
+    window.speechSynthesis.speak(utterance);
 };

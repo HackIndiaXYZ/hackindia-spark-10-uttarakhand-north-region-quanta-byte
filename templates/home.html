@@ -1,261 +1,245 @@
 {% extends "base.html" %}
-{% block title %}Krishi AI - किसान का डिजिटल साथी{% endblock %}
+{% block title %}Krishi AI - Intelligent Farming Solutions{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=2.1">
 {% endblock %}
 
 {% block content %}
 
 <!-- Hero Section -->
 <section class="hero-section">
-    <div class="hero-bg-overlay"></div>
-    <div class="hero-particles" id="heroParticles"></div>
-    <div class="hero-content krishi-container">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
         <div class="hero-badge fade-in-up">
-            <i class="fa-solid fa-leaf"></i> AI-Powered Farming Platform
+            Start using AI <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i>
         </div>
         <h1 class="hero-title fade-in-up delay-1">
-            खेती को बनाएं<br>
-            <span class="hero-highlight">Smart & Profitable</span>
+            Grow the Future with<br>
+            Sustainable Agriculture
         </h1>
         <p class="hero-subtitle fade-in-up delay-2">
-            रोग पहचान · मौसम जानकारी · मंडी भाव · AI सलाह — सब कुछ एक जगह।
+            We empower farmers with real-time data, predictive AI, and seamless integrations to maximize yield and adapt to climate changes effortlessly.
         </p>
         <div class="hero-actions fade-in-up delay-3">
-            <a href="{{ url_for('dashboard') }}" class="btn-krishi-primary hero-cta">
-                <i class="fa-solid fa-rocket"></i> Start Farming Smart
-            </a>
-            <a href="{{ url_for('chatbot') }}" class="btn-krishi-secondary hero-cta-2">
-                <i class="fa-solid fa-comments"></i> AI से पूछें
+            <a href="{{ url_for('dashboard') }}" class="btn-hero-primary">
+                Get started <i class="fa-solid fa-arrow-right"></i>
             </a>
         </div>
-        <div class="hero-stats fade-in-up delay-4">
-            <div class="hero-stat">
-                <span class="stat-num" data-target="50000">0</span><span>+</span>
-                <small>किसान जुड़े</small>
-            </div>
-            <div class="hero-stat-divider"></div>
-            <div class="hero-stat">
-                <span class="stat-num" data-target="95">0</span><span>%</span>
-                <small>Accuracy</small>
-            </div>
-            <div class="hero-stat-divider"></div>
-            <div class="hero-stat">
-                <span class="stat-num" data-target="200">0</span><span>+</span>
-                <small>फसलें Cover</small>
-            </div>
+    </div>
+</section>
+
+<!-- Partner Strip -->
+<div class="partner-strip fade-in-up">
+    <div class="partner-logo"><i class="fa-solid fa-seedling"></i> FocusPoint</div>
+    <div class="partner-logo"><i class="fa-solid fa-chart-pie"></i> Screenshare</div>
+    <div class="partner-logo"><i class="fa-solid fa-leaf"></i> Segment</div>
+    <div class="partner-logo"><i class="fa-solid fa-bolt"></i> Lightspeed</div>
+</div>
+
+<!-- About Us Section -->
+<section class="about-section" id="about" style="padding: 8rem 1.5rem; background: #fff; border-bottom: 1px solid var(--color-border);">
+    <div class="krishi-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
+        <div class="about-content fade-in-up">
+            <h2 class="video-title" style="margin-bottom: 1.5rem; color: var(--color-text);">About Krishi AI</h2>
+            <p style="color: var(--color-text-light); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem;">
+                Krishi AI is born out of a profound respect for the Indian farmer. Our mission is to bridge the gap between traditional farming practices and modern technology, bringing predictive intelligence directly to the fields.
+            </p>
+            <p style="color: var(--color-text-light); line-height: 1.8; font-size: 1.05rem;">
+                By harnessing the power of Artificial Intelligence, satellite imagery, and real-time market data, we empower millions of farmers to make data-driven decisions. From predicting the perfect time to harvest, to instantly diagnosing crop diseases from a simple smartphone photo, Krishi AI is your digital companion in achieving sustainable and profitable agriculture.
+            </p>
         </div>
-    </div>
-    <div class="hero-scroll-hint">
-        <i class="fa-solid fa-chevron-down"></i>
-    </div>
-</section>
-
-<!-- Alert Banner Slider -->
-<section class="alert-banner-section">
-    <div class="alert-ticker">
-        <div class="alert-ticker-label"><i class="fa-solid fa-bell"></i> ताज़ा अपडेट</div>
-        <div class="alert-ticker-content" id="alertTicker">
-            <span>🌧️ अगले 3 दिन बारिश की संभावना — सिंचाई रोकें</span>
-            <span>💰 PM Kisan की नई किस्त जारी — अभी चेक करें</span>
-            <span>🐛 पूर्वी UP में टिड्डी अलर्ट — सावधान रहें</span>
-            <span>📈 गेहूं का MSP ₹2,275/क्विंटल — बेचने का सही समय</span>
-        </div>
-    </div>
-</section>
-
-<!-- Services Grid -->
-<section class="services-section krishi-container">
-    <h2 class="section-title fade-in-up">हमारी सेवाएं <span>🌾</span></h2>
-    <p class="section-subtitle fade-in-up">किसान की हर ज़रूरत के लिए AI-powered tools</p>
-    <div class="services-grid">
-        <a href="{{ url_for('disease') }}" class="service-card fade-in-up">
-            <div class="service-icon" style="background: linear-gradient(135deg, #4CAF50, #2E7D32);">
-                <i class="fa-solid fa-microscope"></i>
-            </div>
-            <h3>रोग पहचान</h3>
-            <p>फोटो से तुरंत पहचानें फसल की बीमारी</p>
-            <span class="service-tag">AI Powered</span>
-        </a>
-        <a href="{{ url_for('soil') }}" class="service-card fade-in-up delay-1">
-            <div class="service-icon" style="background: linear-gradient(135deg, #8D6E63, #5D4037);">
-                <i class="fa-solid fa-mountain"></i>
-            </div>
-            <h3>मिट्टी जांच</h3>
-            <p>मिट्टी का प्रकार और उर्वरता जानें</p>
-            <span class="service-tag">Image Analysis</span>
-        </a>
-        <a href="{{ url_for('weather') }}" class="service-card fade-in-up delay-2">
-            <div class="service-icon" style="background: linear-gradient(135deg, #29B6F6, #0277BD);">
-                <i class="fa-solid fa-cloud-sun-rain"></i>
-            </div>
-            <h3>मौसम सलाह</h3>
-            <p>7-दिन का मौसम और खेती सलाह</p>
-            <span class="service-tag">Real-time</span>
-        </a>
-        <a href="{{ url_for('chatbot') }}" class="service-card fade-in-up delay-3">
-            <div class="service-icon" style="background: linear-gradient(135deg, #AB47BC, #6A1B9A);">
-                <i class="fa-solid fa-robot"></i>
-            </div>
-            <h3>AI सहायक</h3>
-            <p>24/7 कृषि विशेषज्ञ AI चैटबॉट</p>
-            <span class="service-tag">24/7 Available</span>
-        </a>
-        <a href="{{ url_for('market') }}" class="service-card fade-in-up delay-1">
-            <div class="service-icon" style="background: linear-gradient(135deg, #FFA726, #E65100);">
-                <i class="fa-solid fa-chart-line"></i>
-            </div>
-            <h3>मंडी भाव</h3>
-            <p>लाइव मंडी भाव और ट्रेंड्स</p>
-            <span class="service-tag">Live Prices</span>
-        </a>
-        <a href="{{ url_for('machinery') }}" class="service-card fade-in-up delay-2">
-            <div class="service-icon" style="background: linear-gradient(135deg, #26C6DA, #00838F);">
-                <i class="fa-solid fa-tractor"></i>
-            </div>
-            <h3>मशीनरी किराया</h3>
-            <p>नज़दीकी ट्रैक्टर और मशीन बुक करें</p>
-            <span class="service-tag">Near You</span>
-        </a>
-        <a href="{{ url_for('schemes') }}" class="service-card fade-in-up delay-3">
-            <div class="service-icon" style="background: linear-gradient(135deg, #66BB6A, #2E7D32);">
-                <i class="fa-solid fa-file-invoice-dollar"></i>
-            </div>
-            <h3>सरकारी योजनाएं</h3>
-            <p>PM Kisan, Fasal Bima सब एक जगह</p>
-            <span class="service-tag">Government</span>
-        </a>
-        <a href="{{ url_for('voice') }}" class="service-card fade-in-up delay-1">
-            <div class="service-icon" style="background: linear-gradient(135deg, #EF5350, #B71C1C);">
-                <i class="fa-solid fa-microphone"></i>
-            </div>
-            <h3>Voice Advisory</h3>
-            <p>बोलकर पूछें, AI जवाब देगा</p>
-            <span class="service-tag">Hindi Voice</span>
-        </a>
-    </div>
-</section>
-
-<!-- How It Works -->
-<section class="how-section">
-    <div class="krishi-container">
-        <h2 class="section-title fade-in-up">कैसे करें Use? <span>🤔</span></h2>
-        <div class="steps-row">
-            <div class="step-item fade-in-up">
-                <div class="step-circle">1</div>
-                <div class="step-line"></div>
-                <i class="fa-solid fa-camera step-icon"></i>
-                <h4>फोटो लें</h4>
-                <p>फसल या मिट्टी की photo खींचें</p>
-            </div>
-            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-            <div class="step-item fade-in-up delay-1">
-                <div class="step-circle">2</div>
-                <i class="fa-solid fa-upload step-icon"></i>
-                <h4>Upload करें</h4>
-                <p>Photo हमारे AI को भेजें</p>
-            </div>
-            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-            <div class="step-item fade-in-up delay-2">
-                <div class="step-circle">3</div>
-                <i class="fa-solid fa-brain step-icon"></i>
-                <h4>AI Analyze</h4>
-                <p>AI कुछ सेकंड में analyze करता है</p>
-            </div>
-            <div class="step-arrow"><i class="fa-solid fa-arrow-right"></i></div>
-            <div class="step-item fade-in-up delay-3">
-                <div class="step-circle">4</div>
-                <i class="fa-solid fa-lightbulb step-icon"></i>
-                <h4>सलाह पाएं</h4>
-                <p>इलाज और सुझाव हिंदी में पाएं</p>
+        <div class="about-image fade-in-up delay-1" style="position: relative;">
+            <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Indian Farmers" style="border-radius: 2rem; width: 100%; box-shadow: var(--shadow-lg);">
+            <div style="position: absolute; bottom: -2rem; left: -2rem; background: #064E3B; color: #fff; padding: 1.5rem; border-radius: 1.5rem; box-shadow: var(--shadow-lg);">
+                <h3 style="font-size: 2.5rem; font-family: var(--font-display); font-weight: 800; line-height: 1; color: #A3E635;">10M+</h3>
+                <p style="font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem;">Farmers Reached</p>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Testimonials -->
-<section class="testimonials-section krishi-container">
-    <h2 class="section-title fade-in-up">किसानों की बात <span>💬</span></h2>
-    <div class="testimonials-grid">
-        <div class="testimonial-card fade-in-up">
-            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
-            <p>"Krishi AI ने मेरी गेहूं की फसल बचाई। रोग पहचान से 3 दिन पहले ही पता चल गया।"</p>
-            <div class="testimonial-author">
-                <div class="author-avatar">रS</div>
-                <div>
-                    <strong>रमेश सिंह</strong>
-                    <small>किसान, UP</small>
+<!-- Innovating Section -->
+<section class="innovating-section">
+    <div class="innovating-container">
+        <h2 class="innovating-title fade-in-up">Innovating the future<br>of agriculture</h2>
+        
+        <div class="innovating-grid">
+            <div class="innovating-images fade-in-up delay-1">
+                <div class="innovating-img-col">
+                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Farming 1">
                 </div>
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-            </div>
-        </div>
-        <div class="testimonial-card fade-in-up delay-1">
-            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
-            <p>"मंडी भाव feature से पता चला कि मेरे धान को 20% ज़्यादा rate मिल सकता है।"</p>
-            <div class="testimonial-author">
-                <div class="author-avatar">सK</div>
-                <div>
-                    <strong>सुनीता कुमारी</strong>
-                    <small>किसान, Bihar</small>
+                <div class="innovating-img-col">
+                    <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Farming 2">
                 </div>
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
             </div>
-        </div>
-        <div class="testimonial-card fade-in-up delay-2">
-            <div class="testimonial-quote"><i class="fa-solid fa-quote-left"></i></div>
-            <p>"Voice feature बहुत अच्छा है, पढ़ना नहीं आता तो बोलकर पूछ लेता हूं।"</p>
-            <div class="testimonial-author">
-                <div class="author-avatar">मP</div>
-                <div>
-                    <strong>मोहन पटेल</strong>
-                    <small>किसान, MP</small>
+            
+            <div class="innovating-stats fade-in-up delay-2">
+                <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 2rem;">
+                    AgTech platform that offers actionable and sustained solutions to enhance and grow across the farming process.
+                </p>
+                <div class="stat-block">
+                    <h3>100%</h3>
+                    <p>Customer Satisfaction</p>
+                    <small>Thousands of farmers use our service daily.</small>
                 </div>
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                <div class="stat-block">
+                    <h3>20+</h3>
+                    <p>Crops Covered</p>
+                    <small>From local vegetables to cash crops.</small>
+                </div>
+                <div class="stat-block">
+                    <h3>95%</h3>
+                    <p>Prediction Accuracy</p>
+                    <small>Powered by advanced AI models.</small>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- CTA Banner -->
-<section class="cta-banner fade-in-up">
-    <div class="krishi-container cta-inner">
-        <div>
-            <h2>आज ही शुरू करें — <span>मुफ़्त में!</span></h2>
-            <p>50,000+ किसान पहले से use कर रहे हैं</p>
-        </div>
-        <a href="{{ url_for('dashboard') }}" class="btn-krishi-primary cta-btn">
-            <i class="fa-solid fa-rocket"></i> अभी शुरू करें
-        </a>
+<!-- Video Section -->
+<section class="video-section">
+    <div class="video-header fade-in-up">
+        <h2 class="video-title">Where technology meets the roots of nature</h2>
+        <p class="video-subtitle">Delivering the precision and scale that modern agriculture needs, ensuring optimal yields and resource management.</p>
+    </div>
+    
+    <div class="video-wrapper fade-in-up delay-1">
+        <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Farm Drone Shot">
+        <div class="play-btn"><i class="fa-solid fa-play"></i></div>
     </div>
 </section>
 
-{% endblock %}
+<!-- Features Grid -->
+<section class="features-section">
+    <div class="features-container">
+        <div class="video-header fade-in-up">
+            <h2 class="video-title">Comprehensive<br>Agri Intelligence</h2>
+            <p class="video-subtitle">Explore our tools designed to tackle disease, optimize resources, and improve farm outcomes.</p>
+        </div>
+        
+        <div class="features-grid">
+            <a href="{{ url_for('disease') }}" style="text-decoration: none;">
+                <div class="feature-card-large fade-in-up">
+                    <img src="https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Disease">
+                    <div class="fcl-content">
+                        <h3>Disease Detection</h3>
+                        <p>Upload a photo of your crop and our AI will identify the disease and recommend precise treatments instantly to save your harvest.</p>
+                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('soil') }}" style="text-decoration: none;">
+                <div class="feature-card-large fade-in-up delay-1">
+                    <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Soil">
+                    <div class="fcl-content">
+                        <h3>Soil Health & Nutrition</h3>
+                        <p>Analyze soil data and get automated recommendations for fertilizers to ensure optimal growth conditions.</p>
+                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('machinery') }}" style="text-decoration: none;">
+                <div class="feature-card-large fade-in-up">
+                    <img src="https://images.unsplash.com/photo-1592861214040-af84c4da17e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Tractor">
+                    <div class="fcl-content">
+                        <h3>Machinery Network</h3>
+                        <p>Access our vast network of on-demand farming machinery and book tractors instantly near your location.</p>
+                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+            
+            <a href="{{ url_for('market') }}" style="text-decoration: none;">
+                <div class="feature-card-large fade-in-up delay-1">
+                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Market">
+                    <div class="fcl-content">
+                        <h3>Market Predictions</h3>
+                        <p>Track live mandi prices and use predictive modeling to sell your produce at peak profitability.</p>
+                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
 
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-<script>
-// Counter animation
-document.querySelectorAll('.stat-num').forEach(el => {
-    const target = parseInt(el.dataset.target);
-    let count = 0;
-    const step = target / 60;
-    const timer = setInterval(() => {
-        count += step;
-        if (count >= target) { el.textContent = target.toLocaleString('en-IN'); clearInterval(timer); }
-        else el.textContent = Math.floor(count).toLocaleString('en-IN');
-    }, 30);
-});
 
-// Alert Ticker
-const tickerItems = document.querySelectorAll('.alert-ticker-content span');
-let tickerIndex = 0;
-function rotateTicker() {
-    tickerItems.forEach((el, i) => {
-        el.style.display = i === tickerIndex ? 'inline' : 'none';
-    });
-    tickerIndex = (tickerIndex + 1) % tickerItems.length;
-}
-rotateTicker();
-setInterval(rotateTicker, 3500);
-</script>
+<!-- FAQ Section -->
+<section class="faq-section">
+    <div class="faq-container">
+        <div class="faq-left fade-in-up">
+            <h2>Got questions? We've got you covered.</h2>
+            <p>Find answers to common queries about our platform, technology, and how we help you maximize your agricultural efficiency.</p>
+        </div>
+        
+        <div class="faq-right">
+            <div class="faq-item active fade-in-up" onclick="this.classList.toggle('active')">
+                <div class="faq-question">
+                    What kind of farming solutions do you offer?
+                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
+                </div>
+                <div class="faq-answer">
+                    We offer end-to-end solutions including real-time disease detection via AI, hyper-local weather forecasting, soil health analysis, and live market price tracking to help you make informed decisions.
+                </div>
+            </div>
+            
+            <div class="faq-item fade-in-up delay-1" onclick="this.classList.toggle('active')">
+                <div class="faq-question">
+                    How can I start using Krishi AI platform?
+                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
+                </div>
+                <div class="faq-answer">
+                    Simply click on "Get Started" or create an account. You can immediately begin uploading crop images for disease detection or access our dashboard for local weather and market data.
+                </div>
+            </div>
+            
+            <div class="faq-item fade-in-up delay-2" onclick="this.classList.toggle('active')">
+                <div class="faq-question">
+                    Are your technologies eco-friendly?
+                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
+                </div>
+                <div class="faq-answer">
+                    Yes! Our precision farming tools ensure that you only use exactly the amount of water and fertilizer required, reducing runoff and promoting sustainable practices.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Careers Section -->
+<section id="careers" style="padding: 6rem 1.5rem; background: #F4F7F6; border-bottom: 1px solid var(--color-border); text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;" class="fade-in-up">
+        <h2 class="video-title" style="margin-bottom: 1rem; color: var(--color-text);">Join Our Mission</h2>
+        <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 2rem; font-size: 1.1rem;">
+            We are always looking for passionate engineers, data scientists, and agricultural experts to help us build the future of farming. Build products that matter.
+        </p>
+        <a href="#" class="btn-hero-primary" style="display: inline-flex;">View Open Roles <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+</section>
+
+<!-- Contact Section -->
+<section id="contact" style="padding: 6rem 1.5rem; background: #fff; text-align: center;">
+    <div style="max-width: 800px; margin: 0 auto;" class="fade-in-up">
+        <h2 class="video-title" style="margin-bottom: 1rem; color: var(--color-text);">Get in Touch</h2>
+        <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 3rem; font-size: 1.1rem;">
+            Have questions about our platform or need support? Our team is here to help you.
+        </p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+            <div style="padding: 2rem; background: #F4F7F6; border-radius: 1.5rem;">
+                <i class="fa-solid fa-envelope" style="font-size: 2rem; color: #064E3B; margin-bottom: 1rem;"></i>
+                <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--color-text);">Email Support</h3>
+                <p style="color: var(--color-text-light);">support@krishi.ai</p>
+            </div>
+            <div style="padding: 2rem; background: #F4F7F6; border-radius: 1.5rem;">
+                <i class="fa-solid fa-phone" style="font-size: 2rem; color: #064E3B; margin-bottom: 1rem;"></i>
+                <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--color-text);">Call Us</h3>
+                <p style="color: var(--color-text-light);">1800-180-1551</p>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

@@ -2,7 +2,7 @@
    dashboard.css — Krishi AI Dashboard & Analytics
    ===================================================== */
 
-.dashboard-wrap { padding: 0 0 3rem; }
+.dashboard-wrap { padding-bottom: 3rem; }
 
 /* --- Summary Grid --- */
 .summary-grid {
@@ -15,37 +15,28 @@
 .summary-card {
     background: #fff;
     border-radius: var(--radius-lg);
-    padding: 1.25rem 1.25rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
     gap: 0.9rem;
     box-shadow: var(--shadow-sm);
-    border: 1px solid rgba(46,125,50,0.08);
+    border: 1px solid var(--color-border);
     position: relative;
     overflow: hidden;
     transition: var(--transition);
 }
 .summary-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
-.summary-card::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0;
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    opacity: 0.08;
-    transform: translate(20px, -20px);
-}
-.summary-card.status-safe::after { background: var(--color-success); }
+.summary-card::after { display: none; }
 .summary-card.status-warning::after { background: var(--color-warning); }
 .summary-card.status-danger::after { background: var(--color-danger); }
 
 .summary-icon {
-    width: 46px; height: 46px;
-    border-radius: var(--radius-md);
+    width: 38px; height: 38px;
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1rem;
     flex-shrink: 0;
 }
 .status-safe .summary-icon { background: var(--color-success-light); color: var(--color-success); }

@@ -8,7 +8,7 @@
     <title>{% block title %}Krishi AI - किसान सुविधा{% endblock %}</title>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -17,39 +17,48 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Global CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cards.css') }}?v=2.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}?v=2.0">
 
     {% block extra_css %}{% endblock %}
 </head>
-<body>
+<body style="display: flex; flex-direction: column; min-height: 100vh; margin: 0;">
 
     <!-- Top Navbar -->
     <nav class="krishi-navbar" id="mainNavbar">
         <div class="navbar-inner">
             <a href="{{ url_for('home') }}" class="navbar-brand">
-                <div class="brand-icon"><i class="fa-solid fa-seedling"></i></div>
-                <span class="brand-text">Krishi <span>AI</span></span>
+                <div class="brand-icon" style="background: none; width: auto; height: auto; padding: 0;">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}?v=3" alt="Krishi AI Logo" style="height: 48px; width: auto; object-fit: contain;">
+                </div>
             </a>
 
             <ul class="navbar-links" id="navLinks">
-                <li><a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> होम</a></li>
-                <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> डैशबोर्ड</a></li>
-                <li><a href="{{ url_for('disease') }}" class="nav-link {% if request.endpoint == 'disease' %}active{% endif %}"><i class="fa-solid fa-microscope"></i> रोग पहचान</a></li>
-                <li><a href="{{ url_for('weather') }}" class="nav-link {% if request.endpoint == 'weather' %}active{% endif %}"><i class="fa-solid fa-cloud-sun"></i> मौसम</a></li>
-                <li><a href="{{ url_for('market') }}" class="nav-link {% if request.endpoint == 'market' %}active{% endif %}"><i class="fa-solid fa-store"></i> मंडी भाव</a></li>
-                <li><a href="{{ url_for('schemes') }}" class="nav-link {% if request.endpoint == 'schemes' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> योजनाएं</a></li>
-                <li><a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> प्रोफाइल</a></li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('home') }}" class="nav-link {% if request.endpoint == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> <span>होम</span></a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> <span>डैशबोर्ड</span></a></li>
+                <li><a href="{{ url_for('disease') }}" class="nav-link {% if request.endpoint == 'disease' %}active{% endif %}"><i class="fa-solid fa-microscope"></i> <span>रोग पहचान</span></a></li>
+                <li><a href="{{ url_for('weather') }}" class="nav-link {% if request.endpoint == 'weather' %}active{% endif %}"><i class="fa-solid fa-cloud-sun"></i> <span>मौसम</span></a></li>
+                <li><a href="{{ url_for('market') }}" class="nav-link {% if request.endpoint == 'market' %}active{% endif %}"><i class="fa-solid fa-store"></i> <span>मंडी भाव</span></a></li>
+                <li><a href="{{ url_for('schemes') }}" class="nav-link {% if request.endpoint == 'schemes' %}active{% endif %}"><i class="fa-solid fa-file-invoice"></i> <span>योजनाएं</span></a></li>
+                <li><a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}"><i class="fa-solid fa-user"></i> <span>प्रोफाइल</span></a></li>
+                {% endif %}
             </ul>
 
             <div class="navbar-actions">
-                <a href="{{ url_for('alerts') }}" class="nav-alert-btn" title="Alerts">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('alerts') }}" class="nav-alert-btn" title="Alerts" style="margin-right: 15px;">
                     <i class="fa-solid fa-bell"></i>
                     <span class="alert-dot"></span>
                 </a>
-                <button class="hamburger" id="hamburger" aria-label="Menu">
+                <a href="{{ url_for('logout') }}" class="nav-link logout-btn" style="color: #d32f2f; font-weight: 600; text-decoration: none; padding: 6px 12px; border-radius: 6px; border: 1px solid #ffcdd2; background: #ffebee; transition: 0.3s;"><i class="fa-solid fa-right-from-bracket"></i> <span>लॉगआउट</span></a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="nav-link" style="color: #2E7D32; font-weight: 600; text-decoration: none; margin-right: 10px;"><i class="fa-solid fa-user-lock"></i> <span>लॉगिन</span></a>
+                <a href="{{ url_for('register') }}" class="nav-link" style="background: #2E7D32; color: #fff; padding: 6px 14px; border-radius: 6px; font-weight: 600; text-decoration: none; box-shadow: 0 4px 6px rgba(46,125,50,0.2);"><i class="fa-solid fa-user-plus"></i> <span>रजिस्टर</span></a>
+                {% endif %}
+                <button class="hamburger" id="hamburger" aria-label="Menu" style="margin-left: 15px;">
                     <span></span><span></span><span></span>
                 </button>
             </div>
@@ -60,29 +69,75 @@
     <div class="nav-overlay" id="navOverlay"></div>
 
     <!-- Main Content -->
-    <main class="main-content" id="mainContent">
+    <main class="main-content" id="mainContent" style="flex: 1; display: flex; flex-direction: column;">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-messages-container" style="max-width: 1200px; margin: 0 auto; padding: 10px 20px;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 20px; border-radius: 8px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; {% if category == 'success' %}background-color: #d4edda; color: #155724; border-left: 4px solid #28a745;{% elif category == 'danger' %}background-color: #f8d7da; color: #721c24; border-left: 4px solid #dc3545;{% else %}background-color: #e2e3e5; color: #383d41; border-left: 4px solid #6c757d;{% endif %} box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <span><i class="fa-solid fa-circle-info" style="margin-right: 8px;"></i> {{ message }}</span>
+                        <button type="button" style="background: none; border: none; cursor: pointer; color: inherit; font-size: 1.2rem; outline: none;" onclick="this.parentElement.style.display='none';"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
-    <footer class="krishi-footer">
-        <div class="footer-inner krishi-container">
-            <div class="footer-brand">
-                <div class="brand-icon small"><i class="fa-solid fa-seedling"></i></div>
-                <span>Krishi AI</span>
+    <footer class="krishi-footer" style="background: #111827; color: #fff; padding-top: 3rem; position: relative; overflow: hidden; display: flex; flex-direction: column;">
+        <!-- Massive Brand Name Background -->
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; text-align: center; line-height: 1; z-index: 1; pointer-events: none; opacity: 0.03;">
+            <h1 style="font-family: var(--font-display); font-size: clamp(6rem, 20vw, 18rem); font-weight: 800; color: #ffffff; margin: 0; padding: 0; letter-spacing: -2px; user-select: none; white-space: nowrap;">KRISHI AI</h1>
+        </div>
+
+        <div class="krishi-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-bottom: 1.5rem; position: relative; z-index: 2;">
+            <div>
+                <div class="brand-text" style="color: #fff; font-size: 1.5rem; margin-bottom: 1rem;"><i class="fa-solid fa-seedling" style="color: var(--color-primary);"></i> Krishi <span>AI</span></div>
+                <p style="color: #9CA3AF; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem;">Smarter farm monitoring for healthier crops and higher yields.</p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="#" style="color: #9CA3AF;"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#" style="color: #9CA3AF;"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" style="color: #9CA3AF;"><i class="fa-brands fa-linkedin"></i></a>
+                </div>
             </div>
-            <p class="footer-tagline">किसान की हर ज़रूरत, एक जगह।</p>
-            <div class="footer-links">
-                <a href="#">Privacy</a>
-                <a href="#">Help</a>
-                <a href="#">Contact</a>
+            <div>
+                <h4 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 1rem; color: #fff;">Platform</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{{ url_for('dashboard') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Dashboard</a>
+                    <a href="{{ url_for('disease') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Disease Detection</a>
+                    <a href="{{ url_for('market') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Market Prices</a>
+                    <a href="{{ url_for('weather') }}" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Weather Forecast</a>
+                </div>
             </div>
-            <p class="footer-copy">&copy; 2026 Krishi AI. Designed for Indian Farmers 🌾</p>
+            <div>
+                <h4 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 1rem; color: #fff;">Company</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{{ url_for('home') }}#about" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">About Us</a>
+                    <a href="{{ url_for('home') }}#careers" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Careers</a>
+                    <a href="{{ url_for('home') }}#contact" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Contact</a>
+                    <a href="#" style="color: #9CA3AF; text-decoration: none; font-size: 0.9rem;">Privacy Policy</a>
+                </div>
+            </div>
+            <div>
+                <h4 style="font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 1rem; color: #fff;">Contact</h4>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <span style="color: #9CA3AF; font-size: 0.9rem;"><i class="fa-solid fa-phone" style="margin-right: 5px;"></i> 1800-180-1551</span>
+                    <span style="color: #9CA3AF; font-size: 0.9rem;"><i class="fa-solid fa-envelope" style="margin-right: 5px;"></i> support@krishi.ai</span>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; padding: 1rem; background: transparent; color: #6B7280; font-size: 0.8rem; position: relative; z-index: 2; border-top: 1px solid rgba(255,255,255,0.05);">
+            &copy; 2026 Krishi AI. Designed for Indian Farmers 🌾
         </div>
     </footer>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
+        {% if current_user.is_authenticated %}
         <a href="{{ url_for('home') }}" class="mobile-nav-item {% if request.endpoint == 'home' %}active{% endif %}">
             <i class="fa-solid fa-house"></i><span>होम</span>
         </a>
@@ -98,6 +153,14 @@
         <a href="{{ url_for('profile') }}" class="mobile-nav-item {% if request.endpoint == 'profile' %}active{% endif %}">
             <i class="fa-solid fa-user"></i><span>मैं</span>
         </a>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="mobile-nav-item {% if request.endpoint == 'login' %}active{% endif %}">
+            <i class="fa-solid fa-user-lock"></i><span>लॉगिन</span>
+        </a>
+        <a href="{{ url_for('register') }}" class="mobile-nav-item {% if request.endpoint == 'register' %}active{% endif %}">
+            <i class="fa-solid fa-user-plus"></i><span>रजिस्टर</span>
+        </a>
+        {% endif %}
     </nav>
 
     <!-- Floating AI Assistant Button -->
@@ -115,6 +178,21 @@
     <!-- Global JS -->
     <script src="{{ url_for('static', filename='js/global.js') }}"></script>
     <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
+
+    <script>
+        // Animations or generic scripts can go here
+        document.addEventListener("DOMContentLoaded", () => {
+            // Navbar scroll effect
+            const navbar = document.getElementById('mainNavbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 10) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        });
+    </script>
 
     {% block extra_js %}{% endblock %}
 </body>
