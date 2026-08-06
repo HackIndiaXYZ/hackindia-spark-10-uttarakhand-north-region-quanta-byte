@@ -1,26 +1,14 @@
-'use client';
-
 import React from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation } from '../app/LanguageContext';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from '../context/LanguageContext';
 
-interface BackButtonProps {
-  className?: string;
-  style?: React.CSSProperties;
-}
-
-export default function BackButton({ className = '', style }: BackButtonProps) {
-  const router = useRouter();
+export default function BackButton({ label, className }: { label?: string; className?: string }) {
+  const navigate = useNavigate();
   const { t } = useTranslation();
 
   return (
-    <button 
-      onClick={() => router.back()} 
-      className={`btn-back ${className}`} 
-      style={style}
-      aria-label="Back"
-    >
-      <i className="fa-solid fa-arrow-left"></i> {t('back')}
+    <button onClick={() => navigate(-1)} className={`btn-back ${className || ''}`}>
+      <i className="fa-solid fa-arrow-left"></i> {label || t('back')}
     </button>
   );
 }

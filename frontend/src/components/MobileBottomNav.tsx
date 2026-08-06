@@ -1,12 +1,10 @@
-'use client';
-
 import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useTranslation } from '../app/LanguageContext';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from '../context/LanguageContext';
 
 export default function MobileBottomNav() {
-  const pathname = usePathname();
+  const location = useLocation();
+  const pathname = location.pathname;
   const { t } = useTranslation();
 
   const isActive = (path: string) => {
@@ -16,22 +14,27 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="mobile-bottom-nav">
-      <Link href="/" className={`mobile-nav-item ${isActive('/')}`}>
-        <i className="fa-solid fa-house"></i><span>{t('home')}</span>
+    <div className="mobile-bottom-nav">
+      <Link to="/" className={`mobile-nav-item ${isActive('/')}`}>
+        <i className="fa-solid fa-house"></i>
+        <span>{t('home')}</span>
       </Link>
-      <Link href="/dashboard" className={`mobile-nav-item ${isActive('/dashboard')}`}>
-        <i className="fa-solid fa-chart-pie"></i><span>{t('dashboard')}</span>
+      <Link to="/disease" className={`mobile-nav-item ${isActive('/disease')}`}>
+        <i className="fa-solid fa-microscope"></i>
+        <span>{t('disease')}</span>
       </Link>
-      <Link href="/disease" className={`mobile-nav-item ${isActive('/disease')}`}>
-        <i className="fa-solid fa-microscope"></i><span>{t('disease').substring(0, 4)}</span>
+      <Link to="/market" className={`mobile-nav-item ${isActive('/market')}`}>
+        <i className="fa-solid fa-store"></i>
+        <span>{t('market')}</span>
       </Link>
-      <Link href="/market" className={`mobile-nav-item ${isActive('/market')}`}>
-        <i className="fa-solid fa-store"></i><span>{t('market').substring(0, 4)}</span>
+      <Link to="/schemes" className={`mobile-nav-item ${isActive('/schemes')}`}>
+        <i className="fa-solid fa-file-invoice"></i>
+        <span>{t('schemes')}</span>
       </Link>
-      <Link href="/profile" className={`mobile-nav-item ${isActive('/profile')}`}>
-        <i className="fa-solid fa-user"></i><span>{t('profile')}</span>
+      <Link to="/profile" className={`mobile-nav-item ${isActive('/profile')}`}>
+        <i className="fa-solid fa-user"></i>
+        <span>{t('profile')}</span>
       </Link>
-    </nav>
+    </div>
   );
 }

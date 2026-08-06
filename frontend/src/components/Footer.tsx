@@ -1,32 +1,24 @@
-'use client';
-
 import React from 'react';
-import { useTranslation } from '../app/LanguageContext';
+import { Link } from 'react-router-dom';
 
 export default function Footer() {
-  const { t } = useTranslation();
-
   return (
     <footer className="krishi-footer">
       <div className="footer-inner krishi-container">
         <div className="footer-brand">
-          <div className="brand-logo-container small">
-            <img src="/logo.png" alt="Krishi AI Logo" className="brand-logo-img" />
-          </div>
-          <span>Krishi AI</span>
+          <span style={{ fontSize: '1.2rem' }}>🌾</span> Krishi AI
         </div>
-        <p className="footer-tagline">{t('footer_tagline')}</p>
-        <div className="footer-links" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.2rem', margin: '0.4rem 0' }}>
-          <a href="#">{t('privacy')}</a>
-          <a href="#">{t('help')}</a>
-          <a href="mailto:support@krishiai.com" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <i className="fa-solid fa-envelope"></i> support@krishiai.com
-          </a>
-          <a href="tel:+919876543210" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <i className="fa-solid fa-phone"></i> +91 98765 43210
-          </a>
+        <div className="footer-tagline">किसान का डिजिटल साथी — स्मार्ट खेती, बेहतर उत्पादन</div>
+        <div className="footer-links">
+          <Link to="/">होम</Link>
+          <Link to="/disease">रोग पहचान</Link>
+          <Link to="/weather">मौसम</Link>
+          <Link to="/market">मंडी भाव</Link>
+          <Link to="/schemes">योजनाएं</Link>
         </div>
-        <p className="footer-copy">&copy; 2026 Krishi AI. {t('designed_for')}</p>
+        <div className="footer-copy">
+          © {new Date().getFullYear()} Krishi AI. All rights reserved. Made with ❤️ for Indian Farmers.
+        </div>
       </div>
     </footer>
   );
