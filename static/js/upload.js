@@ -11,8 +11,8 @@
     const previewWrap = document.getElementById('previewWrap');
     const imgPreview  = document.getElementById('imagePreview');
     const removeBtn   = document.getElementById('removeImage');
-    const fileInput   = document.querySelector('[type="file"]#cropImage, [type="file"]#soilImage');
-    const form        = document.getElementById('diseaseForm') || document.getElementById('soilForm');
+    const fileInput   = document.querySelector('[type="file"]#cropImage, [type="file"]#soilImage, [type="file"]#pestImage');
+    const form        = document.getElementById('diseaseForm') || document.getElementById('soilForm') || document.getElementById('pestForm');
     const analyzeBtn  = document.getElementById('analyzeBtn');
     const analyzingCard = document.getElementById('analyzingCard');
 
@@ -160,22 +160,7 @@
     }
 
 
-    // ==============================
-    // IMAGE QUALITY HINT
-    // ==============================
-    if (fileInput) {
-        fileInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (!file) return;
 
-            // Warn about very small files (likely low quality)
-            if (file.size < 20 * 1024) { // < 20KB
-                setTimeout(() => {
-                    KrishiToast.show('Photo की quality कम लग रही है। Better result के लिए साफ photo लें।', 'warning', 4000);
-                }, 500);
-            }
-        });
-    }
 
 })();
 

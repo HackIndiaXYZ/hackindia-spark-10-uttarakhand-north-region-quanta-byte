@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+{% block title %}कीट पहचान - Krishi AI{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}?v=3.0">
+{% endblock %}
+
+{% block content %}
+<div class="krishi-container upload-page-wrap" style="padding-bottom: 4rem;">
+
+    <div class="page-header fade-in-up">
+        <h1 class="page-title" style="color:#22C55E;"><i class="fa-solid fa-bug"></i> कीट एवं रोग नियंत्रण</h1>
+        <p class="page-sub">कीट या फसल नुकसान की फोटो लें और Model से पाएं जैविक व रासायनिक समाधान।</p>
+    </div>
+
+    <div class="upload-layout">
+        <!-- Upload Card -->
+        <div class="krishi-card upload-card fade-in-up" style="border-left: 3px solid #22C55E;">
+            <form method="POST" action="{{ url_for('pest') }}" enctype="multipart/form-data" id="pestForm">
+
+                <!-- Drag Drop Zone -->
+                <div class="drop-zone" id="dropZone" style="border-color:rgba(34,197,94,0.3);">
+                    <div class="drop-inner" id="dropInner">
+                        <div class="drop-icon" style="color:#22C55E;"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                        <h3>कीट की Photo यहाँ डालें</h3>
+                        <p>जैसे: टिड्डी, इल्ली, कीट नुकसान</p>
+                        <label for="pestImage" class="btn-krishi-primary upload-btn" style="background:linear-gradient(135deg,#22C55E,#10B981);">
+                            <i class="fa-solid fa-camera"></i> Photo चुनें / Camera
+                        </label>
+                        <input type="file" id="pestImage" name="image" accept="image/*" capture="environment" hidden>
+                    </div>
+                    <!-- Preview -->
+                    <div class="image-preview-wrap" id="previewWrap" style="display:none;">
+                        <img id="imagePreview" src="" alt="Preview">
+                        <button type="button" class="remove-image-btn" id="removeImage">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+
+
+                <button type="submit" class="btn-krishi-primary full-btn" id="analyzeBtn" style="background:linear-gradient(135deg,#22C55E,#10B981);box-shadow:0 4px 14px rgba(34,197,94,0.3);">
+                    <i class="fa-solid fa-microscope"></i> Model Analyze
+                </button>
+            </form>
+        </div>
+
+        <!-- Result Section -->
+        <div class="result-section fade-in-up delay-1">
+            <!-- Analyzing State -->
+            <div class="krishi-card analyzing-card" id="analyzingCard" style="display:none;">
+                <div class="ai-analyzing">
+                    <div class="ai-spinner">
+                        <div class="spinner-ring"></div>
+                        <i class="fa-solid fa-bug ai-brain-icon" style="color:#22C55E;"></i>
+                    </div>
+                    <h3>Model Analyze कर रहा है...</h3>
+                    <p>कीट प्रजाति का डेटाबेस स्कैन हो रहा है</p>
+                    <div class="analyzing-steps">
+                        <div class="step-dot active"></div>
+                        <div class="step-dot"></div>
+                        <div class="step-dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Card -->
+            {% if result %}
+            <div class="krishi-card result-card {% if result.severity == 'High' %}result-danger{% elif result.severity == 'Medium' %}result-warning{% else %}result-safe{% endif %} fade-in-up" style="border-top: 4px solid #22C55E;">
+                <div class="result-header">
+                    <div class="result-icon" style="background:rgba(34,197,94,0.1);color:#22C55E;">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <h2 class="result-disease-name">{{ result.disease }}</h2>
+                    </div>
+                    <div class="severity-badge severity-{{ result.severity|lower }}">{{ result.severity }}</div>
+                </div>
+
+                {% if result.uploaded_image_url %}
+                <div class="uploaded-image-preview" style="text-align: center; margin: 1rem 0;">
+                    <img src="{{ result.uploaded_image_url }}" alt="Uploaded Image" style="max-width: 100%; max-height: 250px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                </div>
+                {% endif %}
+
+                <!-- Confidence Meter -->
+                <div class="confidence-section">
+                    <div class="confidence-label">
+                        <span>Model Confidence</span>
+                        <strong style="color:#22C55E;">{{ result.confidence }}%</strong>
+                    </div>
+                    <div class="confidence-track">
+                        <div class="confidence-fill-bar" style="width: {{ result.confidence }}%; background:linear-gradient(90deg,#22C55E,#10B981);"></div>
+                    </div>
+                </div>
+
+                <!-- Cause -->
+                <div class="result-section-block">
+                    <h4 style="color:#22C55E;"><i class="fa-solid fa-circle-exclamation"></i> नुकसान और व्यवहार</h4>
+                    <p>{{ result.cause }}</p>
+                </div>
+
+                <!-- Treatment -->
+                <div class="result-section-block treatment-block">
+                    <h4 style="color:#22C55E;"><i class="fa-solid fa-spray-can-sparkles"></i> कीट नियंत्रण उपाय</h4>
+                    <ul>
+                        {% for step in result.treatment %}
+                        <li><i class="fa-solid fa-circle-check" style="color:#22C55E;"></i> {{ step }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Prevention -->
+                <div class="result-section-block prevention-block">
+                    <h4 style="color:#22C55E;"><i class="fa-solid fa-shield-halved"></i> भविष्य में बचाव</h4>
+                    <p>{{ result.prevention }}</p>
+                </div>
+
+
+
+                <div class="result-actions">
+                    <button class="btn-krishi-secondary" onclick="window.print()" style="border-color:#22C55E;color:#22C55E;"><i class="fa-solid fa-print"></i> Print</button>
+                    <a href="{{ url_for('chatbot') }}" class="btn-krishi-primary" style="background:linear-gradient(135deg,#22C55E,#10B981);"><i class="fa-solid fa-robot"></i> और जानें</a>
+                </div>
+            </div>
+            {% else %}
+            <!-- Placeholder -->
+            <div class="krishi-card placeholder-result-card">
+                <div class="placeholder-inner">
+                    <i class="fa-solid fa-bug placeholder-icon" style="color:#22C55E;"></i>
+                    <h3>कीट पहचान रिपोर्ट</h3>
+                    <p>कीट या फसल बर्बादी की साफ़ फोटो अपलोड करें और जांच शुरू करें।</p>
+                    <ul class="placeholder-tips">
+                        <li><i class="fa-solid fa-circle-info" style="color:#22C55E;"></i> प्रभावित पत्ती/कीड़े की नज़दीकी फोटो लें</li>
+                        <li><i class="fa-solid fa-circle-info" style="color:#22C55E;"></i> फोटो में कीड़ा साफ दिखना चाहिए</li>
+                        <li><i class="fa-solid fa-circle-info" style="color:#22C55E;"></i> लक्षण व फसल नाम सही चुनें</li>
+                    </ul>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
+<script>
+// Override IDs for pest form
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('pestForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const analyzingCard = document.getElementById('analyzingCard');
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (analyzingCard) { analyzingCard.style.display = 'block'; analyzingCard.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            if (analyzeBtn) { analyzeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> जांच हो रही है...'; analyzeBtn.disabled = true; }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,433 +1,284 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
-import { Bar, Line } from 'react-chartjs-2';
-import { API_BASE_URL } from '../../config';
 import { useTranslation } from '../LanguageContext';
-import BackButton from '../../components/BackButton';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  BarController,
-  LineController
-} from 'chart.js';
-
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-  BarController,
-  LineController
-);
 
 export default function DashboardPage() {
-  const { t, language } = useTranslation();
-  const [currentDate, setCurrentDate] = useState('');
-  const [selectedCrop, setSelectedCrop] = useState('गेहूं');
-
-  useEffect(() => {
-    setCurrentDate(new Date().toLocaleDateString(language === 'hi' ? 'hi-IN' : 'en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    }));
-  }, [language]);
-
-  // Crop translation lookup helper
-  const getCropTranslation = (crop: string) => {
-    const clean = crop.split(' (')[0];
-    return t(`crop_${clean}`) || clean;
-  };
-
-  // Weather condition translation parser
-  const getWeatherConditionText = (cond: string) => {
-    if (!cond) return '';
-    if (language === 'hi') {
-      return cond.split(' (')[0];
-    } else {
-      const match = cond.match(/\(([^)]+)\)/);
-      return match ? match[1] : cond;
-    }
-  };
-
-  // Advisory tip translation mapper
-  const translateAdvisoryTip = (text: string) => {
-    if (language === 'hi') return text;
-    // Map common tip sentences to English
-    const mapping: Record<string, string> = {
-      'आज सिंचाई करना सही रहेगा — मौसम साफ है': 'Good day for irrigation — weather is clear',
-      'गेहूं में पीलापन दिख रहा हो तो Urea spray करें': 'If wheat looks yellow, spray Urea',
-      'कल बारिश संभव — कटाई रोकें': 'Rain expected tomorrow — stop harvesting',
-      'मंडी में गेहूं का भाव अच्छा है — बेचने का समय': 'Wheat price is good in market — right time to sell',
-      '🌧️ भारी बारिश की संभावना है — अपनी फसल कटाई रोकें और भीगने से बचाएं।': '🌧️ Heavy rain expected — stop harvesting and protect crops.',
-      '💧 खेतों में अतिरिक्त पानी निकासी का प्रबंध करें, सिंचाई तुरंत बंद करें।': '💧 Arrange drainage in fields, stop irrigation immediately.',
-      '🥵 अत्यधिक तापमान — फसलों को झुलसने से बचाने के लिए शाम को हल्की सिंचाई करें।': '🥵 Extreme heat — irrigate lightly in the evening to protect crops.',
-      '🌻 गर्मी सहन करने वाली फसलें (जैसे मक्का) के लिए अनुकूल मौसम।': '🌻 Favorable weather for heat-tolerant crops like maize.',
-      '🌤️ मौसम सुहावना है — आज सिंचाई और उर्वरक छिड़काव (Urea spray) के लिए उत्तम दिन है।': '🌤️ Pleasant weather — great day for irrigation and Urea spraying.',
-      '🌾 कटी हुई फसल को धूप में सुखाने का सही समय है।': '🌾 Suitable time to dry harvested crops in the sun.',
-      '🌧️ अगले कुछ दिनों में बारिश की संभावना है — अपनी फसल कटाई रोकें और सुरक्षित स्थान पर रखें।': '🌧️ Rain expected in coming days — stop harvesting and store crops safely.',
-      '💧 सिंचाई तुरंत बंद करें। खेतों में पानी जमा न होने दें।': '💧 Stop irrigation immediately. Avoid waterlogging in fields.',
-      '🥵 अत्यधिक गर्मी — फसलों को सूखने से बचाने के लिए शाम को हल्की सिंचाई करें।': '🥵 Extreme heat — water lightly in the evening to prevent drying.',
-      '🌤️ मौसम अनुकूल है — आज कीटनाशक छिड़काव (Pest spray) या यूरिया का प्रयोग करें।': '🌤️ Favorable weather — apply pest spray or urea today.',
-      '🌾 कटी फसलों को सुखाने और मंडी ले जाने के लिए उपयुक्त समय है।': '🌾 Good time to dry harvested crops and take them to market.'
-    };
-    return mapping[text] || text;
-  };
-
-  // API fetches using React Query
-  // 1. Fetch Profile
-  const { data: profile, isLoading: profileLoading } = useQuery({
-    queryKey: ['profile'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/profile`);
-      if (!res.ok) throw new Error('Failed to fetch profile');
-      return res.json();
-    }
-  });
-
-  const userLocation = profile?.district || profile?.village || (language === 'hi' ? 'वाराणसी' : 'Varanasi');
-
-  // 2. Fetch Weather
-  const { data: weatherData } = useQuery({
-    queryKey: ['weather', userLocation],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/weather?location=${encodeURIComponent(userLocation)}`, {
-        method: 'POST'
-      });
-      if (!res.ok) throw new Error('Failed to fetch weather');
-      return res.json();
-    },
-    enabled: !!profile || !profileLoading
-  });
-
-  // 3. Fetch Mandi Prices
-  const { data: marketPrices } = useQuery({
-    queryKey: ['market'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/market`);
-      if (!res.ok) throw new Error('Failed to fetch market prices');
-      return res.json();
-    }
-  });
-
-  // 4. Fetch Alerts
-  const { data: alerts } = useQuery({
-    queryKey: ['alerts'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/alerts`);
-      if (!res.ok) throw new Error('Failed to fetch alerts');
-      return res.json();
-    }
-  });
-
-  // 5. Fetch Recent Disease Inspections
-  const { data: recentDiseases } = useQuery({
-    queryKey: ['recentDiseases'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/disease/recent`);
-      if (!res.ok) throw new Error('Failed to fetch recent diseases');
-      return res.json();
-    }
-  });
-
-  // 6. Fetch Yield Data
-  const { data: yieldResponse } = useQuery({
-    queryKey: ['yieldData'],
-    queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/yield`);
-      if (!res.ok) throw new Error('Failed to fetch yield');
-      return res.json();
-    }
-  });
-
-  // Helper variables
-  const weather = weatherData?.weather;
-  const activeAlertsCount = alerts?.filter((a: any) => a.active).length || 0;
-  
-  // Find price for user's crop (fallback to seed wheat price if not found)
-  const cropPriceObj = marketPrices?.find((p: any) => p.crop_name === selectedCrop) || 
-                       marketPrices?.find((p: any) => p.crop_name === 'गेहूं');
-  const cropPrice = cropPriceObj ? `₹${cropPriceObj.price.toLocaleString('en-IN')}` : '₹2,150';
-  const cropPriceChange = cropPriceObj ? `${cropPriceObj.change_percent >= 0 ? '+' : ''}${cropPriceObj.change_percent}%` : '+3%';
-
-  // Dynamic advisory text based on weather/season
-  const advisoryTips = weather?.farming_tips || [
-    { type: 'safe', text: 'आज सिंचाई करना सही रहेगा — मौसम साफ है' },
-    { type: 'warning', text: 'गेहूं में पीलापन दिख रहा हो तो Urea spray करें' },
-    { type: 'danger', text: 'कल बारिश संभव — कटाई रोकें' },
-    { type: 'safe', text: 'मंडी में गेहूं का भाव अच्छा है — बेचने का समय' }
-  ];
-
-  // Chart 1: Yield Chart Data (Mocking monthly stats)
-  const yieldChartData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [{
-      label: `${t('production')} (Q)`,
-      data: selectedCrop === 'धान' ? [20, 30, 25, 40, 50, 45, 60, 55, 70, 65, 55, 60] : 
-            selectedCrop === 'मक्का' ? [15, 20, 18, 30, 35, 28, 40, 35, 45, 38, 30, 40] :
-            [30, 45, 28, 60, 75, 50, 80, 65, 90, 70, 55, 85], // default wheat
-      backgroundColor: 'rgba(46,125,50,0.7)',
-      borderRadius: 8,
-      borderSkipped: false
-    }]
-  };
-
-  // Chart 2: Profit Chart Data
-  const profitChartData = {
-    labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
-    datasets: [
-      {
-        label: t('revenue'),
-        data: [20000, 35000, 28000, 45000, 38000, 55000],
-        borderColor: '#43A047',
-        backgroundColor: 'rgba(67,160,71,0.1)',
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: t('expenses'),
-        data: [12000, 18000, 15000, 22000, 19000, 25000],
-        borderColor: '#E53935',
-        backgroundColor: 'rgba(229,57,53,0.1)',
-        fill: true,
-        tension: 0.4
-      }
-    ]
-  };
+  const { language } = useTranslation();
 
   return (
-    <div className="krishi-container dashboard-wrap">
-      <BackButton />
-
-      {/* Page Header */}
-      <div className="page-header fade-in-up">
-        <div>
-          <h1 className="page-title"><i className="fa-solid fa-chart-line"></i> {t('dash_title')}</h1>
-          <p className="page-sub">
-            {t('dash_subtitle').replace('{name}', profile?.name || t('dash_hello_farmer'))}
-          </p>
-        </div>
-        <div className="header-date">
-          <i className="fa-solid fa-calendar"></i>
-          <span id="currentDate">{currentDate}</span>
-        </div>
+    <section className="services-section krishi-container">
+      <div className="services-header fade-in-up">
+        <h2 className="services-main-title">
+          {language === 'hi' ? 'स्मार्ट कृषि समाधान' : 'Smart Agriculture Solutions'}
+        </h2>
+        <p className="services-main-sub">
+          {language === 'hi'
+            ? 'एआई-संचालित 8 शक्तिशाली उपकरण — बेहतर फसल, बेहतर जीवन'
+            : '8 AI-powered tools to optimize your farm, yield, and income'}
+        </p>
       </div>
 
-      {/* Summary Cards */}
-      <div className="summary-grid fade-in-up delay-1">
-        <div className="summary-card status-safe">
-          <div className="summary-icon"><i className="fa-solid fa-seedling"></i></div>
-          <div className="summary-info">
-            <span className="summary-label">{t('dash_crop_health')}</span>
-            <span className="summary-value">{t('dash_crop_healthy')}</span>
-            <span className="summary-sub">{t('dash_crop_health_sub')}</span>
+      <div className="premium-cards-grid">
+
+        {/* ── Card 1: Crop Disease Detection ── */}
+        <Link href="/disease" className="pcard pcard--disease fade-in-up">
+          <div className="pcard__corner-badge">AI</div>
+          <div className="pcard__img-wrap">
+            <img src="/images/crop_disease.png" alt="Crop Disease Detection" className="pcard__img" />
           </div>
-          <div className="summary-badge safe">{t('dash_status_safe')}</div>
-        </div>
-        <div className="summary-card status-warning">
-          <div className="summary-icon"><i className="fa-solid fa-cloud-rain"></i></div>
-          <div className="summary-info">
-            <span className="summary-label">{t('dash_weather_loc')} ({userLocation})</span>
-            <span className="summary-value">{weather ? `${weather.temp}°C` : '28°C'}</span>
-            <span className="summary-sub">{weather ? getWeatherConditionText(weather.condition) : (language === 'hi' ? 'आंशिक बादल' : 'Partly Cloudy')}</span>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'फसल रोग पहचान' : 'Crop Disease Detection'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'पत्ती की फोटो अपलोड करें और तुरंत रोग निदान व उपचार सलाह पाएं।'
+                : 'Upload a leaf image and get AI-powered disease diagnosis & treatment instantly.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn">
+                {language === 'hi' ? 'जांच करें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon"><i className="fa-solid fa-leaf"></i></span>
+            </div>
           </div>
-          <div className="summary-badge warning">
-            {weather && weather.condition.includes('बारिश') ? t('dash_weather_irrigate') : t('dash_weather_normal')}
+        </Link>
+
+        {/* ── Card 2: Soil Analysis ── */}
+        <Link href="/soil" className="pcard pcard--soil fade-in-up delay-1">
+          <div className="pcard__corner-badge pcard__corner-badge--soil">Lab</div>
+          <div className="pcard__img-wrap">
+            <img src="/images/soil_analysis.png" alt="Soil Analysis" className="pcard__img" />
           </div>
-        </div>
-        <div className="summary-card status-safe">
-          <div className="summary-icon"><i className="fa-solid fa-rupee-sign"></i></div>
-          <div className="summary-info">
-            <span className="summary-label">{t('dash_mandi_today')} ({getCropTranslation(selectedCrop)})</span>
-            <span className="summary-value">{cropPrice}</span>
-            <span className="summary-sub">{t('dash_per_quintal')}</span>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'मृदा स्वास्थ्य जांच' : 'Soil Analysis'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'मिट्टी के प्रकार, पोषक तत्व जानें और उर्वरक सिफारिशें पाएं।'
+                : 'Detect soil type, nutrients & get fertilizer recommendations using AI.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--soil">
+                {language === 'hi' ? 'जांच करें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--soil"><i className="fa-solid fa-flask"></i></span>
+            </div>
           </div>
-          <div className="summary-badge safe">↑ {cropPriceChange}</div>
-        </div>
-        <div className="summary-card status-danger">
-          <div className="summary-icon"><i className="fa-solid fa-triangle-exclamation"></i></div>
-          <div className="summary-info">
-            <span className="summary-label">{t('dash_active_alerts')}</span>
-            <span className="summary-value">{activeAlertsCount} {t('dash_alerts_new')}</span>
-            <span className="summary-sub">{language === 'hi' ? 'टिड्डी/मौसम चेतावनियां' : 'Locust/weather warnings'}</span>
+        </Link>
+
+        {/* ── Card 3: Pest Detection ── */}
+        <Link href="/pest" className="pcard pcard--pest fade-in-up delay-2">
+          <div className="pcard__corner-badge pcard__corner-badge--pest">AI</div>
+          <div className="pcard__img-wrap">
+            <img src="/images/pest_detection.png" alt="Pest Detection" className="pcard__img" />
           </div>
-          <div className="summary-badge danger"><Link href="/alerts" style={{ color: 'inherit' }}>{t('dash_alerts_view')}</Link></div>
-        </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'कीट पहचान' : 'Pest Detection'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'कीट पहचानने के लिए फसल की फोटो अपलोड करें और एआई समाधान पाएं।'
+                : 'Upload a crop image to detect pests & get AI-based control solutions.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--pest">
+                {language === 'hi' ? 'पहचानें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--pest"><i className="fa-solid fa-bug"></i></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ── Card 4: Weather Forecast ── */}
+        <Link href="/weather" className="pcard pcard--weather fade-in-up delay-3">
+          <div className="pcard__img-wrap">
+            <img src="/images/weather_forecast.png" alt="Weather Forecast" className="pcard__img" />
+          </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'मौसम पूर्वानुमान' : 'Weather Forecast'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'खेत के स्थान के लिए लाइव मौसम और 5 दिनों का पूर्वानुमान देखें।'
+                : 'Live weather updates & 5-day forecast tailored for your farm location.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--weather">
+                {language === 'hi' ? 'मौसम देखें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--weather"><i className="fa-solid fa-location-dot"></i></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ── Card 5: Mandi Market Price ── */}
+        <Link href="/market" className="pcard pcard--market fade-in-up">
+          <div className="pcard__img-wrap">
+            <img src="/images/mandi_price.png" alt="Mandi Market Price" className="pcard__img" />
+          </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'मंडी बाजार भाव' : 'Mandi Market Price'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'रियल-टाइम मंडी भाव, MSP और मूल्य प्रवृत्ति ट्रैक करें।'
+                : 'Real-time mandi rates, MSP details & price trends for your crops.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--market">
+                {language === 'hi' ? 'भाव देखें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--market"><i className="fa-solid fa-indian-rupee-sign"></i></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ── Card 6: Government Schemes ── */}
+        <Link href="/schemes" className="pcard pcard--schemes fade-in-up delay-1">
+          <div className="pcard__img-wrap">
+            <img src="/images/government_schemes.png" alt="Government Schemes" className="pcard__img" />
+          </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'सरकारी योजनाएं' : 'Government Schemes'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'PM-KISAN, KCC, PMFBY और अन्य सरकारी सब्सिडी योजनाएं देखें।'
+                : 'Explore PM-KISAN, KCC, PMFBY & other farming subsidies & schemes.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--schemes">
+                {language === 'hi' ? 'योजनाएं देखें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--schemes"><i className="fa-solid fa-landmark"></i></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ── Card 7: Voice Advisory ── */}
+        <Link href="/voice" className="pcard pcard--voice fade-in-up delay-2">
+          <div className="pcard__corner-badge pcard__corner-badge--voice">
+            <i className="fa-solid fa-microphone" style={{fontSize:'0.6rem'}}></i>
+          </div>
+          <div className="pcard__img-wrap pcard__img-wrap--svg">
+            <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" className="pcard__svg">
+              <defs>
+                <radialGradient id="vGlowD" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#9333ea" stopOpacity="0.35"/>
+                  <stop offset="100%" stopColor="#9333ea" stopOpacity="0"/>
+                </radialGradient>
+                <linearGradient id="micBodyD" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#c084fc"/>
+                  <stop offset="100%" stopColor="#7c3aed"/>
+                </linearGradient>
+                <linearGradient id="micHeadD" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#e879f9"/>
+                  <stop offset="100%" stopColor="#9333ea"/>
+                </linearGradient>
+                <filter id="glowD">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <ellipse cx="140" cy="110" rx="80" ry="75" fill="url(#vGlowD)"/>
+              <path d="M55 80 Q40 110 55 140" stroke="#a855f7" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.7" filter="url(#glowD)"/>
+              <path d="M68 65 Q45 110 68 155" stroke="#c084fc" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.5"/>
+              <path d="M225 80 Q240 110 225 140" stroke="#a855f7" strokeWidth="3.5" fill="none" strokeLinecap="round" opacity="0.7" filter="url(#glowD)"/>
+              <path d="M212 65 Q235 110 212 155" stroke="#c084fc" strokeWidth="3" fill="none" strokeLinecap="round" opacity="0.5"/>
+              <rect x="130" y="148" width="20" height="30" rx="4" fill="url(#micBodyD)"/>
+              <rect x="108" y="172" width="64" height="10" rx="5" fill="url(#micBodyD)"/>
+              <rect x="114" y="50" width="52" height="100" rx="26" fill="url(#micHeadD)" filter="url(#glowD)"/>
+              <line x1="114" y1="85" x2="166" y2="85" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+              <line x1="114" y1="100" x2="166" y2="100" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+              <line x1="114" y1="115" x2="166" y2="115" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+              <line x1="114" y1="130" x2="166" y2="130" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5"/>
+              <ellipse cx="130" cy="68" rx="8" ry="12" fill="rgba(255,255,255,0.18)" transform="rotate(-10 130 68)"/>
+            </svg>
+          </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'ध्वनि सलाहकार' : 'Voice Advisory'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'हिंदी में बोलकर खेती के सवाल पूछें और तुरंत आवाज़ में जवाब पाएं।'
+                : 'Ask farming questions by voice in Hindi or English and get instant answers.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--voice">
+                {language === 'hi' ? 'बोलें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--voice"><i className="fa-solid fa-waveform-lines"></i></span>
+            </div>
+          </div>
+        </Link>
+
+        {/* ── Card 8: Organic Farming ── */}
+        <Link href="/organic" className="pcard pcard--organic fade-in-up delay-3">
+          <div className="pcard__corner-badge pcard__corner-badge--organic">
+            <i className="fa-solid fa-leaf" style={{fontSize:'0.6rem'}}></i>
+          </div>
+          <div className="pcard__img-wrap pcard__img-wrap--svg">
+            <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" className="pcard__svg">
+              <defs>
+                <radialGradient id="oGlowD" cx="50%" cy="60%" r="55%">
+                  <stop offset="0%" stopColor="#10b981" stopOpacity="0.4"/>
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0"/>
+                </radialGradient>
+                <linearGradient id="plantGreenD" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#34d399"/>
+                  <stop offset="100%" stopColor="#059669"/>
+                </linearGradient>
+                <linearGradient id="soilBrownD" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor="#78350f"/>
+                  <stop offset="100%" stopColor="#3d1a02"/>
+                </linearGradient>
+                <filter id="plantGlowD">
+                  <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <ellipse cx="140" cy="130" rx="90" ry="70" fill="url(#oGlowD)"/>
+              <ellipse cx="140" cy="158" rx="65" ry="18" fill="#1c0a00" opacity="0.8"/>
+              <path d="M75 145 Q140 175 205 145 L200 158 Q140 188 80 158 Z" fill="url(#soilBrownD)"/>
+              <ellipse cx="140" cy="145" rx="65" ry="18" fill="#78350f"/>
+              <ellipse cx="140" cy="143" rx="60" ry="15" fill="#92400e" opacity="0.7"/>
+              <path d="M140 145 L140 70" stroke="url(#plantGreenD)" strokeWidth="7" strokeLinecap="round" filter="url(#plantGlowD)"/>
+              <path d="M140 95 Q95 55 112 108 Q126 108 140 95Z" fill="url(#plantGreenD)" filter="url(#plantGlowD)"/>
+              <path d="M140 80 Q185 40 168 92 Q154 92 140 80Z" fill="url(#plantGreenD)" filter="url(#plantGlowD)"/>
+              <path d="M140 72 Q112 52 120 75 Q130 75 140 72Z" fill="#34d399" opacity="0.8"/>
+              <circle cx="90" cy="100" r="3.5" fill="#34d399" opacity="0.8" filter="url(#plantGlowD)"/>
+              <circle cx="195" cy="85" r="2.5" fill="#6ee7b7" opacity="0.7" filter="url(#plantGlowD)"/>
+              <circle cx="210" cy="115" r="3" fill="#34d399" opacity="0.7" filter="url(#plantGlowD)"/>
+            </svg>
+          </div>
+          <div className="pcard__body">
+            <h3 className="pcard__title">
+              {language === 'hi' ? 'जैविक खेती संवर्धन' : 'Organic Farming'}
+            </h3>
+            <p className="pcard__desc">
+              {language === 'hi'
+                ? 'प्रमाणन गाइड, जैविक खाद रेसिपी और बेहतर पैदावार के सर्वोत्तम तरीके।'
+                : 'Certification guides, organic fertilizer recipes & best practices for better yield.'}
+            </p>
+            <div className="pcard__footer">
+              <span className="pcard__btn pcard__btn--organic">
+                {language === 'hi' ? 'सीखें' : 'Explore'} <i className="fa-solid fa-arrow-right"></i>
+              </span>
+              <span className="pcard__icon pcard__icon--organic"><i className="fa-solid fa-seedling"></i></span>
+            </div>
+          </div>
+        </Link>
+
       </div>
-
-      {/* Charts Row */}
-      <div className="charts-row fade-in-up delay-2">
-        <div className="krishi-card chart-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-chart-bar"></i> {t('dash_crop_yield')}</h3>
-            <select 
-              className="krishi-input mini-select" 
-              id="cropSelect"
-              value={selectedCrop}
-              onChange={(e) => setSelectedCrop(e.target.value)}
-            >
-              <option value="गेहूं">{t('crop_गेहूं') || 'गेहूं'}</option>
-              <option value="धान">{t('crop_धान') || 'धान'}</option>
-              <option value="मक्का">{t('crop_मक्का') || 'मक्का'}</option>
-            </select>
-          </div>
-          <div style={{ height: '200px', position: 'relative' }}>
-            <Bar 
-              data={yieldChartData} 
-              options={{ 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }, 
-                scales: { y: { beginAtZero: true } } 
-              }} 
-            />
-          </div>
-        </div>
-        <div className="krishi-card chart-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-rupee-sign"></i> {t('dash_revenue_vs_expense')}</h3>
-          </div>
-          <div style={{ height: '200px', position: 'relative' }}>
-            <Line 
-              data={profitChartData} 
-              options={{ 
-                responsive: true, 
-                maintainAspectRatio: false,
-                plugins: { legend: { position: 'bottom' } } 
-              }} 
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Advisory + Disease Row */}
-      <div className="dash-mid-row fade-in-up delay-3">
-        {/* AI Advisory */}
-        <div className="krishi-card advisory-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-robot"></i> {t('dash_ai_advisory')}</h3>
-            <span className="badge-green">{t('fresh')}</span>
-          </div>
-          <ul className="advisory-list">
-            {advisoryTips.map((tip: any, index: number) => (
-              <li key={index} className={`advisory-item ${tip.type}`}>
-                <i className={`fa-solid ${
-                  tip.type === 'safe' ? 'fa-check-circle' : 
-                  tip.type === 'warning' ? 'fa-exclamation-triangle' : 
-                  'fa-times-circle'
-                }`}></i>
-                <span>{translateAdvisoryTip(tip.text)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Disease Status */}
-        <div className="krishi-card disease-status-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-microscope"></i> {t('dash_recent_checks')}</h3>
-            <Link href="/disease" className="btn-krishi-secondary btn-sm">{t('dash_new_check')}</Link>
-          </div>
-          {recentDiseases && recentDiseases.length > 0 ? (
-            recentDiseases.map((d: any) => (
-              <div key={d.id} className="disease-row">
-                <div className="disease-thumb">
-                  <img src={d.image_url} alt={d.crop} />
-                </div>
-                <div className="disease-info">
-                  <strong>{getCropTranslation(d.crop)}</strong>
-                  <span className="disease-name">{language === 'hi' ? d.disease_name : (d.disease_name.match(/\(([^)]+)\)/) ? d.disease_name.match(/\(([^)]+)\)/)[1] : d.disease_name)}</span>
-                  <div className="confidence-bar">
-                    <div className="confidence-fill" style={{ width: `${d.confidence}%` }}></div>
-                  </div>
-                  <small>{d.confidence}% {language === 'hi' ? 'भरोसा' : 'confidence'}</small>
-                </div>
-                <span className={`status-${
-                  d.severity === 'High' ? 'danger' : 
-                  d.severity === 'Medium' ? 'warning' : 
-                  'safe'
-                }`}>
-                  {language === 'hi' ? (d.severity === 'High' ? 'गंभीर' : d.severity === 'Medium' ? 'मध्यम' : 'सामान्य') : d.severity}
-                </span>
-              </div>
-            ))
-          ) : (
-            <div className="empty-state">
-              <i className="fa-solid fa-camera"></i>
-              <p>{t('dash_no_checks')}</p>
-              <Link href="/disease" className="btn-krishi-primary btn-sm">{t('dash_check_now')}</Link>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Weather + Yield Progress */}
-      <div className="dash-bottom-row fade-in-up delay-4">
-        {/* Weather Mini */}
-        <div className="krishi-card weather-mini-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-cloud-sun"></i> {t('dash_5day_weather')} ({userLocation})</h3>
-            <Link href="/weather" className="btn-krishi-secondary btn-sm">{t('dash_weather_details')}</Link>
-          </div>
-          <div className="weather-mini-row">
-            {weather?.forecast.slice(0, 5).map((day: any, i: number) => (
-              <div key={i} className="weather-day">
-                <span>{language === 'hi' ? day.day : (day.day === 'आज' ? 'Today' : day.day === 'कल' ? 'Tomorrow' : day.day === 'परसों' ? 'Overmorrow' : day.day)}</span>
-                <i className={`fa-solid ${
-                  day.condition.includes('बारिश') ? 'fa-cloud-rain' : 
-                  day.condition.includes('बादल') ? 'fa-cloud' : 
-                  'fa-sun'
-                }`}></i>
-                <b>{day.high}°</b>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Yield Progress */}
-        <div className="krishi-card yield-progress-card">
-          <div className="card-header">
-            <h3><i className="fa-solid fa-seedling"></i> {t('dash_crop_progress')}</h3>
-            <Link href="/yield" className="btn-krishi-secondary btn-sm">{t('dash_full_report')}</Link>
-          </div>
-          <div className="yield-progress-list">
-            <div className="yield-progress-item">
-              <div className="yield-label"><span>{t('crop_गेहूं') || 'गेहूं'}</span><span>72%</span></div>
-              <div className="progress-bar"><div className="progress-fill safe" style={{ width: '72%' }}></div></div>
-            </div>
-            <div className="yield-progress-item">
-              <div className="yield-label"><span>{t('crop_धान') || 'धान'}</span><span>45%</span></div>
-              <div className="progress-bar"><div className="progress-fill warning" style={{ width: '45%' }}></div></div>
-            </div>
-            <div className="yield-progress-item">
-              <div className="yield-label"><span>{t('crop_मक्का') || 'मक्का'}</span><span>88%</span></div>
-              <div className="progress-bar"><div className="progress-fill safe" style={{ width: '88%' }}></div></div>
-            </div>
-            <div className="yield-progress-item">
-              <div className="yield-label"><span>{t('crop_सरसों') || 'सरसों'}</span><span>30%</span></div>
-              <div className="progress-bar"><div className="progress-fill danger" style={{ width: '30%' }}></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    </section>
   );
 }

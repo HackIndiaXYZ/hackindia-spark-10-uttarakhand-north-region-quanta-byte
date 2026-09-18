@@ -8,6 +8,7 @@ import '../styles/global.css';
 import '../styles/navbar.css';
 import '../styles/cards.css';
 import '../styles/forms.css';
+import '../styles/weather.css';
 import '../styles/dashboard.css';
 import '../styles/chatbot.css';
 import '../styles/home.css';

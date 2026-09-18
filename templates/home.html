@@ -1,245 +1,332 @@
 {% extends "base.html" %}
-{% block title %}Krishi AI - Intelligent Farming Solutions{% endblock %}
+{% block title %}Krishi AI - स्मार्ट कृषि समाधान{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}?v=2.1">
+<style>
+/* Services section */
+.services-section { padding: 3rem 1.5rem 4rem; }
+.services-header { text-align: center; margin-bottom: 3rem; }
+.services-main-title {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 800;
+    background: linear-gradient(to right, #ffffff 30%, #9CA3AF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+.services-main-sub { color: rgba(255,255,255,0.5); font-size: 1.05rem; line-height: 1.7; }
+
+/* ── 4-column premium cards grid ── */
+.premium-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+@media (max-width: 1199px) { .premium-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 599px)  { .premium-cards-grid { grid-template-columns: 1fr; } }
+
+/* ── Base card ── */
+.pcard {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.10);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), box-shadow 0.35s cubic-bezier(0.4,0,0.2,1), border-color 0.35s ease;
+    cursor: pointer;
+}
+.pcard:hover { transform: translateY(-10px) scale(1.015); }
+
+/* Per-card backgrounds */
+.pcard--disease { background: linear-gradient(160deg, #0c2218, #0a1a10); }
+.pcard--disease:hover { box-shadow: 0 20px 60px rgba(16,185,129,0.30); border-color: rgba(16,185,129,0.45); }
+.pcard--soil { background: linear-gradient(160deg, #1e1105, #120d02); }
+.pcard--soil:hover { box-shadow: 0 20px 60px rgba(217,119,6,0.30); border-color: rgba(217,119,6,0.45); }
+.pcard--pest { background: linear-gradient(160deg, #081a0a, #060e08); }
+.pcard--pest:hover { box-shadow: 0 20px 60px rgba(34,197,94,0.30); border-color: rgba(34,197,94,0.45); }
+.pcard--weather { background: linear-gradient(160deg, #060e1e, #04090f); }
+.pcard--weather:hover { box-shadow: 0 20px 60px rgba(59,130,246,0.30); border-color: rgba(59,130,246,0.45); }
+.pcard--market { background: linear-gradient(160deg, #1a0d02, #110802); }
+.pcard--market:hover { box-shadow: 0 20px 60px rgba(249,115,22,0.30); border-color: rgba(249,115,22,0.45); }
+.pcard--schemes { background: linear-gradient(160deg, #02131a, #020e10); }
+.pcard--schemes:hover { box-shadow: 0 20px 60px rgba(6,182,212,0.30); border-color: rgba(6,182,212,0.45); }
+.pcard--voice { background: linear-gradient(160deg, #130b1e, #0d0814); }
+.pcard--voice:hover { box-shadow: 0 20px 60px rgba(139,92,246,0.30); border-color: rgba(139,92,246,0.45); }
+.pcard--organic { background: linear-gradient(160deg, #061a10, #04100b); }
+.pcard--organic:hover { box-shadow: 0 20px 60px rgba(16,185,129,0.30); border-color: rgba(16,185,129,0.45); }
+
+/* Corner badge */
+.pcard__corner-badge {
+    position: absolute; top: 14px; right: 14px; z-index: 20;
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #fff; font-size: 0.65rem; font-weight: 800;
+    letter-spacing: 0.5px; padding: 0.28rem 0.6rem;
+    border-radius: 30px; text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(16,185,129,0.45);
+}
+.pcard__corner-badge--soil   { background: linear-gradient(135deg, #D97706, #B45309); box-shadow: 0 4px 14px rgba(217,119,6,0.45); }
+.pcard__corner-badge--pest   { background: linear-gradient(135deg, #22C55E, #16A34A); box-shadow: 0 4px 14px rgba(34,197,94,0.45); }
+.pcard__corner-badge--voice  { background: linear-gradient(135deg, #9333EA, #7C3AED); box-shadow: 0 4px 14px rgba(139,92,246,0.45); }
+.pcard__corner-badge--organic{ background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 14px rgba(16,185,129,0.45); }
+
+/* Image */
+.pcard__img-wrap { width: 100%; height: 188px; overflow: hidden; flex-shrink: 0; background: rgba(0,0,0,0.25); }
+.pcard__img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+.pcard:hover .pcard__img { transform: scale(1.08); }
+
+/* SVG fallback wrapper */
+.pcard__img-wrap--svg { display: flex; align-items: center; justify-content: center; }
+.pcard__svg { width: 100%; height: 100%; transition: transform 0.55s; }
+.pcard:hover .pcard__svg { transform: scale(1.06); }
+
+/* Body */
+.pcard__body { display: flex; flex-direction: column; flex: 1; padding: 1.25rem 1.35rem 1.35rem; }
+.pcard__title { font-size: 1.18rem; font-weight: 800; color: #fff; margin-bottom: 0.55rem; line-height: 1.3; letter-spacing: -0.2px; }
+.pcard__desc { font-size: 0.84rem; color: rgba(255,255,255,0.60); line-height: 1.65; flex: 1; margin-bottom: 1.15rem; }
+
+/* Footer */
+.pcard__footer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; }
+.pcard__btn {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.85rem; font-weight: 700;
+    transition: all 0.3s ease;
+    background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.25);
+}
+.pcard__btn i { transition: transform 0.3s; }
+.pcard:hover .pcard__btn i { transform: translateX(4px); }
+.pcard:hover .pcard__btn { background: rgba(16,185,129,0.22); border-color: rgba(16,185,129,0.5); }
+
+.pcard__btn--soil    { background: rgba(217,119,6,0.12);  color: #F59E0B; border-color: rgba(217,119,6,0.25); }
+.pcard:hover .pcard__btn--soil    { background: rgba(217,119,6,0.22);  border-color: rgba(217,119,6,0.5); }
+.pcard__btn--pest    { background: rgba(34,197,94,0.12);  color: #22C55E; border-color: rgba(34,197,94,0.25); }
+.pcard:hover .pcard__btn--pest    { background: rgba(34,197,94,0.22);  border-color: rgba(34,197,94,0.5); }
+.pcard__btn--weather { background: rgba(59,130,246,0.12); color: #60A5FA; border-color: rgba(59,130,246,0.25); }
+.pcard:hover .pcard__btn--weather { background: rgba(59,130,246,0.22); border-color: rgba(59,130,246,0.5); }
+.pcard__btn--market  { background: rgba(249,115,22,0.12); color: #FB923C; border-color: rgba(249,115,22,0.25); }
+.pcard:hover .pcard__btn--market  { background: rgba(249,115,22,0.22); border-color: rgba(249,115,22,0.5); }
+.pcard__btn--schemes { background: rgba(6,182,212,0.12);  color: #22D3EE; border-color: rgba(6,182,212,0.25); }
+.pcard:hover .pcard__btn--schemes { background: rgba(6,182,212,0.22);  border-color: rgba(6,182,212,0.5); }
+.pcard__btn--voice   { background: rgba(139,92,246,0.12); color: #A78BFA; border-color: rgba(139,92,246,0.25); }
+.pcard:hover .pcard__btn--voice   { background: rgba(139,92,246,0.22); border-color: rgba(139,92,246,0.5); }
+.pcard__btn--organic { background: rgba(16,185,129,0.12); color: #34D399; border-color: rgba(16,185,129,0.25); }
+.pcard:hover .pcard__btn--organic { background: rgba(16,185,129,0.22); border-color: rgba(16,185,129,0.5); }
+
+/* Icon circle */
+.pcard__icon {
+    width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; flex-shrink: 0; transition: transform 0.3s;
+    background: rgba(16,185,129,0.12); color: #10B981; border: 1px solid rgba(16,185,129,0.20);
+}
+.pcard:hover .pcard__icon { transform: rotate(15deg) scale(1.1); }
+.pcard__icon--soil    { background: rgba(217,119,6,0.12);  color: #F59E0B; border-color: rgba(217,119,6,0.20); }
+.pcard__icon--pest    { background: rgba(34,197,94,0.12);  color: #22C55E; border-color: rgba(34,197,94,0.20); }
+.pcard__icon--weather { background: rgba(59,130,246,0.12); color: #60A5FA; border-color: rgba(59,130,246,0.20); }
+.pcard__icon--market  { background: rgba(249,115,22,0.12); color: #FB923C; border-color: rgba(249,115,22,0.20); }
+.pcard__icon--schemes { background: rgba(6,182,212,0.12);  color: #22D3EE; border-color: rgba(6,182,212,0.20); }
+.pcard__icon--voice   { background: rgba(139,92,246,0.12); color: #A78BFA; border-color: rgba(139,92,246,0.20); }
+.pcard__icon--organic { background: rgba(16,185,129,0.12); color: #34D399; border-color: rgba(16,185,129,0.20); }
+</style>
 {% endblock %}
 
 {% block content %}
-
-<!-- Hero Section -->
-<section class="hero-section">
-    <div class="hero-overlay"></div>
-    <div class="hero-content">
-        <div class="hero-badge fade-in-up">
-            Start using AI <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i>
-        </div>
-        <h1 class="hero-title fade-in-up delay-1">
-            Grow the Future with<br>
-            Sustainable Agriculture
-        </h1>
-        <p class="hero-subtitle fade-in-up delay-2">
-            We empower farmers with real-time data, predictive AI, and seamless integrations to maximize yield and adapt to climate changes effortlessly.
-        </p>
-        <div class="hero-actions fade-in-up delay-3">
-            <a href="{{ url_for('dashboard') }}" class="btn-hero-primary">
-                Get started <i class="fa-solid fa-arrow-right"></i>
-            </a>
-        </div>
+<section class="services-section">
+    <div class="services-header fade-in-up">
+        <h2 class="services-main-title">स्मार्ट कृषि समाधान</h2>
+        <p class="services-main-sub">एआई-संचालित 8 शक्तिशाली उपकरण — बेहतर फसल, बेहतर जीवन</p>
     </div>
-</section>
 
-<!-- Partner Strip -->
-<div class="partner-strip fade-in-up">
-    <div class="partner-logo"><i class="fa-solid fa-seedling"></i> FocusPoint</div>
-    <div class="partner-logo"><i class="fa-solid fa-chart-pie"></i> Screenshare</div>
-    <div class="partner-logo"><i class="fa-solid fa-leaf"></i> Segment</div>
-    <div class="partner-logo"><i class="fa-solid fa-bolt"></i> Lightspeed</div>
-</div>
+    <div class="premium-cards-grid">
 
-<!-- About Us Section -->
-<section class="about-section" id="about" style="padding: 8rem 1.5rem; background: #fff; border-bottom: 1px solid var(--color-border);">
-    <div class="krishi-container" style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;">
-        <div class="about-content fade-in-up">
-            <h2 class="video-title" style="margin-bottom: 1.5rem; color: var(--color-text);">About Krishi AI</h2>
-            <p style="color: var(--color-text-light); line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.05rem;">
-                Krishi AI is born out of a profound respect for the Indian farmer. Our mission is to bridge the gap between traditional farming practices and modern technology, bringing predictive intelligence directly to the fields.
-            </p>
-            <p style="color: var(--color-text-light); line-height: 1.8; font-size: 1.05rem;">
-                By harnessing the power of Artificial Intelligence, satellite imagery, and real-time market data, we empower millions of farmers to make data-driven decisions. From predicting the perfect time to harvest, to instantly diagnosing crop diseases from a simple smartphone photo, Krishi AI is your digital companion in achieving sustainable and profitable agriculture.
-            </p>
-        </div>
-        <div class="about-image fade-in-up delay-1" style="position: relative;">
-            <img src="https://images.unsplash.com/photo-1605000797499-95a51c5269ae?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Indian Farmers" style="border-radius: 2rem; width: 100%; box-shadow: var(--shadow-lg);">
-            <div style="position: absolute; bottom: -2rem; left: -2rem; background: #064E3B; color: #fff; padding: 1.5rem; border-radius: 1.5rem; box-shadow: var(--shadow-lg);">
-                <h3 style="font-size: 2.5rem; font-family: var(--font-display); font-weight: 800; line-height: 1; color: #A3E635;">10M+</h3>
-                <p style="font-size: 0.9rem; font-weight: 600; margin-top: 0.5rem;">Farmers Reached</p>
+        <!-- Card 1: Crop Disease Detection -->
+        <a href="{{ url_for('disease') }}" class="pcard pcard--disease fade-in-up">
+            <div class="pcard__corner-badge">AI</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/crop_disease.png') }}" alt="Crop Disease Detection" class="pcard__img">
             </div>
-        </div>
-    </div>
-</section>
-
-<!-- Innovating Section -->
-<section class="innovating-section">
-    <div class="innovating-container">
-        <h2 class="innovating-title fade-in-up">Innovating the future<br>of agriculture</h2>
-        
-        <div class="innovating-grid">
-            <div class="innovating-images fade-in-up delay-1">
-                <div class="innovating-img-col">
-                    <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Farming 1">
-                </div>
-                <div class="innovating-img-col">
-                    <img src="https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Farming 2">
+            <div class="pcard__body">
+                <h3 class="pcard__title">फसल रोग पहचान</h3>
+                <p class="pcard__desc">पत्ती की फोटो अपलोड करें और तुरंत रोग निदान व उपचार सलाह पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn">जांच करें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon"><i class="fa-solid fa-leaf"></i></span>
                 </div>
             </div>
-            
-            <div class="innovating-stats fade-in-up delay-2">
-                <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 2rem;">
-                    AgTech platform that offers actionable and sustained solutions to enhance and grow across the farming process.
-                </p>
-                <div class="stat-block">
-                    <h3>100%</h3>
-                    <p>Customer Satisfaction</p>
-                    <small>Thousands of farmers use our service daily.</small>
-                </div>
-                <div class="stat-block">
-                    <h3>20+</h3>
-                    <p>Crops Covered</p>
-                    <small>From local vegetables to cash crops.</small>
-                </div>
-                <div class="stat-block">
-                    <h3>95%</h3>
-                    <p>Prediction Accuracy</p>
-                    <small>Powered by advanced AI models.</small>
+        </a>
+
+        <!-- Card 2: Soil Analysis -->
+        <a href="{{ url_for('soil') }}" class="pcard pcard--soil fade-in-up delay-1">
+            <div class="pcard__corner-badge pcard__corner-badge--soil">Lab</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/soil_analysis.png') }}" alt="Soil Analysis" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मृदा स्वास्थ्य जाँच</h3>
+                <p class="pcard__desc">मिट्टी के प्रकार, पोषक तत्व जानें और उर्वरक सिफारिशें पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--soil">जांच करें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--soil"><i class="fa-solid fa-flask"></i></span>
                 </div>
             </div>
-        </div>
-    </div>
-</section>
+        </a>
 
-<!-- Video Section -->
-<section class="video-section">
-    <div class="video-header fade-in-up">
-        <h2 class="video-title">Where technology meets the roots of nature</h2>
-        <p class="video-subtitle">Delivering the precision and scale that modern agriculture needs, ensuring optimal yields and resource management.</p>
-    </div>
-    
-    <div class="video-wrapper fade-in-up delay-1">
-        <img src="https://images.unsplash.com/photo-1560493676-04071c5f467b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80" alt="Farm Drone Shot">
-        <div class="play-btn"><i class="fa-solid fa-play"></i></div>
-    </div>
-</section>
-
-<!-- Features Grid -->
-<section class="features-section">
-    <div class="features-container">
-        <div class="video-header fade-in-up">
-            <h2 class="video-title">Comprehensive<br>Agri Intelligence</h2>
-            <p class="video-subtitle">Explore our tools designed to tackle disease, optimize resources, and improve farm outcomes.</p>
-        </div>
-        
-        <div class="features-grid">
-            <a href="{{ url_for('disease') }}" style="text-decoration: none;">
-                <div class="feature-card-large fade-in-up">
-                    <img src="https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Disease">
-                    <div class="fcl-content">
-                        <h3>Disease Detection</h3>
-                        <p>Upload a photo of your crop and our AI will identify the disease and recommend precise treatments instantly to save your harvest.</p>
-                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{{ url_for('soil') }}" style="text-decoration: none;">
-                <div class="feature-card-large fade-in-up delay-1">
-                    <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Soil">
-                    <div class="fcl-content">
-                        <h3>Soil Health & Nutrition</h3>
-                        <p>Analyze soil data and get automated recommendations for fertilizers to ensure optimal growth conditions.</p>
-                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{{ url_for('machinery') }}" style="text-decoration: none;">
-                <div class="feature-card-large fade-in-up">
-                    <img src="https://images.unsplash.com/photo-1592861214040-af84c4da17e0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Tractor">
-                    <div class="fcl-content">
-                        <h3>Machinery Network</h3>
-                        <p>Access our vast network of on-demand farming machinery and book tractors instantly near your location.</p>
-                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-            </a>
-            
-            <a href="{{ url_for('market') }}" style="text-decoration: none;">
-                <div class="feature-card-large fade-in-up delay-1">
-                    <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" class="fcl-image" alt="Market">
-                    <div class="fcl-content">
-                        <h3>Market Predictions</h3>
-                        <p>Track live mandi prices and use predictive modeling to sell your produce at peak profitability.</p>
-                        <span class="fcl-link">Learn More <i class="fa-solid fa-arrow-right"></i></span>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
-</section>
-
-
-<!-- FAQ Section -->
-<section class="faq-section">
-    <div class="faq-container">
-        <div class="faq-left fade-in-up">
-            <h2>Got questions? We've got you covered.</h2>
-            <p>Find answers to common queries about our platform, technology, and how we help you maximize your agricultural efficiency.</p>
-        </div>
-        
-        <div class="faq-right">
-            <div class="faq-item active fade-in-up" onclick="this.classList.toggle('active')">
-                <div class="faq-question">
-                    What kind of farming solutions do you offer?
-                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
-                </div>
-                <div class="faq-answer">
-                    We offer end-to-end solutions including real-time disease detection via AI, hyper-local weather forecasting, soil health analysis, and live market price tracking to help you make informed decisions.
+        <!-- Card 3: Pest Detection -->
+        <a href="{{ url_for('pest') }}" class="pcard pcard--pest fade-in-up delay-2">
+            <div class="pcard__corner-badge pcard__corner-badge--pest">AI</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/pest_detection.png') }}" alt="Pest Detection" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">कीट पहचान</h3>
+                <p class="pcard__desc">कीट पहचानने के लिए फसल की फोटो अपलोड करें और एआई समाधान पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--pest">पहचानें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--pest"><i class="fa-solid fa-bug"></i></span>
                 </div>
             </div>
-            
-            <div class="faq-item fade-in-up delay-1" onclick="this.classList.toggle('active')">
-                <div class="faq-question">
-                    How can I start using Krishi AI platform?
-                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
-                </div>
-                <div class="faq-answer">
-                    Simply click on "Get Started" or create an account. You can immediately begin uploading crop images for disease detection or access our dashboard for local weather and market data.
+        </a>
+
+        <!-- Card 4: Weather Forecast -->
+        <a href="{{ url_for('weather') }}" class="pcard pcard--weather fade-in-up delay-3">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/weather_forecast.png') }}" alt="Weather Forecast" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मौसम पूर्वानुमान</h3>
+                <p class="pcard__desc">खेत के स्थान के लिए लाइव मौसम और 5 दिनों का पूर्वानुमान देखें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--weather">मौसम देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--weather"><i class="fa-solid fa-location-dot"></i></span>
                 </div>
             </div>
-            
-            <div class="faq-item fade-in-up delay-2" onclick="this.classList.toggle('active')">
-                <div class="faq-question">
-                    Are your technologies eco-friendly?
-                    <div class="faq-icon"><i class="fa-solid fa-plus"></i></div>
-                </div>
-                <div class="faq-answer">
-                    Yes! Our precision farming tools ensure that you only use exactly the amount of water and fertilizer required, reducing runoff and promoting sustainable practices.
+        </a>
+
+        <!-- Card 5: Mandi Market Price -->
+        <a href="{{ url_for('market') }}" class="pcard pcard--market fade-in-up">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/mandi_price.png') }}" alt="Mandi Market Price" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मंडी बाजार भाव</h3>
+                <p class="pcard__desc">रियल-टाइम मंडी भाव, MSP और मूल्य प्रवृत्ति ट्रैक करें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--market">भाव देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--market"><i class="fa-solid fa-indian-rupee-sign"></i></span>
                 </div>
             </div>
-        </div>
+        </a>
+
+        <!-- Card 6: Government Schemes -->
+        <a href="{{ url_for('schemes') }}" class="pcard pcard--schemes fade-in-up delay-1">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/government_schemes.png') }}" alt="Government Schemes" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">सरकारी योजनाएं</h3>
+                <p class="pcard__desc">PM-KISAN, KCC, PMFBY और अन्य सरकारी सब्सिडी योजनाएं देखें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--schemes">योजनाएं देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--schemes"><i class="fa-solid fa-landmark"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Card 7: Voice Advisory — SVG illustration -->
+        <a href="{{ url_for('voice') }}" class="pcard pcard--voice fade-in-up delay-2">
+            <div class="pcard__corner-badge pcard__corner-badge--voice">
+                <i class="fa-solid fa-microphone" style="font-size:0.6rem;"></i>
+            </div>
+            <div class="pcard__img-wrap pcard__img-wrap--svg">
+                <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" class="pcard__svg">
+                    <defs>
+                        <radialGradient id="vGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#9333ea" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#9333ea" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="micBody" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="micHead" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#e879f9"/><stop offset="100%" stop-color="#9333ea"/>
+                        </linearGradient>
+                        <filter id="glow"><feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <ellipse cx="140" cy="110" rx="80" ry="75" fill="url(#vGlow)"/>
+                    <path d="M55 80 Q40 110 55 140" stroke="#a855f7" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.7" filter="url(#glow)"/>
+                    <path d="M68 65 Q45 110 68 155" stroke="#c084fc" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5"/>
+                    <path d="M225 80 Q240 110 225 140" stroke="#a855f7" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.7" filter="url(#glow)"/>
+                    <path d="M212 65 Q235 110 212 155" stroke="#c084fc" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.5"/>
+                    <rect x="130" y="148" width="20" height="30" rx="4" fill="url(#micBody)"/>
+                    <rect x="108" y="172" width="64" height="10" rx="5" fill="url(#micBody)"/>
+                    <rect x="114" y="50" width="52" height="100" rx="26" fill="url(#micHead)" filter="url(#glow)"/>
+                    <line x1="114" y1="85" x2="166" y2="85" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="114" y1="100" x2="166" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="114" y1="115" x2="166" y2="115" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="114" y1="130" x2="166" y2="130" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <ellipse cx="130" cy="68" rx="8" ry="12" fill="rgba(255,255,255,0.18)" transform="rotate(-10 130 68)"/>
+                </svg>
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">ध्वनि सलाहकार</h3>
+                <p class="pcard__desc">हिंदी में बोलकर खेती के सवाल पूछें और तुरंत आवाज़ में जवाब पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--voice">बोलें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--voice"><i class="fa-solid fa-waveform-lines"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <!-- Card 8: Organic Farming — SVG illustration -->
+        <a href="{{ url_for('organic') }}" class="pcard pcard--organic fade-in-up delay-3">
+            <div class="pcard__corner-badge pcard__corner-badge--organic">
+                <i class="fa-solid fa-leaf" style="font-size:0.6rem;"></i>
+            </div>
+            <div class="pcard__img-wrap pcard__img-wrap--svg">
+                <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" class="pcard__svg">
+                    <defs>
+                        <radialGradient id="oGlow2" cx="50%" cy="60%" r="55%">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="plantGreen2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <linearGradient id="soilBrown2" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#78350f"/><stop offset="100%" stop-color="#3d1a02"/>
+                        </linearGradient>
+                        <filter id="plantGlow2"><feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <ellipse cx="140" cy="130" rx="90" ry="70" fill="url(#oGlow2)"/>
+                    <ellipse cx="140" cy="158" rx="65" ry="18" fill="#1c0a00" opacity="0.8"/>
+                    <path d="M75 145 Q140 175 205 145 L200 158 Q140 188 80 158 Z" fill="url(#soilBrown2)"/>
+                    <ellipse cx="140" cy="145" rx="65" ry="18" fill="#78350f"/>
+                    <ellipse cx="140" cy="143" rx="60" ry="15" fill="#92400e" opacity="0.7"/>
+                    <path d="M140 145 L140 70" stroke="url(#plantGreen2)" stroke-width="7" stroke-linecap="round" filter="url(#plantGlow2)"/>
+                    <path d="M140 95 Q95 55 112 108 Q126 108 140 95Z" fill="url(#plantGreen2)" filter="url(#plantGlow2)"/>
+                    <path d="M140 80 Q185 40 168 92 Q154 92 140 80Z" fill="url(#plantGreen2)" filter="url(#plantGlow2)"/>
+                    <path d="M140 72 Q112 52 120 75 Q130 75 140 72Z" fill="#34d399" opacity="0.8"/>
+                    <circle cx="90" cy="100" r="3.5" fill="#34d399" opacity="0.8" filter="url(#plantGlow2)"/>
+                    <circle cx="195" cy="85" r="2.5" fill="#6ee7b7" opacity="0.7" filter="url(#plantGlow2)"/>
+                    <circle cx="210" cy="115" r="3" fill="#34d399" opacity="0.7" filter="url(#plantGlow2)"/>
+                </svg>
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">जैविक खेती संवर्धन</h3>
+                <p class="pcard__desc">प्रमाणन गाइड, जैविक खाद रेसिपी और बेहतर पैदावार के सर्वोत्तम तरीके।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--organic">सीखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--organic"><i class="fa-solid fa-seedling"></i></span>
+                </div>
+            </div>
+        </a>
+
     </div>
 </section>
-
-<!-- Careers Section -->
-<section id="careers" style="padding: 6rem 1.5rem; background: #F4F7F6; border-bottom: 1px solid var(--color-border); text-align: center;">
-    <div style="max-width: 800px; margin: 0 auto;" class="fade-in-up">
-        <h2 class="video-title" style="margin-bottom: 1rem; color: var(--color-text);">Join Our Mission</h2>
-        <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 2rem; font-size: 1.1rem;">
-            We are always looking for passionate engineers, data scientists, and agricultural experts to help us build the future of farming. Build products that matter.
-        </p>
-        <a href="#" class="btn-hero-primary" style="display: inline-flex;">View Open Roles <i class="fa-solid fa-arrow-right"></i></a>
-    </div>
-</section>
-
-<!-- Contact Section -->
-<section id="contact" style="padding: 6rem 1.5rem; background: #fff; text-align: center;">
-    <div style="max-width: 800px; margin: 0 auto;" class="fade-in-up">
-        <h2 class="video-title" style="margin-bottom: 1rem; color: var(--color-text);">Get in Touch</h2>
-        <p style="color: var(--color-text-light); line-height: 1.6; margin-bottom: 3rem; font-size: 1.1rem;">
-            Have questions about our platform or need support? Our team is here to help you.
-        </p>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
-            <div style="padding: 2rem; background: #F4F7F6; border-radius: 1.5rem;">
-                <i class="fa-solid fa-envelope" style="font-size: 2rem; color: #064E3B; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--color-text);">Email Support</h3>
-                <p style="color: var(--color-text-light);">support@krishi.ai</p>
-            </div>
-            <div style="padding: 2rem; background: #F4F7F6; border-radius: 1.5rem;">
-                <i class="fa-solid fa-phone" style="font-size: 2rem; color: #064E3B; margin-bottom: 1rem;"></i>
-                <h3 style="font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; color: var(--color-text);">Call Us</h3>
-                <p style="color: var(--color-text-light);">1800-180-1551</p>
-            </div>
-        </div>
-    </div>
-</section>
-
 {% endblock %}

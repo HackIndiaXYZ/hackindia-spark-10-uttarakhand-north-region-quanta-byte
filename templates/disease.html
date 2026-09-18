@@ -9,7 +9,7 @@
 
     <div class="page-header fade-in-up">
         <h1 class="page-title"><i class="fa-solid fa-microscope"></i> फसल रोग पहचान</h1>
-        <p class="page-sub">फसल की photo upload करें — AI तुरंत रोग बताएगा</p>
+        <p class="page-sub">फसल की photo upload करें — Model तुरंत रोग बताएगा</p>
     </div>
 
     <div class="upload-layout">
@@ -36,31 +36,10 @@
                     </div>
                 </div>
 
-                <!-- Crop Selection -->
-                <div class="form-group">
-                    <label class="form-label"><i class="fa-solid fa-seedling"></i> फसल का नाम</label>
-                    <select name="crop" class="krishi-input" required>
-                        <option value="">-- फसल चुनें --</option>
-                        <option>गेहूं (Wheat)</option>
-                        <option>धान (Paddy)</option>
-                        <option>मक्का (Maize)</option>
-                        <option>सरसों (Mustard)</option>
-                        <option>टमाटर (Tomato)</option>
-                        <option>आलू (Potato)</option>
-                        <option>प्याज (Onion)</option>
-                        <option>मिर्च (Chili)</option>
-                        <option>गन्ना (Sugarcane)</option>
-                    </select>
-                </div>
 
-                <!-- Symptoms -->
-                <div class="form-group">
-                    <label class="form-label"><i class="fa-solid fa-stethoscope"></i> लक्षण बताएं (Optional)</label>
-                    <textarea name="symptoms" class="krishi-input" rows="3" placeholder="जैसे: पत्तियों पर पीले दाग, तना सड़ रहा है..."></textarea>
-                </div>
 
                 <button type="submit" class="btn-krishi-primary full-btn" id="analyzeBtn">
-                    <i class="fa-solid fa-brain"></i> AI से जांच करवाएं
+                    <i class="fa-solid fa-microscope"></i> Model Analyze
                 </button>
             </form>
         </div>
@@ -74,7 +53,7 @@
                         <div class="spinner-ring"></div>
                         <i class="fa-solid fa-brain ai-brain-icon"></i>
                     </div>
-                    <h3>AI जांच कर रहा है...</h3>
+                    <h3>Model Analyze कर रहा है...</h3>
                     <p>कृपया रुकें, कुछ सेकंड लगेंगे</p>
                     <div class="analyzing-steps">
                         <div class="step-dot active"></div>
@@ -99,15 +78,20 @@
                     </div>
                     <div>
                         <h2 class="result-disease-name">{{ result.disease }}</h2>
-                        <p class="result-crop">{{ result.crop }} की फसल</p>
                     </div>
                     <div class="severity-badge severity-{{ result.severity|lower }}">{{ result.severity }}</div>
                 </div>
 
+                {% if result.uploaded_image_url %}
+                <div class="uploaded-image-preview" style="text-align: center; margin: 1rem 0;">
+                    <img src="{{ result.uploaded_image_url }}" alt="Uploaded Image" style="max-width: 100%; max-height: 250px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                </div>
+                {% endif %}
+
                 <!-- Confidence Meter -->
                 <div class="confidence-section">
                     <div class="confidence-label">
-                        <span>AI Confidence</span>
+                        <span>Model Confidence</span>
                         <strong>{{ result.confidence }}%</strong>
                     </div>
                     <div class="confidence-track">
@@ -139,7 +123,7 @@
 
                 <div class="result-actions">
                     <button class="btn-krishi-secondary" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
-                    <a href="{{ url_for('chatbot') }}" class="btn-krishi-primary"><i class="fa-solid fa-robot"></i> AI से पूछें</a>
+                    <a href="{{ url_for('chatbot') }}" class="btn-krishi-primary"><i class="fa-solid fa-robot"></i> और जानें</a>
                 </div>
             </div>
             {% else %}
@@ -148,7 +132,7 @@
                 <div class="placeholder-inner">
                     <i class="fa-solid fa-leaf placeholder-icon"></i>
                     <h3>अभी तक कोई जांच नहीं</h3>
-                    <p>Photo upload करके AI से फसल की जांच करवाएं</p>
+                    <p>Photo upload करके Model से फसल की जांच करवाएं</p>
                     <ul class="placeholder-tips">
                         <li><i class="fa-solid fa-camera"></i> साफ, close-up photo लें</li>
                         <li><i class="fa-solid fa-sun"></i> अच्छी रोशनी में photo लें</li>

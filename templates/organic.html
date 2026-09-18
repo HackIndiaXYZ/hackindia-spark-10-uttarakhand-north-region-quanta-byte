@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block title %}जैविक खेती - Krishi AI{% endblock %}
+
+{% block content %}
+<div class="krishi-container" style="padding-bottom: 4rem;">
+
+    <div class="page-header fade-in-up">
+        <h1 class="page-title" style="color:#10B981;"><i class="fa-solid fa-leaf"></i> जैविक खेती संवर्धन</h1>
+        <p class="page-sub">परंपरा और तकनीक का मिलाप — सीखें प्राकृतिक कीटनाशक बनाना और निकालें जैविक खाद की जरूरत।</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr;gap:2rem;">
+
+        <!-- Certification Guide -->
+        <div class="krishi-card fade-in-up" style="border-left:3px solid #10B981;background:rgba(17,24,39,0.45);">
+            <h3 style="color:#fff;font-size:1.25rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fa-solid fa-certificate" style="color:#10B981;"></i>
+                भारत जैविक प्रमाणन गाइड
+            </h3>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;color:#D1D5DB;">
+                <div style="background:rgba(3,7,18,0.3);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
+                    <strong style="color:#10B981;display:block;margin-bottom:0.4rem;font-size:0.95rem;">1. PGS-India (भागीदारी गारंटी प्रणाली)</strong>
+                    <p style="font-size:0.82rem;line-height:1.5;">स्थानीय स्तर पर किसानों के समूहों (न्यूनतम 5 किसान) के लिए प्रमाणन की एक सरल प्रणाली। यह पूरी तरह मुफ्त है और छोटे घरेलू बिक्री करने वाले किसानों के लिए आदर्श है।</p>
+                </div>
+                <div style="background:rgba(3,7,18,0.3);padding:1rem;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
+                    <strong style="color:#3B82F6;display:block;margin-bottom:0.4rem;font-size:0.95rem;">2. NPOP (राष्ट्रीय जैविक उत्पादन कार्यक्रम)</strong>
+                    <p style="font-size:0.82rem;line-height:1.5;">वाणिज्यिक और निर्यात स्तर पर जैविक खेती के लिए अधिकृत प्रमाणन। यह तीसरे पक्ष के मान्यता प्राप्त निकायों (जैसे APEDA) द्वारा ऑडिट के बाद दिया जाता है।</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Organic Crop Directory -->
+        <div class="krishi-card fade-in-up" style="border-left:3px solid #F59E0B;background:rgba(17,24,39,0.45);padding:1.5rem;">
+            <h3 style="color:#fff;font-size:1.25rem;font-weight:700;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fa-solid fa-book-open" style="color:#F59E0B;"></i>
+                जैविक फसल मार्गदर्शिका
+            </h3>
+            <p style="color:#9CA3AF;font-size:0.85rem;margin-bottom:1.5rem;">अनाज, सब्जियां, फूल और फलों की श्रेणी के अनुसार जैविक खेती करने की पूरी जानकारी।</p>
+
+            <!-- Crop Cards Grid -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;">
+
+                <!-- Organic Wheat -->
+                <div style="background:rgba(3,7,18,0.45);border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
+                    <div style="height:100px;background:linear-gradient(135deg,rgba(16,185,129,0.1),rgba(245,158,11,0.05));display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:3rem;">🌾</span>
+                    </div>
+                    <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#D1D5DB;">
+                        <strong style="color:#fff;font-size:0.95rem;">जैविक गेहूं (Organic Wheat)</strong>
+                        <div><strong style="color:#34D399;">मिट्टी:</strong> दोमट या बलुई दोमट (pH 6.0 - 7.5)</div>
+                        <div><strong style="color:#60A5FA;">पानी:</strong> 4 से 6 बार सिंचाई (क्राउन रूट, पुष्पन)</div>
+                        <div><strong style="color:#A78BFA;">किस्में:</strong> शरबती, बंसी, सी.306, कुदरत</div>
+                        <div><strong style="color:#F87171;">कीट नियंत्रण:</strong> दीमक के लिए नीमास्त्र, रस्ट के लिए खट्टी छाछ स्प्रे</div>
+                    </div>
+                </div>
+
+                <!-- Organic Rice -->
+                <div style="background:rgba(3,7,18,0.45);border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
+                    <div style="height:100px;background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(16,185,129,0.05));display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:3rem;">🌾</span>
+                    </div>
+                    <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#D1D5DB;">
+                        <strong style="color:#fff;font-size:0.95rem;">जैविक धान (Organic Rice)</strong>
+                        <div><strong style="color:#34D399;">मिट्टी:</strong> चिकनी मिट्टी (पानी रोकने की क्षमता, pH 5.5 - 6.5)</div>
+                        <div><strong style="color:#60A5FA;">पानी:</strong> रोपाई के बाद 2-5 सेमी खड़ा पानी</div>
+                        <div><strong style="color:#A78BFA;">किस्में:</strong> बासमती 370, पूसा बासमती, काला नमक</div>
+                        <div><strong style="color:#F87171;">कीट नियंत्रण:</strong> तना छेदक के लिए प्रकाश प्रपंच + अग्निअस्त्र</div>
+                    </div>
+                </div>
+
+                <!-- Organic Tomato -->
+                <div style="background:rgba(3,7,18,0.45);border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
+                    <div style="height:100px;background:linear-gradient(135deg,rgba(239,68,68,0.08),rgba(245,158,11,0.05));display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:3rem;">🍅</span>
+                    </div>
+                    <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#D1D5DB;">
+                        <strong style="color:#fff;font-size:0.95rem;">जैविक टमाटर (Organic Tomato)</strong>
+                        <div><strong style="color:#34D399;">मिट्टी:</strong> अच्छी जल निकासी वाली दोमट (pH 6.0 - 7.0)</div>
+                        <div><strong style="color:#60A5FA;">पानी:</strong> हर 7-10 दिनों में नियमित सिंचाई</div>
+                        <div><strong style="color:#A78BFA;">किस्में:</strong> पूसा रोहिणी, स्वर्ण नवीन, अर्का रक्षक</div>
+                        <div><strong style="color:#F87171;">कीट नियंत्रण:</strong> फल छेदक के लिए पंचगव्य स्प्रे + फेरोमोन ट्रैप</div>
+                    </div>
+                </div>
+
+                <!-- Organic Mango -->
+                <div style="background:rgba(3,7,18,0.45);border-radius:16px;border:1px solid rgba(255,255,255,0.06);overflow:hidden;">
+                    <div style="height:100px;background:linear-gradient(135deg,rgba(245,158,11,0.08),rgba(16,185,129,0.05));display:flex;align-items:center;justify-content:center;border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span style="font-size:3rem;">🥭</span>
+                    </div>
+                    <div style="padding:1.25rem;display:flex;flex-direction:column;gap:0.6rem;font-size:0.82rem;color:#D1D5DB;">
+                        <strong style="color:#fff;font-size:0.95rem;">जैविक आम (Organic Mango)</strong>
+                        <div><strong style="color:#34D399;">मिट्टी:</strong> गहरी बलुई दोमट (pH 5.5 - 7.5)</div>
+                        <div><strong style="color:#60A5FA;">पानी:</strong> पुष्पन और फल के दौरान 10-15 दिन अंतराल</div>
+                        <div><strong style="color:#A78BFA;">किस्में:</strong> अल्फांसो, दशहरी, लंगड़ा, चौसा</div>
+                        <div><strong style="color:#F87171;">कीट नियंत्रण:</strong> हॉपर के लिए नीमास्त्र; तना छेदक के लिए बोर्डो पेस्ट</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Bio-recipes + Calculator Row -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;">
+
+            <!-- Bio-recipes Card -->
+            <div class="krishi-card fade-in-up delay-1">
+                <h3 style="color:#fff;font-size:1.15rem;font-weight:700;margin-bottom:1rem;">
+                    <i class="fa-solid fa-jar" style="color:#10B981;margin-right:0.5rem;"></i>
+                    प्राकृतिक कीटनाशक विधि
+                </h3>
+
+                <!-- Jeevamrutha -->
+                <div style="background:rgba(3,7,18,0.3);padding:1.25rem;border-radius:16px;border:1px solid rgba(255,255,255,0.05);margin-bottom:1rem;">
+                    <h4 style="color:#10B981;font-size:0.95rem;margin-bottom:0.6rem;">जीवामृत (Jeevamrutha)</h4>
+                    <p style="font-size:0.8rem;color:#9CA3AF;margin-bottom:0.75rem;">मिट्टी में जीवाणुओं की संख्या बढ़ाता है — फसल की रोग प्रतिरोधक क्षमता बढ़ती है।</p>
+                    <strong style="color:#10B981;font-size:0.8rem;display:block;margin-bottom:0.3rem;">सामग्री:</strong>
+                    <ul style="padding-left:1.2rem;margin:0;font-size:0.8rem;color:#D1D5DB;line-height:1.7;">
+                        <li>ताजा गाय का गोबर: 10 किलो</li>
+                        <li>देशी गाय का गोमूत्र: 5-10 लीटर</li>
+                        <li>गुड़: 1 किलो, बेसन: 1 किलो</li>
+                        <li>बरगद की जड़ की मिट्टी: 1 मुट्ठी</li>
+                    </ul>
+                    <strong style="color:#10B981;font-size:0.8rem;display:block;margin-top:0.75rem;margin-bottom:0.3rem;">विधि:</strong>
+                    <ol style="padding-left:1.2rem;margin:0;font-size:0.8rem;color:#D1D5DB;line-height:1.7;">
+                        <li>200 लीटर पानी में सभी सामग्री मिलाएं।</li>
+                        <li>48 घंटे छाया में रखें और रोज़ हिलाएं।</li>
+                        <li>10 लीटर जीवामृत को 200 लीटर पानी में मिलाकर फसल पर डालें।</li>
+                    </ol>
+                </div>
+
+                <!-- Neem Astra -->
+                <div style="background:rgba(3,7,18,0.3);padding:1.25rem;border-radius:16px;border:1px solid rgba(255,255,255,0.05);">
+                    <h4 style="color:#F59E0B;font-size:0.95rem;margin-bottom:0.6rem;">नीमास्त्र (Neem Astra)</h4>
+                    <p style="font-size:0.8rem;color:#9CA3AF;margin-bottom:0.75rem;">रस चूसने वाले कीटों (एफिड्स, थ्रिप्स, व्हाइटफ्लाई) के लिए सर्वश्रेष्ठ।</p>
+                    <strong style="color:#F59E0B;font-size:0.8rem;display:block;margin-bottom:0.3rem;">सामग्री:</strong>
+                    <ul style="padding-left:1.2rem;margin:0;font-size:0.8rem;color:#D1D5DB;line-height:1.7;">
+                        <li>नीम के पत्ते: 5 किलो</li>
+                        <li>गोमूत्र: 5 लीटर</li>
+                        <li>पानी: 200 लीटर</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Fertilizer Calculator -->
+            <div class="krishi-card fade-in-up delay-1" style="border-left:3px solid #3B82F6;">
+                <h3 style="color:#fff;font-size:1.15rem;font-weight:700;margin-bottom:1rem;">
+                    <i class="fa-solid fa-calculator" style="color:#3B82F6;margin-right:0.5rem;"></i>
+                    जैविक उर्वरक कैलकुलेटर
+                </h3>
+
+                <form id="organicCalcForm" onsubmit="calcOrganic(event)">
+                    <div class="form-group">
+                        <label class="form-label" style="color:#3B82F6;">फसल की श्रेणी</label>
+                        <select class="krishi-input" id="cropCat">
+                            <option value="cereals">अनाज / दलहन (Grains/Pulses)</option>
+                            <option value="vegetables">सब्जियां / बागवानी</option>
+                            <option value="cash">नकदी फसलें (गन्ना, कपास)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" style="color:#3B82F6;">खेत का क्षेत्रफल (एकड़ में)</label>
+                        <input type="number" class="krishi-input" id="acreage" placeholder="जैसे: 2 एकड़" step="0.1" min="0.1" required>
+                    </div>
+                    <button type="submit" class="btn-krishi-primary full-btn" style="background:linear-gradient(135deg,#3B82F6,#1D4ED8);box-shadow:0 4px 14px rgba(59,130,246,0.3);">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> आवश्यकता की गणना करें
+                    </button>
+                </form>
+
+                <div id="calcResult" style="display:none;margin-top:1.5rem;border-top:1px solid rgba(255,255,255,0.08);padding-top:1.25rem;">
+                    <h4 style="color:#fff;font-size:0.9rem;font-weight:600;margin-bottom:0.75rem;">अनुशंसित जैविक खुराक:</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+                        <div style="background:rgba(3,7,18,0.3);padding:0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                            <span style="font-size:0.72rem;color:#9CA3AF;display:block;">गोबर खाद (Compost)</span>
+                            <strong style="font-size:1.1rem;color:#10B981;display:block;margin-top:0.2rem;" id="resCompost">-</strong>
+                        </div>
+                        <div style="background:rgba(3,7,18,0.3);padding:0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                            <span style="font-size:0.72rem;color:#9CA3AF;display:block;">केंचुआ खाद</span>
+                            <strong style="font-size:1.1rem;color:#10B981;display:block;margin-top:0.2rem;" id="resVermi">-</strong>
+                        </div>
+                        <div style="background:rgba(3,7,18,0.3);padding:0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                            <span style="font-size:0.72rem;color:#9CA3AF;display:block;">नीम केक खाद</span>
+                            <strong style="font-size:1.1rem;color:#10B981;display:block;margin-top:0.2rem;" id="resNeem">-</strong>
+                        </div>
+                        <div style="background:rgba(3,7,18,0.3);padding:0.75rem;border-radius:10px;border:1px solid rgba(255,255,255,0.05);">
+                            <span style="font-size:0.72rem;color:#9CA3AF;display:block;">जीवामृत जरूरत</span>
+                            <strong style="font-size:1.1rem;color:#10B981;display:block;margin-top:0.2rem;" id="resJeeva">-</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function calcOrganic(e) {
+    e.preventDefault();
+    const acres = parseFloat(document.getElementById('acreage').value);
+    const cat = document.getElementById('cropCat').value;
+    if (isNaN(acres) || acres <= 0) return;
+    let cf = 2.5, vf = 1.0, nf = 100;
+    if (cat === 'vegetables') { cf = 3.5; vf = 1.5; nf = 150; }
+    else if (cat === 'cash') { cf = 4.0; vf = 2.0; nf = 200; }
+    document.getElementById('resCompost').textContent = (acres * cf).toFixed(1) + ' टन';
+    document.getElementById('resVermi').textContent = (acres * vf).toFixed(1) + ' टन';
+    document.getElementById('resNeem').textContent = (acres * nf).toFixed(0) + ' किग्रा';
+    document.getElementById('resJeeva').textContent = (acres * 150).toFixed(0) + ' लीटर';
+    document.getElementById('calcResult').style.display = 'block';
+}
+</script>
+{% endblock %}

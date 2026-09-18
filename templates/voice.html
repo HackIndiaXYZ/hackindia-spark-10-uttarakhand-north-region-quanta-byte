@@ -66,69 +66,207 @@
 {% block extra_js %}
 <script>
 const micBtn = document.getElementById('voiceMicBtn');
+const micIcon = document.getElementById('micIcon');
 const statusBar = document.getElementById('voiceStatusBar');
 const instruction = document.getElementById('voiceInstruction');
 const transcriptCard = document.getElementById('transcriptCard');
 const transcriptText = document.getElementById('transcriptText');
 const responseCard = document.getElementById('voiceResponseCard');
 const responseText = document.getElementById('responseText');
+const speakAgainBtn = document.getElementById('speakAgainBtn');
+const waveWrap = document.getElementById('voiceWaveWrap');
+
 let isRecording = false;
+let recognition = null;
+let lastResponse = '';
 
+// Initialize Speech Recognition
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 
-if (recognition) {
+if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
     recognition.lang = 'hi-IN';
     recognition.interimResults = false;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
 
-    recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
-        transcriptText.textContent = text;
-        transcriptCard.style.display = 'block';
-        stopRecording();
-        // Send to backend
-        fetch('/chatbot/query', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({message: text}) })
-            .then(r => r.json()).then(d => {
-                // Convert simple markdown for display
-                const htmlResponse = d.response
-                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
-                responseText.innerHTML = htmlResponse;
-                responseCard.style.display = 'block';
-                // Remove markdown symbols for speech
-                const rawSpeechText = d.response.replace(/[*#]/g, '');
-                speak(rawSpeechText);
-            });
-    };
-    recognition.onend = () => stopRecording();
-}
-
-micBtn.addEventListener('click', () => {
-    if (!isRecording) {
+    recognition.onstart = () => {
+        console.log('Speech recognition started');
         isRecording = true;
         micBtn.classList.add('recording');
+        micIcon.className = 'fa-solid fa-stop';
         statusBar.style.display = 'flex';
-        instruction.textContent = 'बोल रहे हैं... रुकें नहीं';
-        if (recognition) recognition.start();
+        instruction.textContent = '🎤 सुन रहा हूं... बोलें';
+        instruction.style.color = '#EF4444';
+    };
+
+    recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript;
+        console.log('Recognized:', text);
+        transcriptText.textContent = text;
+        transcriptCard.style.display = 'block';
+        stopRecordingUI();
+        
+        // Show processing state
+        instruction.textContent = '⏳ AI सोच रहा है...';
+        instruction.style.color = '#F59E0B';
+        responseCard.style.display = 'none';
+        
+        // Send to backend
+        fetchAIResponse(text);
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        stopRecordingUI();
+        
+        if (event.error === 'no-speech') {
+            instruction.textContent = '❌ कोई आवाज़ नहीं मिली। फिर से बोलें।';
+        } else if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            instruction.textContent = '❌ माइक की अनुमति दें। ब्राउज़र सेटिंग्स में जाएं।';
+        } else if (event.error === 'network') {
+            instruction.textContent = '❌ नेटवर्क त्रुटि। इंटरनेट जांचें।';
+        } else if (event.error === 'aborted') {
+            instruction.textContent = 'माइक बटन दबाएं और बोलें';
+        } else {
+            instruction.textContent = '❌ त्रुटि: ' + event.error + '. फिर से प्रयास करें।';
+        }
+        instruction.style.color = '';
+    };
+
+    recognition.onend = () => {
+        console.log('Speech recognition ended');
+        stopRecordingUI();
+    };
+} else {
+    instruction.textContent = '❌ आपका ब्राउज़र Speech Recognition सपोर्ट नहीं करता। Chrome इस्तेमाल करें।';
+    instruction.style.color = '#EF4444';
+    micBtn.style.opacity = '0.5';
+    micBtn.style.cursor = 'not-allowed';
+}
+
+// Mic button click handler
+micBtn.addEventListener('click', () => {
+    if (!recognition) {
+        instruction.textContent = '❌ Chrome ब्राउज़र इस्तेमाल करें।';
+        instruction.style.color = '#EF4444';
+        return;
+    }
+
+    if (!isRecording) {
+        // Stop any ongoing speech
+        speechSynthesis.cancel();
+        
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error('Recognition start error:', e);
+            // Already started, abort and restart
+            try {
+                recognition.abort();
+                setTimeout(() => recognition.start(), 200);
+            } catch (e2) {
+                instruction.textContent = '❌ माइक शुरू नहीं हो सका। पेज रीफ्रेश करें।';
+                instruction.style.color = '#EF4444';
+            }
+        }
     } else {
-        stopRecording();
-        if (recognition) recognition.stop();
+        recognition.stop();
+        stopRecordingUI();
     }
 });
 
-function stopRecording() {
+function stopRecordingUI() {
     isRecording = false;
     micBtn.classList.remove('recording');
+    micIcon.className = 'fa-solid fa-microphone';
     statusBar.style.display = 'none';
-    instruction.textContent = 'माइक बटन दबाएं और बोलें';
+    if (instruction.textContent === '🎤 सुन रहा हूं... बोलें') {
+        instruction.textContent = 'माइक बटन दबाएं और बोलें';
+        instruction.style.color = '';
+    }
 }
 
-function speak(text) {
+function fetchAIResponse(text) {
+    fetch('/voice/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: text })
+    })
+    .then(r => {
+        if (!r.ok) throw new Error('Server error: ' + r.status);
+        return r.json();
+    })
+    .then(data => {
+        const rawResponse = data.response || 'कोई जवाब नहीं मिला।';
+        lastResponse = rawResponse;
+        
+        // Convert markdown for display
+        const htmlResponse = rawResponse
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/\n/g, '<br>');
+        
+        responseText.innerHTML = htmlResponse;
+        responseCard.style.display = 'block';
+        instruction.textContent = '🔊 AI बोल रहा है...';
+        instruction.style.color = '#10B981';
+        
+        // Speak the response
+        const cleanText = rawResponse.replace(/[*#_`]/g, '').replace(/\n/g, '. ');
+        speakHindi(cleanText, () => {
+            instruction.textContent = '✅ जवाब सुन लिया। फिर से पूछने के लिए माइक दबाएं।';
+            instruction.style.color = '#10B981';
+        });
+    })
+    .catch(err => {
+        console.error('Fetch error:', err);
+        instruction.textContent = '❌ सर्वर से जवाब नहीं मिला। फिर से प्रयास करें।';
+        instruction.style.color = '#EF4444';
+    });
+}
+
+function speakHindi(text, onEndCallback) {
+    speechSynthesis.cancel();
+    
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = 'hi-IN';
+    utter.rate = 0.95;
+    utter.pitch = 1.0;
+    
+    // Try to find Hindi voice
+    const voices = speechSynthesis.getVoices();
+    const hindiVoice = voices.find(v => v.lang.startsWith('hi')) || 
+                       voices.find(v => v.lang.includes('IN')) || null;
+    if (hindiVoice) {
+        utter.voice = hindiVoice;
+    }
+    
+    utter.onend = () => {
+        if (onEndCallback) onEndCallback();
+    };
+    
+    utter.onerror = (e) => {
+        console.error('Speech synthesis error:', e);
+        if (onEndCallback) onEndCallback();
+    };
+    
     speechSynthesis.speak(utter);
 }
 
-document.getElementById('speakAgainBtn')?.addEventListener('click', () => speak(responseText.textContent));
+// Load voices (some browsers load them async)
+if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = () => {
+        speechSynthesis.getVoices(); // Trigger voice loading
+    };
+}
+
+// Speak again button
+speakAgainBtn?.addEventListener('click', () => {
+    if (lastResponse) {
+        const cleanText = lastResponse.replace(/[*#_`]/g, '').replace(/\n/g, '. ');
+        speakHindi(cleanText);
+    }
+});
 </script>
 {% endblock %}

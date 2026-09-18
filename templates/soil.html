@@ -32,13 +32,18 @@
                     <input type="text" name="location" class="krishi-input" placeholder="जैसे: वाराणसी, UP">
                 </div>
                 <button type="submit" class="btn-krishi-primary full-btn">
-                    <i class="fa-solid fa-brain"></i> मिट्टी जांचें
+                    <i class="fa-solid fa-microscope"></i> Model Analyze
                 </button>
             </form>
         </div>
         <div class="result-section fade-in-up delay-1">
             {% if result %}
             <div class="krishi-card soil-result-card">
+                {% if result.uploaded_image_url %}
+                <div class="uploaded-image-preview" style="text-align: center; margin-bottom: 1.5rem;">
+                    <img src="{{ result.uploaded_image_url }}" alt="Uploaded Soil Image" style="max-width: 100%; max-height: 250px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                </div>
+                {% endif %}
                 <div class="soil-color-display" style="background: {{ result.soil_color_hex }};">
                     <span class="soil-color-label">{{ result.soil_color }}</span>
                 </div>

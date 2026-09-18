@@ -1,134 +1,633 @@
 {% extends "base.html" %}
 {% block title %}मौसम - Krishi AI{% endblock %}
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/forms.css') }}?v=2.1">
-{% endblock %}
+
 {% block content %}
-<div class="krishi-container">
-    <div class="page-header fade-in-up">
-        <h1 class="page-title"><i class="fa-solid fa-cloud-sun"></i> मौसम जानकारी</h1>
-        <p class="page-sub">अपने खेत का मौसम देखें और खेती की सही योजना बनाएं</p>
+<div class="wx-page">
+
+  <!-- Animated background clouds/particles -->
+  <div class="wx-bg-anim" id="wxBg"></div>
+
+  <!-- Page Header -->
+  <div class="wx-header fade-in-up">
+    <div class="wx-title-wrap">
+      <i class="fa-solid fa-cloud-sun-rain wx-title-icon"></i>
+      <div>
+        <h1 class="wx-title">मौसम जानकारी</h1>
+        <p class="wx-subtitle">अपने खेत का मौसम देखें और खेती की सही योजना बनाएं</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="wx-search-card fade-in-up">
+    <form method="POST" action="{{ url_for('weather') }}" class="wx-search-form">
+      <div class="wx-search-input-wrap">
+        <i class="fa-solid fa-magnifying-glass wx-search-icon"></i>
+        <input type="text" name="location" class="wx-search-input"
+               placeholder="शहर या जिला टाइप करें... (e.g. Delhi, Bareilly)"
+               value="{{ location if location else '' }}" autocomplete="off">
+      </div>
+      <button type="submit" class="wx-btn wx-btn-primary">
+        <i class="fa-solid fa-search"></i> खोजें
+      </button>
+      <button type="button" class="wx-btn wx-btn-secondary" id="autoLocBtn">
+        <i class="fa-solid fa-crosshairs"></i> Auto
+      </button>
+    </form>
+  </div>
+
+  {% if weather %}
+
+  <!-- HERO WEATHER CARD -->
+  <div class="wx-hero-card fade-in-up wx-cond-{{ weather.condition|lower }}">
+    <!-- Animated weather icon top right -->
+    <div class="wx-hero-icon-wrap">
+      {% if 'rain' in weather.condition|lower %}
+        <div class="wx-anim-icon wx-rain">
+          <i class="fa-solid fa-cloud-showers-heavy"></i>
+          <div class="wx-rain-drops">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+      {% elif 'storm' in weather.condition|lower %}
+        <div class="wx-anim-icon wx-storm">
+          <i class="fa-solid fa-cloud-bolt"></i>
+        </div>
+      {% elif 'cloud' in weather.condition|lower %}
+        <div class="wx-anim-icon wx-cloud">
+          <i class="fa-solid fa-cloud"></i>
+        </div>
+      {% elif 'fog' in weather.condition|lower %}
+        <div class="wx-anim-icon wx-fog">
+          <i class="fa-solid fa-smog"></i>
+        </div>
+      {% else %}
+        <div class="wx-anim-icon wx-sun">
+          <i class="fa-solid fa-sun"></i>
+        </div>
+      {% endif %}
     </div>
 
-    <!-- Location Bar -->
-    <div class="krishi-card location-bar fade-in-up">
-        <form method="POST" action="{{ url_for('weather') }}" class="location-form">
-            <div class="location-input-wrap">
-                <i class="fa-solid fa-location-dot"></i>
-                <input type="text" name="location" class="krishi-input" placeholder="शहर या जिला टाइप करें..." value="{{ location if location else '' }}">
-            </div>
-            <button type="submit" class="btn-krishi-primary">
-                <i class="fa-solid fa-search"></i> खोजें
-            </button>
-            <button type="button" class="btn-krishi-secondary" id="autoLocBtn">
-                <i class="fa-solid fa-crosshairs"></i> Auto
-            </button>
-        </form>
+    <!-- Left: Location & Temp -->
+    <div class="wx-hero-left">
+      <div class="wx-location">
+        <i class="fa-solid fa-location-dot"></i>
+        <span>{{ weather.location }}</span>
+      </div>
+      <div class="wx-date">{{ weather.date }}</div>
+      <div class="wx-temp-wrap">
+        <span class="wx-temp">{{ weather.temp }}</span>
+        <span class="wx-temp-unit">°C</span>
+      </div>
+      <div class="wx-condition">{{ weather.condition }}</div>
+      <div class="wx-feels">Feels like {{ weather.feels_like }}°C</div>
     </div>
 
-    {% if weather %}
-    <!-- Current Weather Big Card -->
-    <div class="krishi-card current-weather-card fade-in-up delay-1">
-        <div class="weather-main">
-            <div class="weather-location-info">
-                <h2><i class="fa-solid fa-location-dot"></i> {{ weather.location }}</h2>
-                <p>{{ weather.date }}</p>
-            </div>
-            <div class="weather-temp-display">
-                <div class="weather-big-icon">
-                    {% if 'rain' in weather.condition|lower %}
-                    <i class="fa-solid fa-cloud-rain"></i>
-                    {% elif 'cloud' in weather.condition|lower %}
-                    <i class="fa-solid fa-cloud"></i>
-                    {% elif 'storm' in weather.condition|lower %}
-                    <i class="fa-solid fa-cloud-bolt"></i>
-                    {% else %}
-                    <i class="fa-solid fa-sun"></i>
-                    {% endif %}
-                </div>
-                <div class="temp-big">{{ weather.temp }}<sup>°C</sup></div>
-                <div class="condition-text">{{ weather.condition }}</div>
-            </div>
+    <!-- Right: Quick Stats -->
+    <div class="wx-hero-stats">
+      <div class="wx-stat">
+        <i class="fa-solid fa-droplet"></i>
+        <div class="wx-stat-info">
+          <span>नमी</span>
+          <strong>{{ weather.humidity }}%</strong>
         </div>
-        <div class="weather-details-row">
-            <div class="weather-detail-item">
-                <i class="fa-solid fa-droplet"></i>
-                <span>नमी</span>
-                <strong>{{ weather.humidity }}%</strong>
-            </div>
-            <div class="weather-detail-item">
-                <i class="fa-solid fa-wind"></i>
-                <span>हवा</span>
-                <strong>{{ weather.wind_speed }} km/h</strong>
-            </div>
-            <div class="weather-detail-item">
-                <i class="fa-solid fa-gauge"></i>
-                <span>दबाव</span>
-                <strong>{{ weather.pressure }} hPa</strong>
-            </div>
-            <div class="weather-detail-item">
-                <i class="fa-solid fa-eye"></i>
-                <span>Visibility</span>
-                <strong>{{ weather.visibility }} km</strong>
-            </div>
+      </div>
+      <div class="wx-stat">
+        <i class="fa-solid fa-wind"></i>
+        <div class="wx-stat-info">
+          <span>हवा</span>
+          <strong>{{ weather.wind_speed }} km/h</strong>
         </div>
+      </div>
+      <div class="wx-stat">
+        <i class="fa-solid fa-gauge"></i>
+        <div class="wx-stat-info">
+          <span>दबाव</span>
+          <strong>{{ weather.pressure|round|int }} hPa</strong>
+        </div>
+      </div>
+      <div class="wx-stat">
+        <i class="fa-solid fa-eye"></i>
+        <div class="wx-stat-info">
+          <span>Visibility</span>
+          <strong>{{ weather.visibility }} km</strong>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- 7-Day Forecast -->
-    <div class="krishi-card forecast-card fade-in-up delay-2">
-        <h3 class="card-section-title"><i class="fa-solid fa-calendar-week"></i> 7-दिन का पूर्वानुमान</h3>
-        <div class="forecast-row">
-            {% for day in weather.forecast %}
-            <div class="forecast-day-card">
-                <span class="forecast-day-name">{{ day.day }}</span>
-                <div class="forecast-icon">
-                    {% if 'rain' in day.condition|lower %}
-                    <i class="fa-solid fa-cloud-rain"></i>
-                    {% elif 'cloud' in day.condition|lower %}
-                    <i class="fa-solid fa-cloud"></i>
-                    {% else %}
-                    <i class="fa-solid fa-sun"></i>
-                    {% endif %}
-                </div>
-                <span class="forecast-temp">{{ day.high }}° / {{ day.low }}°</span>
-                <span class="forecast-rain"><i class="fa-solid fa-umbrella"></i> {{ day.rain_chance }}%</span>
-            </div>
-            {% endfor %}
-        </div>
+  <!-- EXTRA DETAILS ROW -->
+  <div class="wx-details-grid fade-in-up">
+    <div class="wx-detail-box">
+      <div class="wx-detail-icon" style="background: rgba(248,113,113,0.15); color:#F87171;">
+        <i class="fa-solid fa-temperature-half"></i>
+      </div>
+      <div class="wx-detail-text">
+        <span>Feels Like</span>
+        <strong>{{ weather.feels_like }}°C</strong>
+      </div>
     </div>
+    <div class="wx-detail-box">
+      <div class="wx-detail-icon" style="background: rgba(251,191,36,0.15); color:#FBBF24;">
+        <i class="fa-solid fa-sun"></i>
+      </div>
+      <div class="wx-detail-text">
+        <span>UV Index</span>
+        <strong>{{ weather.uv_index }}</strong>
+      </div>
+    </div>
+    <div class="wx-detail-box">
+      <div class="wx-detail-icon" style="background: rgba(96,165,250,0.15); color:#60A5FA;">
+        <i class="fa-solid fa-droplet-slash"></i>
+      </div>
+      <div class="wx-detail-text">
+        <span>Dew Point</span>
+        <strong>{{ weather.dew_point }}°C</strong>
+      </div>
+    </div>
+    <div class="wx-detail-box">
+      <div class="wx-detail-icon" style="background: rgba(253,186,116,0.15); color:#FDBA74;">
+        <i class="fa-solid fa-sun"></i>
+      </div>
+      <div class="wx-detail-text">
+        <span>Sunrise</span>
+        <strong>{{ weather.sunrise }}</strong>
+      </div>
+    </div>
+    <div class="wx-detail-box">
+      <div class="wx-detail-icon" style="background: rgba(251,146,60,0.15); color:#FB923C;">
+        <i class="fa-solid fa-moon"></i>
+      </div>
+      <div class="wx-detail-text">
+        <span>Sunset</span>
+        <strong>{{ weather.sunset }}</strong>
+      </div>
+    </div>
+  </div>
 
-    <!-- Farming Advisory based on weather -->
-    <div class="krishi-card weather-advisory-card fade-in-up delay-3">
-        <h3 class="card-section-title"><i class="fa-solid fa-robot"></i> मौसम के अनुसार खेती सलाह</h3>
-        <div class="advisory-list">
-            {% for tip in weather.farming_tips %}
-            <div class="advisory-item {{ tip.type }}">
-                <i class="fa-solid {{ 'fa-check-circle' if tip.type == 'safe' else 'fa-exclamation-triangle' if tip.type == 'warning' else 'fa-times-circle' }}"></i>
-                <span>{{ tip.text }}</span>
-            </div>
-            {% endfor %}
-        </div>
+  <!-- 7-DAY FORECAST -->
+  <div class="wx-card fade-in-up">
+    <div class="wx-card-title">
+      <i class="fa-solid fa-calendar-week"></i>
+      7-दिन का पूर्वानुमान
     </div>
-    {% else %}
-    <div class="krishi-card weather-empty-card fade-in-up delay-1">
-        <div class="placeholder-inner">
-            <i class="fa-solid fa-cloud-sun placeholder-icon" style="color:#29B6F6;"></i>
-            <h3>अपना मौसम देखें</h3>
-            <p>ऊपर अपना शहर या जिला डालें और "Auto" बटन से automatic location भी detect हो सकती है</p>
+    <div class="wx-forecast-grid">
+      {% for day in weather.forecast %}
+      <div class="wx-forecast-item {% if loop.first %}wx-forecast-today{% endif %}">
+        <span class="wx-fday">{{ day.day }}</span>
+        <div class="wx-ficon {% if 'rain' in day.condition|lower %}wx-ficon-rain{% elif 'storm' in day.condition|lower %}wx-ficon-storm{% elif 'cloud' in day.condition|lower %}wx-ficon-cloud{% else %}wx-ficon-sun{% endif %}">
+          {% if 'rain' in day.condition|lower %}
+          <i class="fa-solid fa-cloud-rain"></i>
+          {% elif 'storm' in day.condition|lower %}
+          <i class="fa-solid fa-cloud-bolt"></i>
+          {% elif 'cloud' in day.condition|lower %}
+          <i class="fa-solid fa-cloud"></i>
+          {% else %}
+          <i class="fa-solid fa-sun"></i>
+          {% endif %}
         </div>
+        <div class="wx-ftemp">
+          <span class="wx-fhigh">{{ day.high }}°</span>
+          <span class="wx-flow">{{ day.low }}°</span>
+        </div>
+        <div class="wx-frain">
+          <i class="fa-solid fa-umbrella"></i> {{ day.rain_chance }}%
+        </div>
+        <div class="wx-fbar-wrap">
+          <div class="wx-fbar" style="width: {{ day.rain_chance }}%;"></div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-    {% endif %}
+  </div>
+
+  <!-- FARMING ADVISORY -->
+  <div class="wx-card fade-in-up">
+    <div class="wx-card-title">
+      <i class="fa-solid fa-seedling"></i>
+      मौसम के अनुसार खेती सलाह
+    </div>
+    <div class="wx-advisory-list">
+      {% for tip in weather.farming_tips %}
+      <div class="wx-advisory wx-advisory-{{ tip.type }}">
+        <div class="wx-advisory-icon">
+          {% if tip.type == 'safe' %}
+          <i class="fa-solid fa-circle-check"></i>
+          {% elif tip.type == 'warning' %}
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          {% else %}
+          <i class="fa-solid fa-circle-xmark"></i>
+          {% endif %}
+        </div>
+        <span>{{ tip.text }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% else %}
+
+  <!-- EMPTY STATE -->
+  <div class="wx-empty fade-in-up">
+    <div class="wx-empty-anim">
+      <i class="fa-solid fa-cloud-sun"></i>
+    </div>
+    <h2>अपना मौसम देखें</h2>
+    <p>ऊपर अपना शहर या जिला डालें।<br>Auto बटन से automatic location detect होगी।</p>
+    <div class="wx-tips">
+      <div class="wx-tip"><i class="fa-solid fa-city"></i> शहर का नाम अंग्रेजी में टाइप करें</div>
+      <div class="wx-tip"><i class="fa-solid fa-crosshairs"></i> Auto से GPS location detect होगी</div>
+      <div class="wx-tip"><i class="fa-solid fa-calendar-check"></i> 7 दिन का मौसम देखें</div>
+    </div>
+  </div>
+
+  {% endif %}
+
 </div>
-{% endblock %}
-{% block extra_js %}
+
+<style>
+/* ============================================================
+   WEATHER PAGE — Premium Redesign
+   ============================================================ */
+
+.wx-page {
+  min-height: 100vh;
+  padding: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Animated Background */
+.wx-bg-anim {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+/* Page Header */
+.wx-header { margin-bottom: 1.5rem; position: relative; z-index: 1; }
+.wx-title-wrap { display: flex; align-items: center; gap: 1rem; }
+.wx-title-icon { font-size: 2.2rem; color: #29B6F6; filter: drop-shadow(0 0 8px rgba(41,182,246,0.5)); }
+.wx-title { font-size: 1.8rem; font-weight: 800; color: #fff; margin: 0; }
+.wx-subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.55); margin: 0; }
+
+/* Search Card */
+.wx-search-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(12px);
+  position: relative; z-index: 1;
+}
+.wx-search-form { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+.wx-search-input-wrap { flex: 1; min-width: 200px; position: relative; display: flex; align-items: center; }
+.wx-search-icon { position: absolute; left: 1rem; color: rgba(255,255,255,0.4); font-size: 1rem; }
+.wx-search-input {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 0.8rem 1rem 0.8rem 2.75rem;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+}
+.wx-search-input::placeholder { color: rgba(255,255,255,0.35); }
+.wx-search-input:focus { border-color: #29B6F6; background: rgba(41,182,246,0.05); }
+
+.wx-btn {
+  padding: 0.75rem 1.4rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.wx-btn-primary { background: linear-gradient(135deg, #2E7D32, #1B5E20); color: #fff; box-shadow: 0 4px 12px rgba(46,125,50,0.3); }
+.wx-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46,125,50,0.45); }
+.wx-btn-secondary { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.12); }
+.wx-btn-secondary:hover { background: rgba(255,255,255,0.14); }
+
+/* Hero Card */
+.wx-hero-card {
+  background: linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,41,59,0.9) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  flex-wrap: wrap;
+  z-index: 1;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.wx-hero-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(41,182,246,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Condition-based border glow */
+.wx-cond-rain { border-color: rgba(96,165,250,0.3); }
+.wx-cond-rain::before { background: radial-gradient(circle, rgba(96,165,250,0.1) 0%, transparent 70%); }
+.wx-cond-storm { border-color: rgba(167,139,250,0.3); }
+.wx-cond-storm::before { background: radial-gradient(circle, rgba(167,139,250,0.1) 0%, transparent 70%); }
+.wx-cond-clear { border-color: rgba(251,191,36,0.25); }
+.wx-cond-clear::before { background: radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 70%); }
+
+/* Animated Icon */
+.wx-hero-icon-wrap {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+}
+.wx-anim-icon { font-size: 5rem; line-height: 1; position: relative; }
+.wx-sun i { color: #FBBF24; animation: spin-slow 12s linear infinite; display: inline-block; filter: drop-shadow(0 0 20px rgba(251,191,36,0.5)); }
+.wx-cloud i { color: #94A3B8; animation: float 4s ease-in-out infinite; display: inline-block; filter: drop-shadow(0 0 15px rgba(148,163,184,0.3)); }
+.wx-rain i { color: #60A5FA; animation: float 3s ease-in-out infinite; display: inline-block; filter: drop-shadow(0 0 15px rgba(96,165,250,0.4)); }
+.wx-storm i { color: #A78BFA; animation: pulse-icon 1.5s ease-in-out infinite; display: inline-block; filter: drop-shadow(0 0 20px rgba(167,139,250,0.5)); }
+.wx-fog i { color: #9CA3AF; animation: float 5s ease-in-out infinite; display: inline-block; }
+
+/* Rain drops */
+.wx-rain { overflow: hidden; }
+.wx-rain-drops { position: absolute; top: 90%; left: 10%; display: flex; gap: 8px; }
+.wx-rain-drops span {
+  width: 2px;
+  height: 12px;
+  background: #60A5FA;
+  border-radius: 2px;
+  opacity: 0.7;
+  animation: rain-fall 0.8s linear infinite;
+}
+.wx-rain-drops span:nth-child(2) { animation-delay: 0.15s; }
+.wx-rain-drops span:nth-child(3) { animation-delay: 0.3s; }
+.wx-rain-drops span:nth-child(4) { animation-delay: 0.45s; }
+.wx-rain-drops span:nth-child(5) { animation-delay: 0.6s; }
+
+@keyframes rain-fall { 0% { transform: translateY(0); opacity: 0.7; } 100% { transform: translateY(30px); opacity: 0; } }
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes pulse-icon { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.08); opacity: 0.85; } }
+
+/* Hero Left */
+.wx-hero-left { flex: 1; min-width: 200px; }
+.wx-location { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 0.25rem; }
+.wx-location i { color: #F87171; font-size: 1.2rem; }
+.wx-date { font-size: 0.9rem; color: rgba(255,255,255,0.45); margin-bottom: 1rem; }
+.wx-temp-wrap { display: flex; align-items: flex-start; line-height: 1; margin-bottom: 0.5rem; }
+.wx-temp { font-size: 5rem; font-weight: 900; color: #fff; letter-spacing: -3px; }
+.wx-temp-unit { font-size: 1.8rem; font-weight: 700; color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
+.wx-condition { font-size: 1.2rem; color: rgba(255,255,255,0.7); font-weight: 600; margin-bottom: 0.25rem; }
+.wx-feels { font-size: 0.9rem; color: rgba(255,255,255,0.4); }
+
+/* Hero Stats */
+.wx-hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  min-width: 180px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+.wx-stat { display: flex; align-items: center; gap: 0.9rem; }
+.wx-stat > i { font-size: 1.3rem; color: #29B6F6; width: 28px; text-align: center; }
+.wx-stat-info { display: flex; flex-direction: column; }
+.wx-stat-info span { font-size: 0.78rem; color: rgba(255,255,255,0.45); }
+.wx-stat-info strong { font-size: 1.05rem; font-weight: 700; color: #fff; }
+
+/* Extra Details Grid */
+.wx-details-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  position: relative; z-index: 1;
+}
+.wx-detail-box {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 1.25rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  text-align: center;
+  transition: all 0.25s;
+  backdrop-filter: blur(8px);
+}
+.wx-detail-box:hover { background: rgba(255,255,255,0.07); transform: translateY(-4px); }
+.wx-detail-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+.wx-detail-text { display: flex; flex-direction: column; gap: 0.2rem; }
+.wx-detail-text span { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+.wx-detail-text strong { font-size: 1.15rem; font-weight: 700; color: #fff; }
+
+/* Cards */
+.wx-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 20px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(12px);
+  position: relative; z-index: 1;
+}
+.wx-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.wx-card-title i { color: #2E7D32; font-size: 1.1rem; }
+
+/* Forecast Grid */
+.wx-forecast-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.75rem;
+}
+.wx-forecast-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  transition: all 0.25s;
+  cursor: default;
+}
+.wx-forecast-item:hover { background: rgba(255,255,255,0.07); transform: translateY(-5px); border-color: rgba(41,182,246,0.25); }
+.wx-forecast-today { border-color: rgba(41,182,246,0.3); background: rgba(41,182,246,0.06); }
+.wx-fday { font-size: 0.85rem; font-weight: 700; color: rgba(255,255,255,0.7); }
+.wx-ficon { font-size: 1.8rem; }
+.wx-ficon-sun i { color: #FBBF24; }
+.wx-ficon-cloud i { color: #94A3B8; }
+.wx-ficon-rain i { color: #60A5FA; }
+.wx-ficon-storm i { color: #A78BFA; }
+.wx-ftemp { display: flex; flex-direction: column; gap: 2px; }
+.wx-fhigh { font-size: 1rem; font-weight: 800; color: #fff; }
+.wx-flow { font-size: 0.82rem; color: rgba(255,255,255,0.4); }
+.wx-frain { font-size: 0.78rem; color: #60A5FA; display: flex; align-items: center; gap: 4px; }
+.wx-fbar-wrap { width: 100%; background: rgba(255,255,255,0.06); border-radius: 4px; height: 4px; overflow: hidden; }
+.wx-fbar { height: 100%; background: linear-gradient(90deg, #29B6F6, #0288D1); border-radius: 4px; transition: width 1s ease; }
+
+/* Advisory */
+.wx-advisory-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.wx-advisory {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+.wx-advisory-icon { font-size: 1.3rem; flex-shrink: 0; }
+.wx-advisory-safe { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); color: #4ADE80; }
+.wx-advisory-warning { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #FCD34D; }
+.wx-advisory-danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #F87171; }
+.wx-advisory span { color: rgba(255,255,255,0.85); }
+
+/* Empty State */
+.wx-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  position: relative; z-index: 1;
+}
+.wx-empty-anim i {
+  font-size: 6rem;
+  color: #29B6F6;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(41,182,246,0.4));
+  display: block;
+  margin-bottom: 1.5rem;
+}
+.wx-empty h2 { font-size: 1.8rem; font-weight: 800; color: #fff; margin-bottom: 0.75rem; }
+.wx-empty p { color: rgba(255,255,255,0.5); font-size: 1rem; line-height: 1.7; margin-bottom: 2rem; }
+.wx-tips { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.wx-tip {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.wx-tip i { color: #29B6F6; }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .wx-details-grid { grid-template-columns: repeat(3, 1fr); }
+  .wx-forecast-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 650px) {
+  .wx-hero-card { flex-direction: column; }
+  .wx-hero-icon-wrap { position: static; margin-bottom: 1rem; }
+  .wx-hero-stats { flex-direction: row; flex-wrap: wrap; width: 100%; }
+  .wx-stat { flex: 1 1 45%; }
+  .wx-details-grid { grid-template-columns: repeat(2, 1fr); }
+  .wx-forecast-grid { grid-template-columns: repeat(3, 1fr); }
+  .wx-temp { font-size: 3.5rem; }
+}
+@media (max-width: 400px) {
+  .wx-forecast-grid { grid-template-columns: repeat(2, 1fr); }
+  .wx-details-grid { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+
 <script>
+// Auto Locate
 document.getElementById('autoLocBtn').addEventListener('click', () => {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            fetch(`/weather/auto?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
-                .then(r => r.json()).then(d => { document.querySelector('[name=location]').value = d.city; document.querySelector('.location-form').submit(); });
-        });
+  if (!navigator.geolocation) { alert('Geolocation not supported.'); return; }
+  const btn = document.getElementById('autoLocBtn');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Locating...';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      fetch(`/weather/auto?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.city) {
+            document.querySelector('[name=location]').value = d.city;
+            document.querySelector('.wx-search-form').submit();
+          } else {
+            btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Auto';
+            btn.disabled = false;
+          }
+        })
+        .catch(() => { btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Auto'; btn.disabled = false; });
+    },
+    () => {
+      alert('Location access denied.');
+      btn.innerHTML = '<i class="fa-solid fa-crosshairs"></i> Auto';
+      btn.disabled = false;
     }
+  );
 });
+
+// Background floating particles
+(function() {
+  const bg = document.getElementById('wxBg');
+  const n = window.innerWidth < 600 ? 12 : 25;
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('div');
+    const size = Math.random() * 4 + 1;
+    p.style.cssText = `
+      position: absolute;
+      width: ${size}px; height: ${size}px;
+      background: rgba(255,255,255,${(Math.random() * 0.07 + 0.02).toFixed(2)});
+      border-radius: 50%;
+      left: ${Math.random() * 100}vw;
+      top: ${Math.random() * 100}vh;
+      animation: wx-float-p ${Math.random() * 20 + 15}s ease-in-out infinite alternate;
+      animation-delay: -${Math.random() * 20}s;
+    `;
+    bg.appendChild(p);
+  }
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes wx-float-p {
+      0% { transform: translate(0, 0); }
+      33% { transform: translate(${Math.random() > 0.5 ? '' : '-'}${Math.floor(Math.random()*40+10)}px, -${Math.floor(Math.random()*30+10)}px); }
+      66% { transform: translate(${Math.random() > 0.5 ? '' : '-'}${Math.floor(Math.random()*30+5)}px, ${Math.floor(Math.random()*20+5)}px); }
+      100% { transform: translate(0, 0); }
+    }
+  `;
+  document.head.appendChild(style);
+})();
 </script>
 {% endblock %}

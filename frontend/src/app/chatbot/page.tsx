@@ -42,7 +42,7 @@ export default function ChatbotPage() {
   const { data: historyData, isLoading: historyLoading } = useQuery({
     queryKey: ['chatHistory', session_id],
     queryFn: async () => {
-      const res = await fetch(`${API_BASE_URL}/api/chatbot/history/${session_id}`);
+      const res = await fetch(`${API_BASE_URL}/chatbot/history/${session_id}`);
       if (!res.ok) return [];
       return res.json();
     },

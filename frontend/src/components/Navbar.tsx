@@ -11,13 +11,29 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage, t } = useTranslation();
 
+  const [navHidden, setNavHidden] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      
+      // Handle transparent/solid background
+      setScrolled(currentScrollY > 20);
+      
+      // Handle hide/show on scroll direction
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        setNavHidden(true); // scrolling down
+      } else {
+        setNavHidden(false); // scrolling up
+      }
+      
+      setLastScrollY(currentScrollY);
     };
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -41,7 +57,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`krishi-navbar ${scrolled ? 'scrolled' : ''}`} id="mainNavbar">
+      <nav className={`krishi-navbar ${scrolled ? 'scrolled' : ''} ${navHidden ? 'nav-hidden' : ''}`} id="mainNavbar">
         <div className="navbar-top-bar">
           <div className="navbar-lang-list">
             <button 

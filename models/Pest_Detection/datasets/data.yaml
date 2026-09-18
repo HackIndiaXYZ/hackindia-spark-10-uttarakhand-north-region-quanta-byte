@@ -1,0 +1,24 @@
+# Pest Detection Dataset - YOLOv8 format
+# NOTE: 'path' is resolved relative to this file's location.
+# Keep data.yaml inside the 'datasets/' folder — paths below work
+# on any machine without modification.
+
+path: .               # dataset root (same dir as this yaml)
+train: train/images   # train images
+val: valid/images     # validation images
+test: test/images     # test images
+
+# Classes
+nc: 3
+names:
+  - aphid
+  - fruit fly
+  - scale_insect
+
+# Roboflow metadata
+roboflow:
+  license: CC BY 4.0
+  project: pest-detection-and-counter
+  url: https://universe.roboflow.com/sample-n5l88/pest-detection-and-counter/dataset/1
+  version: 1
+  workspace: sample-n5l88

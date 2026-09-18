@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PestVision — AI Pest Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & Root ───────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0c0a;
+      --surface:   #111511;
+      --panel:     #161c16;
+      --border:    #1e2b1e;
+      --border-hi: #2a3e2a;
+      --accent:    #39ff6e;
+      --accent-dim:#1a7a35;
+      --accent-glow: rgba(57, 255, 110, 0.18);
+      --warn:      #ffb84d;
+      --error:     #ff5a5a;
+      --text:      #d6e8d6;
+      --text-dim:  #6b8a6b;
+      --text-faint:#3a4e3a;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+      --radius: 4px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Scanline overlay ───────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ── Grid noise bg ──────────────────────────────────────────── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(57,255,110,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(57,255,110,0.025) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Header ─────────────────────────────────────────────────── */
+    header {
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      background: var(--surface);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      animation: pulse-ring 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+      50%       { box-shadow: 0 0 0 8px transparent; }
+    }
+
+    .logo-icon::before {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+    }
+
+    .logo-text {
+      font-family: var(--sans);
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: -0.02em;
+      color: #fff;
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    .header-meta {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: blink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    /* ── Layout ─────────────────────────────────────────────────── */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem 4rem;
+    }
+
+    .hero {
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .hero-title .hl { color: var(--accent); }
+
+    .hero-sub {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      max-width: 520px;
+      line-height: 1.7;
+    }
+
+    /* ── Two-panel layout ───────────────────────────────────────── */
+    .workspace {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 860px) {
+      .workspace { grid-template-columns: 1fr; }
+    }
+
+    /* ── Panel shared styles ────────────────────────────────────── */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 0.9rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .panel-header-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .panel-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ── Upload Panel ───────────────────────────────────────────── */
+    .upload-panel { }
+
+    .upload-body { padding: 1.25rem; }
+
+    /* Mode tabs */
+    .mode-tabs {
+      display: flex;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .mode-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .mode-tab:first-child { border-right: 1px solid var(--border); }
+
+    .mode-tab.active {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+    }
+
+    .mode-tab:not(.active):hover {
+      background: var(--border);
+      color: var(--text);
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 1.5px dashed var(--border-hi);
+      border-radius: var(--radius);
+      min-height: 180px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      width: 40px;
+      height: 40px;
+      color: var(--text-faint);
+      transition: color 0.2s;
+    }
+
+    .drop-zone:hover .drop-icon { color: var(--accent); }
+
+    .drop-label {
+      text-align: center;
+      color: var(--text-dim);
+    }
+
+    .drop-label strong {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+    }
+
+    .drop-label span {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    /* Preview */
+    .preview-container {
+      display: none;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .preview-container.visible { display: block; }
+
+    .preview-container img,
+    .preview-container video {
+      width: 100%;
+      max-height: 220px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .preview-label {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.75);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 2px 8px;
+      font-family: var(--mono);
+      font-size: 0.58rem;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .file-info {
+      display: none;
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--text-dim);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1rem;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .file-info.visible {
+      display: flex;
+    }
+
+    .file-info-name {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    .file-info-size { color: var(--text-faint); flex-shrink: 0; }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-faint);
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      padding: 0 2px;
+      flex-shrink: 0;
+      transition: color 0.15s;
+    }
+
+    .clear-btn:hover { color: var(--error); }
+
+    /* Run button */
+    .run-btn {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .run-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0);
+      transition: background 0.18s;
+    }
+
+    .run-btn:hover:not(:disabled)::before { background: rgba(255,255,255,0.12); }
+
+    .run-btn:active:not(:disabled) { transform: scale(0.98); }
+
+    .run-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .run-btn.loading {
+      pointer-events: none;
+    }
+
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(0,0,0,0.3);
+      border-top-color: #000;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: none;
+    }
+
+    .run-btn.loading .spinner { display: block; }
+    .run-btn.loading .btn-text { opacity: 0.7; }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Output Panel ───────────────────────────────────────────── */
+    .output-panel { min-height: 380px; }
+
+    .output-body { padding: 1.25rem; }
+
+    .output-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 1rem;
+      color: var(--text-faint);
+    }
+
+    .output-empty svg {
+      width: 48px;
+      height: 48px;
+      opacity: 0.3;
+    }
+
+    .output-empty p {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* Result image/video */
+    .result-media {
+      display: none;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      border: 1px solid var(--border);
+      margin-bottom: 1.25rem;
+    }
+
+    .result-media.visible { display: block; }
+
+    .result-media img,
+    .result-media video {
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* Detection results */
+    .detections {
+      display: none;
+    }
+
+    .detections.visible { display: block; }
+
+    .detections-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.9rem;
+    }
+
+    .detections-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .detections-count {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      border-radius: 20px;
+      padding: 2px 10px;
+      letter-spacing: 0.05em;
+    }
+
+    .detection-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .detection-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.6rem 0.8rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      animation: slide-up 0.3s ease backwards;
+    }
+
+    @keyframes slide-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .detection-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .detection-name {
+      flex: 1;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text);
+      text-transform: capitalize;
+    }
+
+    .detection-bar-wrap {
+      flex: 2;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .detection-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+
+    .detection-conf {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--accent);
+      flex-shrink: 0;
+      min-width: 44px;
+      text-align: right;
+    }
+
+    .detection-count-badge {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      background: var(--border);
+      color: var(--text-dim);
+      border-radius: 3px;
+      padding: 1px 6px;
+    }
+
+    /* Download button */
+    .download-btn {
+      display: none;
+      width: 100%;
+      margin-top: 1rem;
+      padding: 0.65rem 1rem;
+      background: none;
+      border: 1px solid var(--border-hi);
+      color: var(--text);
+      border-radius: var(--radius);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: all 0.18s ease;
+    }
+
+    .download-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    .download-btn.visible { display: block; }
+
+    /* ── Loading overlay ────────────────────────────────────────── */
+    .loading-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 12, 10, 0.88);
+      z-index: 100;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.25rem;
+      border-radius: var(--radius);
+      backdrop-filter: blur(2px);
+    }
+
+    .loading-overlay.visible {
+      display: flex;
+    }
+
+    .loading-spinner-big {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--border-hi);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .loading-text {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--text-dim);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .loading-subtext {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+      margin-top: -0.5rem;
+    }
+
+    /* ── Error message ──────────────────────────────────────────── */
+    .error-msg {
+      display: none;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: rgba(255, 90, 90, 0.08);
+      border: 1px solid rgba(255, 90, 90, 0.25);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin-top: 1rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--error);
+      line-height: 1.5;
+    }
+
+    .error-msg.visible { display: flex; }
+    .error-msg svg { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; }
+
+    /* ── Stats bar ──────────────────────────────────────────────── */
+    .stats-bar {
+      display: none;
+      border-top: 1px solid var(--border);
+      padding: 0.75rem 1.25rem;
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+      gap: 1.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stats-bar.visible { display: flex; }
+
+    .stat-item { display: flex; align-items: center; gap: 0.4rem; }
+    .stat-item span:first-child { color: var(--text-dim); }
+    .stat-item strong { color: var(--accent); font-weight: 400; }
+
+    /* ── Footer ─────────────────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 10;
+      border-top: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    footer p {
+      font-family: var(--mono);
+      font-size: 0.6rem;
+      color: var(--text-faint);
+      letter-spacing: 0.08em;
+    }
+
+    footer a { color: var(--accent-dim); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ── Responsive ─────────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      header { padding: 0 1rem; }
+      main   { padding: 1.5rem 1rem; }
+      .hero-title { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ───────────────────────────────────────────────────── -->
+  <header>
+    <a class="logo" href="#">
+      <div class="logo-icon"></div>
+      <span class="logo-text">Pest<span>Vision</span></span>
+    </a>
+    <span class="header-meta">YOLOv8 · Neural Detection System</span>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      System Online
+    </div>
+  </header>
+
+  <!-- ── MAIN ─────────────────────────────────────────────────────── -->
+  <main>
+    <div class="hero">
+      <p class="hero-eyebrow">// AI-Powered Agricultural Intelligence</p>
+      <h1 class="hero-title">Detect Pests<br>with <span class="hl">Precision</span></h1>
+      <p class="hero-sub">Upload an image or video — our YOLOv8 model will identify and locate pests with bounding boxes and confidence scores in real time.</p>
+    </div>
+
+    <div class="workspace">
+
+      <!-- LEFT: Upload Panel -->
+      <div class="panel upload-panel">
+        <div class="panel-header">
+          <svg class="panel-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <span class="panel-title">Upload File</span>
+        </div>
+        <div class="upload-body">
+
+          <!-- Mode Tabs -->
+          <div class="mode-tabs">
+            <button class="mode-tab active" id="tab-image" onclick="switchMode('image')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              Image
+            </button>
+            <button class="mode-tab" id="tab-video" onclick="switchMode('video')">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              Video
+            </button>
+          </div>
+
+          <!-- Image upload -->
+          <div id="image-section">
+            <div class="drop-zone" id="image-drop" ondragover="onDrag(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'image')">
+              <input type="file" id="image-input" accept=".jpg,.jpeg,.png,.bmp,.webp" onchange="onFileSelect(event,'image')" />
+              <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <div class="drop-label">
+                <strong>Drop image here</strong>
+                <span>JPG · PNG · BMP · WEBP</span>
+              </div>
+            </div>
+            <div class="preview-container" id="image-preview-box">
+              <span class="preview-label">Preview</span>
+              <img id="image-preview" src="" alt="Preview" />
+            </div>
+            <div class="file-info" id="image-file-info">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              <span class="file-info-name" id="image-file-name">—</span>
+              <span class="file-info-size" id="image-file-size">—</span>
+              <button class="clear-btn" onclick="clearFile('image')" title="Clear">✕</button>
+            </div>
+          </div>
+
+          <!-- Video upload -->
+          <div id="video-section" style="display:none">
+            <div class="drop-zone" id="video-drop" ondragover="onDrag(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event,'video')">
+              <input type="file" id="video-input" accept=".mp4,.avi,.mov,.mkv,.webm" onchange="onFileSelect(event,'video')" />
+              <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              <div class="drop-label">
+                <strong>Drop video here</strong>
+                <span>MP4 · AVI · MOV · MKV · WEBM</span>
+              </div>
+            </div>
+            <div class="preview-container" id="video-preview-box">
+              <span class="preview-label">Preview</span>
+              <video id="video-preview" controls muted></video>
+            </div>
+            <div class="file-info" id="video-file-info">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="23 7 16 12 23 17 23 7"/>
+                <rect x="1" y="5" width="15" height="14" rx="2"/>
+              </svg>
+              <span class="file-info-name" id="video-file-name">—</span>
+              <span class="file-info-size" id="video-file-size">—</span>
+              <button class="clear-btn" onclick="clearFile('video')" title="Clear">✕</button>
+            </div>
+          </div>
+
+          <!-- Run button -->
+          <button class="run-btn" id="run-btn" onclick="runDetection()" disabled>
+            <div class="spinner"></div>
+            <span class="btn-text">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;vertical-align:middle;margin-right:4px">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              Run Detection
+            </span>
+          </button>
+
+          <!-- Error -->
+          <div class="error-msg" id="error-msg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="error-text">An error occurred.</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- RIGHT: Output Panel -->
+      <div class="panel output-panel" style="position:relative">
+
+        <div class="panel-header">
+          <svg class="panel-header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span class="panel-title">Detection Output</span>
+        </div>
+
+        <!-- Loading overlay on output panel -->
+        <div class="loading-overlay" id="loading-overlay">
+          <div class="loading-spinner-big"></div>
+          <span class="loading-text" id="loading-text">Running detection...</span>
+          <span class="loading-subtext" id="loading-subtext">Processing with YOLOv8</span>
+        </div>
+
+        <div class="output-body">
+
+          <!-- Empty state -->
+          <div class="output-empty" id="output-empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            <p>Upload a file and click<br><strong style="color:var(--text-dim)">Run Detection</strong> to see results</p>
+          </div>
+
+          <!-- Result media -->
+          <div class="result-media" id="result-media">
+            <img id="result-image" src="" alt="Detection result" style="display:none" />
+            <video id="result-video" controls style="display:none"></video>
+          </div>
+
+          <!-- Detections list -->
+          <div class="detections" id="detections-panel">
+            <div class="detections-header">
+              <span class="detections-title">Detections</span>
+              <span class="detections-count" id="detections-count">0 found</span>
+            </div>
+            <div class="detection-list" id="detection-list"></div>
+          </div>
+
+          <!-- Download link -->
+          <a class="download-btn" id="download-btn" href="#" download target="_blank">
+            ↓ &nbsp; Download Result File
+          </a>
+
+        </div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar" id="stats-bar">
+          <div class="stat-item"><span>Type</span><strong id="stat-type">—</strong></div>
+          <div class="stat-item"><span>Detections</span><strong id="stat-count">—</strong></div>
+          <div class="stat-item"><span>Status</span><strong style="color:var(--accent)">✓ Complete</strong></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ── FOOTER ───────────────────────────────────────────────────── -->
+  <footer>
+    <p>PestVision — YOLOv8 Pest Detection · Built with Flask + Ultralytics</p>
+    <p>Supports JPG · PNG · MP4 · AVI · MOV</p>
+  </footer>
+
+  <script>
+    // ── State ──────────────────────────────────────────────────────
+    let currentMode = 'image';
+    let selectedFiles = { image: null, video: null };
+
+    // ── Mode switch ────────────────────────────────────────────────
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('image-section').style.display = mode === 'image' ? 'block' : 'none';
+      document.getElementById('video-section').style.display = mode === 'video' ? 'block' : 'none';
+      document.getElementById('tab-image').classList.toggle('active', mode === 'image');
+      document.getElementById('tab-video').classList.toggle('active', mode === 'video');
+      updateRunBtn();
+      clearError();
+    }
+
+    // ── Drag & drop ────────────────────────────────────────────────
+    function onDrag(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('drag-over');
+    }
+
+    function onDragLeave(e) {
+      e.currentTarget.classList.remove('drag-over');
+    }
+
+    function onDrop(e, type) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file, type);
+    }
+
+    // ── File select ────────────────────────────────────────────────
+    function onFileSelect(e, type) {
+      const file = e.target.files[0];
+      if (file) handleFile(file, type);
+    }
+
+    function handleFile(file, type) {
+      selectedFiles[type] = file;
+      const url = URL.createObjectURL(file);
+
+      // File info row
+      document.getElementById(`${type}-file-name`).textContent = file.name;
+      document.getElementById(`${type}-file-size`).textContent = formatSize(file.size);
+      document.getElementById(`${type}-file-info`).classList.add('visible');
+
+      // Preview
+      if (type === 'image') {
+        document.getElementById('image-preview').src = url;
+        document.getElementById('image-preview-box').classList.add('visible');
+      } else {
+        document.getElementById('video-preview').src = url;
+        document.getElementById('video-preview-box').classList.add('visible');
+      }
+
+      updateRunBtn();
+      clearError();
+      resetOutput();
+    }
+
+    function clearFile(type) {
+      selectedFiles[type] = null;
+      document.getElementById(`${type}-input`).value = '';
+      document.getElementById(`${type}-file-info`).classList.remove('visible');
+      document.getElementById(`${type}-preview-box`).classList.remove('visible');
+      if (type === 'image') document.getElementById('image-preview').src = '';
+      else document.getElementById('video-preview').src = '';
+      updateRunBtn();
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1048576).toFixed(1) + ' MB';
+    }
+
+    function updateRunBtn() {
+      const btn = document.getElementById('run-btn');
+      btn.disabled = !selectedFiles[currentMode];
+    }
+
+    // ── Run detection ──────────────────────────────────────────────
+    async function runDetection() {
+      const file = selectedFiles[currentMode];
+      if (!file) return;
+
+      clearError();
+      setLoading(true);
+      resetOutput();
+
+      const formData = new FormData();
+      const endpoint = currentMode === 'image' ? '/detect/image' : '/detect/video';
+
+      if (currentMode === 'image') {
+        formData.append('image_file', file);
+        document.getElementById('loading-text').textContent = 'Analysing image...';
+        document.getElementById('loading-subtext').textContent = 'Running YOLOv8 inference';
+      } else {
+        formData.append('video_file', file);
+        document.getElementById('loading-text').textContent = 'Processing video...';
+        document.getElementById('loading-subtext').textContent = 'This may take a few minutes';
+      }
+
+      try {
+        const res  = await fetch(endpoint, { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          showError(data.error || 'Detection failed. Check server logs.');
+        } else {
+          showResult(data);
+        }
+      } catch (err) {
+        showError('Network error: ' + err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    function setLoading(on) {
+      const btn     = document.getElementById('run-btn');
+      const overlay = document.getElementById('loading-overlay');
+      btn.classList.toggle('loading', on);
+      btn.disabled = on;
+      overlay.classList.toggle('visible', on);
+      if (!on) updateRunBtn();
+    }
+
+    function resetOutput() {
+      document.getElementById('output-empty').style.display    = 'flex';
+      document.getElementById('result-media').classList.remove('visible');
+      document.getElementById('detections-panel').classList.remove('visible');
+      document.getElementById('download-btn').classList.remove('visible');
+      document.getElementById('stats-bar').classList.remove('visible');
+      document.getElementById('result-image').style.display = 'none';
+      document.getElementById('result-video').style.display = 'none';
+      document.getElementById('detection-list').innerHTML = '';
+    }
+
+    function showResult(data) {
+      document.getElementById('output-empty').style.display = 'none';
+
+      // Show media
+      const mediaBox = document.getElementById('result-media');
+      mediaBox.classList.add('visible');
+
+      if (data.type === 'image') {
+        const img = document.getElementById('result-image');
+        img.src = data.result_url + '?t=' + Date.now();
+        img.style.display = 'block';
+      } else {
+        const vid = document.getElementById('result-video');
+        vid.src = data.result_url + '?t=' + Date.now();
+        vid.style.display = 'block';
+      }
+
+      // Download
+      const dlBtn = document.getElementById('download-btn');
+      dlBtn.href = data.result_url;
+      dlBtn.classList.add('visible');
+
+      // Detections
+      const list      = document.getElementById('detection-list');
+      const panel     = document.getElementById('detections-panel');
+      const countBadge = document.getElementById('detections-count');
+
+      if (data.detections && data.detections.length > 0) {
+        panel.classList.add('visible');
+        countBadge.textContent = data.count !== undefined
+          ? `${data.count} detection${data.count !== 1 ? 's' : ''}`
+          : `${data.detections.length} pest${data.detections.length !== 1 ? 's' : ''}`;
+
+        data.detections.forEach((det, i) => {
+          const item = document.createElement('div');
+          item.className = 'detection-item';
+          item.style.animationDelay = `${i * 0.06}s`;
+
+          if (data.type === 'image') {
+            item.innerHTML = `
+              <div class="detection-dot"></div>
+              <span class="detection-name">${det.label}</span>
+              <div class="detection-bar-wrap">
+                <div class="detection-bar" style="width:${det.confidence}%"></div>
+              </div>
+              <span class="detection-conf">${det.confidence}%</span>
+            `;
+          } else {
+            item.innerHTML = `
+              <div class="detection-dot"></div>
+              <span class="detection-name">${det.label}</span>
+              <span class="detection-count-badge">×${det.count}</span>
+            `;
+          }
+
+          list.appendChild(item);
+        });
+      } else {
+        panel.classList.add('visible');
+        countBadge.textContent = '0 found';
+        list.innerHTML = `<p style="font-family:var(--mono);font-size:0.65rem;color:var(--text-faint);padding:0.5rem 0">No pests detected in this ${data.type}.</p>`;
+      }
+
+      // Stats bar
+      const statsBar = document.getElementById('stats-bar');
+      statsBar.classList.add('visible');
+      document.getElementById('stat-type').textContent = data.type.charAt(0).toUpperCase() + data.type.slice(1);
+      document.getElementById('stat-count').textContent = data.count ?? (data.detections?.length ?? 0);
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('error-msg');
+      document.getElementById('error-text').textContent = msg;
+      el.classList.add('visible');
+    }
+
+    function clearError() {
+      document.getElementById('error-msg').classList.remove('visible');
+    }
+  </script>
+</body>
+</html>

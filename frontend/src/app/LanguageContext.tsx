@@ -13,7 +13,6 @@ interface LanguageContextType {
 const translations: Record<Language, Record<string, string>> = {
   hi: {
     // Navigation
-    "home": "होम",
     "dashboard": "डैशबोर्ड",
     "disease": "रोग पहचान",
     "weather": "मौसम",
@@ -335,7 +334,6 @@ const translations: Record<Language, Record<string, string>> = {
   },
   en: {
     // Navigation
-    "home": "Home",
     "dashboard": "Dashboard",
     "disease": "Disease Detect",
     "weather": "Weather",

@@ -38,7 +38,7 @@
 .sidebar-header h3 {
     margin: 0;
     font-size: 1.1rem;
-    color: var(--color-dark);
+    color: #1a1a2e;
 }
 
 .new-chat-btn {
@@ -70,7 +70,7 @@
 .session-item {
     padding: 0.75rem 1rem;
     border-radius: var(--radius-md);
-    color: var(--color-dark);
+    color: #1a1a2e;
     text-decoration: none;
     font-size: 0.95rem;
     display: flex;
@@ -96,7 +96,7 @@
 .no-history {
     padding: 1rem;
     text-align: center;
-    color: var(--color-muted);
+    color: #6b7280;
     font-size: 0.9rem;
 }
 
@@ -230,7 +230,7 @@
 }
 
 .chatbot-title-info { flex: 1; }
-.chatbot-title-info h2 { font-size: 0.95rem; font-weight: 700; }
+.chatbot-title-info h2 { font-size: 0.95rem; font-weight: 700; color: #1a1a2e; }
 .chatbot-status {
     font-size: 0.75rem;
     color: var(--color-success);
@@ -306,7 +306,7 @@
 }
 .bot-bubble .bubble-content {
     background: #fff;
-    color: var(--color-text);
+    color: #1a1a2e;
     border-bottom-left-radius: 4px;
     box-shadow: var(--shadow-sm);
 }
@@ -347,7 +347,7 @@
 
 .bubble-time {
     font-size: 0.65rem;
-    color: var(--color-text-muted);
+    color: #6b7280;
     display: block;
     margin-top: 3px;
     align-self: flex-end;
@@ -426,7 +426,8 @@
     border-radius: var(--radius-full);
     font-size: 0.9rem;
     font-family: var(--font-primary);
-    background: var(--color-bg);
+    background: #f8faf8;
+    color: #1a1a2e;
     outline: none;
     transition: var(--transition);
 }

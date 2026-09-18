@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import database
 from .database import Base
 from .config import settings
-from .routes import auth, profile, disease, soil, weather, market, schemes, yields, machinery, alerts, chatbot
+from .routes import auth, profile, disease, soil, weather, market, schemes, yields, machinery, alerts, chatbot, voice
 
 app = FastAPI(
     title="Krishi AI Backend",
@@ -46,6 +46,7 @@ app.include_router(yields.router, prefix="/api/yield", tags=["Yield Analysis"])
 app.include_router(machinery.router, prefix="/api/machinery", tags=["Machinery Rental"])
 app.include_router(alerts.router, prefix="/api/alerts", tags=["Alerts & Notifications"])
 app.include_router(chatbot.router, prefix="/api/chatbot", tags=["AI Chatbot"])
+app.include_router(voice.router, prefix="/api/voice", tags=["Voice Advisory"])
 
 @app.get("/")
 def read_root():

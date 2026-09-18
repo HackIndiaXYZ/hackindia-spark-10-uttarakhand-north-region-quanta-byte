@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     OPENWEATHER_API_KEY: str = os.getenv("OPENWEATHER_API_KEY", "")
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
+    DATA_GOV_API_KEY: str = os.getenv("DATA_GOV_API_KEY", "")
     
     class Config:
         env_file = ".env"

@@ -4,57 +4,112 @@
 
 {% block extra_css %}
 <style>
-    .auth-page {
-        min-height: calc(100vh - 140px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, rgba(46,125,50,0.05) 0%, rgba(129,199,132,0.15) 100%);
-        padding: 40px 20px;
-    }
+    .auth-page{
+    position:relative;
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:40px 20px;
+
+    overflow:hidden;
+    isolation:isolate;
+}
+.auth-page::before{
+    content:"";
+    position:absolute;
+    inset:0;
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    animation:loginSlider 48s infinite;
+
+    transform:scale(1.05);
+
+    z-index:-3;
+}
+
+.auth-page::after{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:linear-gradient(
+rgba(3,7,18,.25),
+rgba(3,7,18,.30)
+);
+
+    backdrop-filter:blur(2px);
+
+    z-index:-2;
+}
     
-    .auth-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 40px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08), 0 1px 8px rgba(0,0,0,0.04);
-        border: 1px solid rgba(255,255,255,0.4);
-        text-align: center;
-        animation: slideUp 0.5s ease-out;
-    }
+    .auth-card{
+
+    position:relative;
+
+    z-index:10;
+
+    background:rgba(17,24,39,.52);
+
+    backdrop-filter:blur(22px);
+
+    -webkit-backdrop-filter:blur(22px);
+
+    border-radius:28px;
+
+    width:100%;
+
+    max-width:600px;
+
+    padding:55px;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    box-shadow:0 35px 80px rgba(0,0,0,.55);
+
+    text-align:center;
+
+    animation:slideUp .5s ease-out;
+}
 
     .auth-header {
         margin-bottom: 25px;
     }
 
     .auth-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #2E7D32, #4CAF50);
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #10B981, #059669);
         color: white;
-        border-radius: 50%;
+        border-radius: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 26px;
+        font-size: 28px;
         margin: 0 auto 15px;
-        box-shadow: 0 4px 15px rgba(46,125,50,0.3);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
     }
 
     .auth-title {
-        font-family: 'Baloo 2', cursive;
+        font-family: 'Outfit', sans-serif;
         font-size: 28px;
-        color: #1a1a1a;
+        color: #ffffff !important;
         margin-bottom: 5px;
-        font-weight: 700;
+        font-weight: 800;
     }
 
     .auth-subtitle {
-        color: #666;
-        font-size: 15px;
+        color: #9CA3AF;
+        font-size: 14.5px;
+        line-height: 1.5;
     }
 
     .form-row {
@@ -76,7 +131,7 @@
     .form-label {
         display: block;
         font-weight: 600;
-        color: #333;
+        color: #E5E7EB;
         margin-bottom: 8px;
         font-size: 14px;
     }
@@ -90,62 +145,65 @@
         left: 15px;
         top: 50%;
         transform: translateY(-50%);
-        color: #888;
+        color: #9CA3AF;
         font-size: 16px;
     }
 
     .form-control {
         width: 100%;
         padding: 12px 15px 12px 45px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
+        background: rgba(3, 7, 18, 0.6);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
         font-size: 15px;
+        color: #ffffff;
         transition: all 0.3s;
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Inter', sans-serif;
     }
 
     .form-control:focus {
-        border-color: #2E7D32;
+        border-color: #10B981;
         outline: none;
-        box-shadow: 0 0 0 4px rgba(46,125,50,0.1);
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+        background: rgba(3, 7, 18, 0.8);
     }
 
     .auth-btn {
         width: 100%;
         padding: 14px;
-        background: linear-gradient(135deg, #2E7D32, #4CAF50);
+        background: linear-gradient(135deg, #10B981, #059669);
         color: white;
         border: none;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 18px;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
         transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 15px rgba(46,125,50,0.3);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
         margin-top: 10px;
-        font-family: 'Baloo 2', cursive;
+        font-family: 'Outfit', sans-serif;
     }
 
     .auth-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(46,125,50,0.4);
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
     }
 
     .auth-footer {
         margin-top: 20px;
         font-size: 15px;
-        color: #555;
+        color: #9CA3AF;
     }
 
     .auth-link {
-        color: #2E7D32;
+        color: #34D399;
         font-weight: 600;
         text-decoration: none;
         transition: 0.2s;
     }
 
     .auth-link:hover {
-        color: #1b5e20;
+        color: #10B981;
         text-decoration: underline;
     }
 
@@ -153,6 +211,41 @@
         from { opacity: 0; transform: translateY(20px); }
         to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes loginSlider{
+
+0%,12.5%{
+background-image:url("/static/login-bg/bg1.jpg");
+}
+
+12.5%,25%{
+background-image:url("/static/login-bg/bg2.jpg");
+}
+
+25%,37.5%{
+background-image:url("/static/login-bg/bg3.jpg");
+}
+
+37.5%,50%{
+background-image:url("/static/login-bg/bg4.jpg");
+}
+
+50%,62.5%{
+background-image:url("/static/login-bg/bg5.jpg");
+}
+
+62.5%,75%{
+background-image:url("/static/login-bg/bg6.jpg");
+}
+
+75%,87.5%{
+background-image:url("/static/login-bg/bg7.jpg");
+}
+
+87.5%,100%{
+background-image:url("/static/login-bg/bg8.jpg");
+}
+
+}
 
     /* Mobile Responsive */
     @media (max-width: 500px) {
@@ -160,9 +253,10 @@
             flex-direction: column;
             gap: 20px;
         }
-        .auth-card {
-            padding: 30px 20px;
-        }
+        .auth-card{
+         max-width:95%;
+         padding:35px 22px;
+}
     }
 </style>
 {% endblock %}

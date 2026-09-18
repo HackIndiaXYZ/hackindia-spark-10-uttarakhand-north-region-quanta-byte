@@ -16,7 +16,7 @@
 .drop-zone {
     border: 2px dashed rgba(46,125,50,0.35);
     border-radius: var(--radius-lg);
-    min-height: 220px;
+    min-height: 380px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -36,25 +36,25 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.6rem;
-    padding: 2rem 1rem;
+    gap: 1rem;
+    padding: 4rem 1rem;
     text-align: center;
 }
 .drop-icon {
-    width: 60px; height: 60px;
+    width: 80px; height: 80px;
     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-size: 1.5rem;
+    font-size: 2rem;
     box-shadow: var(--shadow-green);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.8rem;
 }
 .soil-icon { background: linear-gradient(135deg, #8D6E63, #5D4037) !important; }
-.drop-zone h3 { font-size: 1rem; font-weight: 700; color: var(--color-primary); }
-.drop-zone p { font-size: 0.82rem; color: var(--color-text-muted); }
+.drop-zone h3 { font-size: 1.25rem; font-weight: 700; color: var(--color-primary); }
+.drop-zone p { font-size: 0.95rem; color: var(--color-text-muted); }
 
 .upload-btn {
     margin-top: 0.5rem;
@@ -64,7 +64,7 @@
 /* Image Preview */
 .image-preview-wrap {
     width: 100%;
-    height: 220px;
+    height: 380px;
     position: relative;
 }
 .image-preview-wrap img {
@@ -153,14 +153,14 @@
 .result-warning .result-icon { background: var(--color-warning-light); color: #E65100; }
 .result-danger .result-icon { background: var(--color-danger-light); color: var(--color-danger); }
 
-.result-disease-name { font-family: var(--font-display); font-size: 1.3rem; font-weight: 800; }
-.result-crop { color: var(--color-text-muted); font-size: 0.85rem; }
+.result-disease-name { font-family: var(--font-display); font-size: 1.6rem; font-weight: 800; }
+.result-crop { color: var(--color-text-muted); font-size: 1rem; }
 
 .severity-badge {
     margin-left: auto;
-    padding: 0.35rem 0.9rem;
+    padding: 0.45rem 1.1rem;
     border-radius: var(--radius-full);
-    font-size: 0.78rem;
+    font-size: 0.95rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -174,7 +174,7 @@
 .confidence-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: 600;
     margin-bottom: 0.4rem;
 }
@@ -200,7 +200,7 @@
     background: var(--color-bg);
 }
 .result-section-block h4 {
-    font-size: 0.88rem;
+    font-size: 1.05rem;
     font-weight: 700;
     color: var(--color-primary);
     margin-bottom: 0.5rem;
@@ -208,14 +208,14 @@
     align-items: center;
     gap: 0.4rem;
 }
-.result-section-block p, .result-section-block li { font-size: 0.88rem; color: var(--color-text-muted); line-height: 1.65; }
+.result-section-block p, .result-section-block li { font-size: 1rem; color: #E5E7EB; line-height: 1.7; }
 .result-section-block ul { display: flex; flex-direction: column; gap: 0.4rem; }
 .result-section-block li { display: flex; align-items: flex-start; gap: 0.4rem; }
 .result-section-block li i { color: var(--color-primary); margin-top: 3px; flex-shrink: 0; }
 
-.treatment-block { background: #FFF3E0; }
-.treatment-block h4 { color: #E65100; }
-.prevention-block { background: var(--color-success-light); }
+.treatment-block { background: rgba(230, 81, 0, 0.12); }
+.treatment-block h4 { color: #FB923C; }
+.prevention-block { background: rgba(16, 185, 129, 0.12); }
 
 .result-actions {
     display: flex;
@@ -260,10 +260,10 @@
 }
 .soil-color-label {
     background: rgba(255,255,255,0.85);
-    padding: 0.3rem 1rem;
+    padding: 0.4rem 1.25rem;
     border-radius: var(--radius-full);
     font-weight: 700;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
 }
 .soil-info-grid {
     display: grid;
@@ -274,26 +274,26 @@
 .soil-info-item {
     background: var(--color-bg);
     border-radius: var(--radius-md);
-    padding: 0.75rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.4rem;
     text-align: center;
 }
-.soil-info-item i { color: var(--color-primary); font-size: 1.1rem; }
-.soil-info-item span { font-size: 0.75rem; color: var(--color-text-muted); }
-.soil-info-item strong { font-size: 0.9rem; font-weight: 700; }
+.soil-info-item i { color: var(--color-primary); font-size: 1.4rem; }
+.soil-info-item span { font-size: 1rem; color: var(--color-text-muted); }
+.soil-info-item strong { font-size: 1.2rem; font-weight: 700; }
 
 .recommended-crops { margin-bottom: 1rem; }
-.recommended-crops h4 { font-size: 0.88rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.6rem; display: flex; gap: 0.4rem; align-items: center; }
-.crop-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.recommended-crops h4 { font-size: 1.05rem; font-weight: 700; color: var(--color-primary); margin-bottom: 0.6rem; display: flex; gap: 0.4rem; align-items: center; }
+.crop-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .crop-tag {
     background: var(--color-success-light);
     color: var(--color-primary);
-    padding: 0.25rem 0.75rem;
+    padding: 0.35rem 0.9rem;
     border-radius: var(--radius-full);
-    font-size: 0.8rem;
+    font-size: 0.95rem;
     font-weight: 600;
 }
 
@@ -346,9 +346,9 @@
     padding: 0.75rem;
     text-align: center;
 }
-.weather-detail-item i { color: var(--color-primary); font-size: 1.1rem; }
-.weather-detail-item span { font-size: 0.72rem; color: var(--color-text-muted); }
-.weather-detail-item strong { font-weight: 700; font-size: 0.9rem; }
+.weather-detail-item i { color: var(--color-primary); font-size: 1.5rem; }
+.weather-detail-item span { font-size: 0.9rem; color: var(--color-text-muted); }
+.weather-detail-item strong { font-weight: 700; font-size: 1.1rem; }
 
 .forecast-card { margin-bottom: 1rem; }
 .forecast-row {

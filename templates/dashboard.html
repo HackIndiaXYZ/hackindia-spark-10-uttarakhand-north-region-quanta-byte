@@ -1,226 +1,313 @@
 {% extends "base.html" %}
 {% block title %}Dashboard - Krishi AI{% endblock %}
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}?v=2.1">
+<style>
+/* Dashboard reuses home card styles — inline below */
+.services-section { padding: 3rem 1.5rem 4rem; }
+.services-header { text-align: center; margin-bottom: 3rem; }
+.services-main-title {
+    font-size: clamp(1.6rem, 3.5vw, 2.5rem);
+    font-weight: 800;
+    background: linear-gradient(to right, #ffffff 30%, #9CA3AF);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.5px;
+}
+.services-main-sub { color: rgba(255,255,255,0.5); font-size: 1rem; line-height: 1.7; }
+
+/* stats bar */
+.dash-stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 1rem; margin: 0 1.5rem 2rem; }
+.dash-stat { background: rgba(17,24,39,0.6); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 1.1rem 1.25rem; display:flex; align-items:center; gap: 0.85rem; }
+.dash-stat-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.3rem; flex-shrink:0; }
+.dash-stat-label { font-size:0.72rem; color:#9CA3AF; display:block; }
+.dash-stat-value { font-size:1.25rem; font-weight:800; color:#fff; display:block; line-height:1.2; }
+.dash-stat-sub { font-size:0.7rem; display:block; margin-top:1px; }
+
+/* Cards */
+.premium-cards-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(320px, 380px));
+    justify-content:center;
+    gap:1.4rem;
+    align-items:start;
+}
+@media(max-width:1199px){.premium-cards-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:599px){.premium-cards-grid{grid-template-columns:1fr;}}
+
+.pcard { position:relative; display:flex; flex-direction:column; border-radius:20px; overflow:hidden; text-decoration:none; color:#fff; border:1px solid rgba(255,255,255,0.10); transition:transform 0.35s cubic-bezier(0.4,0,0.2,1),box-shadow 0.35s,border-color 0.35s; cursor:pointer; }
+.pcard:hover { transform:translateY(-10px) scale(1.015); }
+.pcard--disease{background:linear-gradient(160deg,#0c2218,#0a1a10);} .pcard--disease:hover{box-shadow:0 20px 60px rgba(16,185,129,0.30);border-color:rgba(16,185,129,0.45);}
+.pcard--soil{background:linear-gradient(160deg,#1e1105,#120d02);} .pcard--soil:hover{box-shadow:0 20px 60px rgba(217,119,6,0.30);border-color:rgba(217,119,6,0.45);}
+.pcard--pest{background:linear-gradient(160deg,#081a0a,#060e08);} .pcard--pest:hover{box-shadow:0 20px 60px rgba(34,197,94,0.30);border-color:rgba(34,197,94,0.45);}
+.pcard--weather{background:linear-gradient(160deg,#060e1e,#04090f);} .pcard--weather:hover{box-shadow:0 20px 60px rgba(59,130,246,0.30);border-color:rgba(59,130,246,0.45);}
+.pcard--market{background:linear-gradient(160deg,#1a0d02,#110802);} .pcard--market:hover{box-shadow:0 20px 60px rgba(249,115,22,0.30);border-color:rgba(249,115,22,0.45);}
+.pcard--schemes{background:linear-gradient(160deg,#02131a,#020e10);} .pcard--schemes:hover{box-shadow:0 20px 60px rgba(6,182,212,0.30);border-color:rgba(6,182,212,0.45);}
+.pcard--voice{background:linear-gradient(160deg,#130b1e,#0d0814);} .pcard--voice:hover{box-shadow:0 20px 60px rgba(139,92,246,0.30);border-color:rgba(139,92,246,0.45);}
+.pcard--organic{background:linear-gradient(160deg,#061a10,#04100b);} .pcard--organic:hover{box-shadow:0 20px 60px rgba(16,185,129,0.30);border-color:rgba(16,185,129,0.45);}
+
+.pcard__corner-badge { position:absolute; top:14px; right:14px; z-index:20; background:linear-gradient(135deg,#10B981,#059669); color:#fff; font-size:0.65rem; font-weight:800; letter-spacing:0.5px; padding:0.28rem 0.6rem; border-radius:30px; text-transform:uppercase; box-shadow:0 4px 14px rgba(16,185,129,0.45); }
+.pcard__corner-badge--soil{background:linear-gradient(135deg,#D97706,#B45309);box-shadow:0 4px 14px rgba(217,119,6,0.45);}
+.pcard__corner-badge--pest{background:linear-gradient(135deg,#22C55E,#16A34A);box-shadow:0 4px 14px rgba(34,197,94,0.45);}
+.pcard__corner-badge--voice{background:linear-gradient(135deg,#9333EA,#7C3AED);box-shadow:0 4px 14px rgba(139,92,246,0.45);}
+.pcard__corner-badge--organic{background:linear-gradient(135deg,#10B981,#059669);box-shadow:0 4px 14px rgba(16,185,129,0.45);}
+
+.pcard__img-wrap { width:100%; height:370px; overflow:hidden; flex-shrink:0; background:rgba(0,0,0,0.25); }
+.pcard__img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.55s cubic-bezier(0.4,0,0.2,1); }
+.pcard:hover .pcard__img { transform:scale(1.08); }
+.pcard__img-wrap--svg { display:flex; align-items:center; justify-content:center; }
+.pcard__svg { width:100%; height:100%; transition:transform 0.55s; }
+.pcard:hover .pcard__svg { transform:scale(1.06); }
+
+.pcard__body { display:flex; flex-direction:column; flex:1;   padding:0.8rem 1rem; }
+.pcard__title { font-size:1.18rem; font-weight:800; color:#fff; margin-bottom:0.55rem; line-height:1.3; letter-spacing:-0.2px; }
+.pcard__desc { font-size:0.84rem; color:rgba(255,255,255,0.60); line-height:1.65; flex:1; margin-bottom:0; line-height: 1.45; margin-top:auto}
+.pcard__footer { display:flex; align-items:center; justify-content:space-between; gap:0.75rem; }
+.pcard__btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.6rem 1rem; border-radius:10px; font-size:0.8rem; font-weight:700; transition:all 0.3s; background:rgba(16,185,129,0.12); color:#10B981; border:1px solid rgba(16,185,129,0.25); }
+.pcard__btn i { transition:transform 0.3s; }
+.pcard:hover .pcard__btn i { transform:translateX(4px); }
+.pcard:hover .pcard__btn { background:rgba(16,185,129,0.22); border-color:rgba(16,185,129,0.5); }
+.pcard__btn--soil{background:rgba(217,119,6,0.12);color:#F59E0B;border-color:rgba(217,119,6,0.25);}
+.pcard:hover .pcard__btn--soil{background:rgba(217,119,6,0.22);border-color:rgba(217,119,6,0.5);}
+.pcard__btn--pest{background:rgba(34,197,94,0.12);color:#22C55E;border-color:rgba(34,197,94,0.25);}
+.pcard:hover .pcard__btn--pest{background:rgba(34,197,94,0.22);border-color:rgba(34,197,94,0.5);}
+.pcard__btn--weather{background:rgba(59,130,246,0.12);color:#60A5FA;border-color:rgba(59,130,246,0.25);}
+.pcard:hover .pcard__btn--weather{background:rgba(59,130,246,0.22);border-color:rgba(59,130,246,0.5);}
+.pcard__btn--market{background:rgba(249,115,22,0.12);color:#FB923C;border-color:rgba(249,115,22,0.25);}
+.pcard:hover .pcard__btn--market{background:rgba(249,115,22,0.22);border-color:rgba(249,115,22,0.5);}
+.pcard__btn--schemes{background:rgba(6,182,212,0.12);color:#22D3EE;border-color:rgba(6,182,212,0.25);}
+.pcard:hover .pcard__btn--schemes{background:rgba(6,182,212,0.22);border-color:rgba(6,182,212,0.5);}
+.pcard__btn--voice{background:rgba(139,92,246,0.12);color:#A78BFA;border-color:rgba(139,92,246,0.25);}
+.pcard:hover .pcard__btn--voice{background:rgba(139,92,246,0.22);border-color:rgba(139,92,246,0.5);}
+.pcard__btn--organic{background:rgba(16,185,129,0.12);color:#34D399;border-color:rgba(16,185,129,0.25);}
+.pcard:hover .pcard__btn--organic{background:rgba(16,185,129,0.22);border-color:rgba(16,185,129,0.5);}
+
+.pcard__icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.95rem; flex-shrink:0; transition:transform 0.3s; background:rgba(16,185,129,0.12); color:#10B981; border:1px solid rgba(16,185,129,0.20); }
+.pcard:hover .pcard__icon { transform:rotate(15deg) scale(1.1); }
+.pcard__icon--soil{background:rgba(217,119,6,0.12);color:#F59E0B;border-color:rgba(217,119,6,0.20);}
+.pcard__icon--pest{background:rgba(34,197,94,0.12);color:#22C55E;border-color:rgba(34,197,94,0.20);}
+.pcard__icon--weather{background:rgba(59,130,246,0.12);color:#60A5FA;border-color:rgba(59,130,246,0.20);}
+.pcard__icon--market{background:rgba(249,115,22,0.12);color:#FB923C;border-color:rgba(249,115,22,0.20);}
+.pcard__icon--schemes{background:rgba(6,182,212,0.12);color:#22D3EE;border-color:rgba(6,182,212,0.20);}
+.pcard__icon--voice{background:rgba(139,92,246,0.12);color:#A78BFA;border-color:rgba(139,92,246,0.20);}
+.pcard__icon--organic{background:rgba(16,185,129,0.12);color:#34D399;border-color:rgba(16,185,129,0.20);}
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="krishi-container dashboard-wrap">
 
-    <!-- Page Header -->
-    <div class="page-header fade-in-up">
+<!-- Stats bar -->
+<div class="dash-stats">
+    <div class="dash-stat">
+        <div class="dash-stat-icon" style="background:rgba(16,185,129,0.1);color:#10B981;"><i class="fa-solid fa-seedling"></i></div>
         <div>
-            <h1 class="page-title"><i class="fa-solid fa-chart-line"></i> मेरा डैशबोर्ड</h1>
-            <p class="page-sub">नमस्ते, {{ current_user.name if current_user else 'किसान जी' }}! आज का सारांश देखें।</p>
-        </div>
-        <div class="header-date">
-            <i class="fa-solid fa-calendar"></i>
-            <span id="currentDate"></span>
+            <span class="dash-stat-label">फसल स्वास्थ्य</span>
+            <span class="dash-stat-value">Good</span>
+            <span class="dash-stat-sub" style="color:#10B981;">85% healthy</span>
         </div>
     </div>
-
-    <!-- Summary Cards -->
-    <div class="summary-grid fade-in-up delay-1">
-        <div class="summary-card status-safe">
-            <div class="summary-icon"><i class="fa-solid fa-seedling"></i></div>
-            <div class="summary-info">
-                <span class="summary-label">फसल स्वास्थ्य</span>
-                <span class="summary-value">Good</span>
-                <span class="summary-sub">85% healthy</span>
-            </div>
-            <div class="summary-badge safe">✓ सुरक्षित</div>
-        </div>
-        <div class="summary-card status-warning">
-            <div class="summary-icon"><i class="fa-solid fa-cloud-rain"></i></div>
-            <div class="summary-info">
-                <span class="summary-label">मौसम</span>
-                <span class="summary-value">28°C</span>
-                <span class="summary-sub">बादल + बारिश संभव</span>
-            </div>
-            <div class="summary-badge warning">⚠ सावधान</div>
-        </div>
-        <div class="summary-card status-safe">
-            <div class="summary-icon"><i class="fa-solid fa-rupee-sign"></i></div>
-            <div class="summary-info">
-                <span class="summary-label">आज मंडी भाव</span>
-                <span class="summary-value">₹2,150</span>
-                <span class="summary-sub">गेहूं / क्विंटल</span>
-            </div>
-            <div class="summary-badge safe">↑ +3%</div>
-        </div>
-        <div class="summary-card status-danger">
-            <div class="summary-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-            <div class="summary-info">
-                <span class="summary-label">अलर्ट</span>
-                <span class="summary-value">2 New</span>
-                <span class="summary-sub">Pest warning nearby</span>
-            </div>
-            <div class="summary-badge danger">! देखें</div>
+    <div class="dash-stat">
+        <div class="dash-stat-icon" style="background:rgba(245,158,11,0.1);color:#F59E0B;"><i class="fa-solid fa-cloud-rain"></i></div>
+        <div>
+            <span class="dash-stat-label">मौसम</span>
+            <span class="dash-stat-value">28°C</span>
+            <span class="dash-stat-sub" style="color:#F59E0B;">बादल + बारिश संभव</span>
         </div>
     </div>
-
-    <!-- Charts Row -->
-    <div class="charts-row fade-in-up delay-2">
-        <div class="krishi-card chart-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-chart-bar"></i> फसल उत्पादन (Quintal)</h3>
-                <select class="krishi-input mini-select" id="cropSelect">
-                    <option>गेहूं</option><option>धान</option><option>मक्का</option>
-                </select>
-            </div>
-            <canvas id="yieldChart" height="200"></canvas>
-        </div>
-        <div class="krishi-card chart-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-rupee-sign"></i> कमाई vs खर्च</h3>
-            </div>
-            <canvas id="profitChart" height="200"></canvas>
+    <div class="dash-stat">
+        <div class="dash-stat-icon" style="background:rgba(59,130,246,0.1);color:#3B82F6;"><i class="fa-solid fa-rupee-sign"></i></div>
+        <div>
+            <span class="dash-stat-label">मंडी भाव (गेहूं)</span>
+            <span class="dash-stat-value">₹2,150</span>
+            <span class="dash-stat-sub" style="color:#10B981;">↑ +3%</span>
         </div>
     </div>
-
-    <!-- Advisory + Disease Row -->
-    <div class="dash-mid-row fade-in-up delay-3">
-        <!-- AI Advisory -->
-        <div class="krishi-card advisory-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-robot"></i> AI सलाह — आज की</h3>
-                <span class="badge-green">Fresh</span>
-            </div>
-            <ul class="advisory-list">
-                <li class="advisory-item safe">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span>आज सिंचाई करना सही रहेगा — मौसम साफ है</span>
-                </li>
-                <li class="advisory-item warning">
-                    <i class="fa-solid fa-exclamation-triangle"></i>
-                    <span>गेहूं में पीलापन दिख रहा हो तो Urea spray करें</span>
-                </li>
-                <li class="advisory-item danger">
-                    <i class="fa-solid fa-times-circle"></i>
-                    <span>कल बारिश संभव — कटाई रोकें</span>
-                </li>
-                <li class="advisory-item safe">
-                    <i class="fa-solid fa-check-circle"></i>
-                    <span>मंडी में गेहूं का भाव अच्छा है — बेचने का समय</span>
-                </li>
-            </ul>
-        </div>
-
-        <!-- Disease Status -->
-        <div class="krishi-card disease-status-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-microscope"></i> हालिया जांच</h3>
-                <a href="{{ url_for('disease') }}" class="btn-krishi-secondary btn-sm">नई जांच</a>
-            </div>
-            {% if recent_diseases %}
-            {% for d in recent_diseases %}
-            <div class="disease-row">
-                <div class="disease-thumb">
-                    <img src="{{ d.image_url }}" alt="crop">
-                </div>
-                <div class="disease-info">
-                    <strong>{{ d.crop }}</strong>
-                    <span class="disease-name">{{ d.disease }}</span>
-                    <div class="confidence-bar">
-                        <div class="confidence-fill" style="width: {{ d.confidence }}%"></div>
-                    </div>
-                    <small>{{ d.confidence }}% confidence</small>
-                </div>
-                <span class="status-{{ 'danger' if d.severity == 'High' else 'warning' if d.severity == 'Medium' else 'safe' }}">{{ d.severity }}</span>
-            </div>
-            {% endfor %}
-            {% else %}
-            <div class="empty-state">
-                <i class="fa-solid fa-camera"></i>
-                <p>अभी तक कोई जांच नहीं हुई</p>
-                <a href="{{ url_for('disease') }}" class="btn-krishi-primary btn-sm">जांच करें</a>
-            </div>
-            {% endif %}
+    <div class="dash-stat">
+        <div class="dash-stat-icon" style="background:rgba(239,68,68,0.1);color:#EF4444;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div>
+            <span class="dash-stat-label">अलर्ट</span>
+            <span class="dash-stat-value">2 New</span>
+            <span class="dash-stat-sub" style="color:#EF4444;">Pest warning nearby</span>
         </div>
     </div>
-
-    <!-- Weather + Yield Progress -->
-    <div class="dash-bottom-row fade-in-up delay-4">
-        <!-- Weather Mini -->
-        <div class="krishi-card weather-mini-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-cloud-sun"></i> मौसम — 5 दिन</h3>
-                <a href="{{ url_for('weather') }}" class="btn-krishi-secondary btn-sm">विस्तार</a>
-            </div>
-            <div class="weather-mini-row">
-                <div class="weather-day"><span>आज</span><i class="fa-solid fa-cloud-rain"></i><b>28°</b></div>
-                <div class="weather-day"><span>कल</span><i class="fa-solid fa-cloud"></i><b>26°</b></div>
-                <div class="weather-day"><span>परसों</span><i class="fa-solid fa-sun"></i><b>31°</b></div>
-                <div class="weather-day"><span>Thu</span><i class="fa-solid fa-sun"></i><b>32°</b></div>
-                <div class="weather-day"><span>Fri</span><i class="fa-solid fa-cloud-sun"></i><b>29°</b></div>
-            </div>
-        </div>
-
-        <!-- Yield Progress -->
-        <div class="krishi-card yield-progress-card">
-            <div class="card-header">
-                <h3><i class="fa-solid fa-seedling"></i> फसल प्रगति</h3>
-                <a href="{{ url_for('yield_page') }}" class="btn-krishi-secondary btn-sm">पूरी रिपोर्ट</a>
-            </div>
-            <div class="yield-progress-list">
-                <div class="yield-progress-item">
-                    <div class="yield-label"><span>गेहूं</span><span>72%</span></div>
-                    <div class="progress-bar"><div class="progress-fill safe" style="width:72%"></div></div>
-                </div>
-                <div class="yield-progress-item">
-                    <div class="yield-label"><span>धान</span><span>45%</span></div>
-                    <div class="progress-bar"><div class="progress-fill warning" style="width:45%"></div></div>
-                </div>
-                <div class="yield-progress-item">
-                    <div class="yield-label"><span>मक्का</span><span>88%</span></div>
-                    <div class="progress-bar"><div class="progress-fill safe" style="width:88%"></div></div>
-                </div>
-                <div class="yield-progress-item">
-                    <div class="yield-label"><span>सरसों</span><span>30%</span></div>
-                    <div class="progress-bar"><div class="progress-fill danger" style="width:30%"></div></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
-{% endblock %}
 
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
-<script>
-// Set date
-document.getElementById('currentDate').textContent = new Date().toLocaleDateString('hi-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+<!-- 8 Feature Cards -->
+<section class="services-section" style="padding-top:0;">
+    <div class="services-header fade-in-up">
+        <h2 class="services-main-title">स्मार्ट कृषि समाधान</h2>
+        <p class="services-main-sub">एआई-संचालित 8 शक्तिशाली उपकरण — बेहतर फसल, बेहतर जीवन</p>
+    </div>
 
-// Yield Chart
-const yieldCtx = document.getElementById('yieldChart').getContext('2d');
-new Chart(yieldCtx, {
-    type: 'bar',
-    data: {
-        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
-        datasets: [{
-            label: 'उत्पादन (Q)',
-            data: [30,45,28,60,75,50,80,65,90,70,55,85],
-            backgroundColor: 'rgba(46,125,50,0.7)',
-            borderRadius: 8,
-            borderSkipped: false
-        }]
-    },
-    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-});
+    <div class="premium-cards-grid">
 
-// Profit Chart
-const profitCtx = document.getElementById('profitChart').getContext('2d');
-new Chart(profitCtx, {
-    type: 'line',
-    data: {
-        labels: ['Jan','Mar','May','Jul','Sep','Nov'],
-        datasets: [
-            { label: 'कमाई', data: [20000,35000,28000,45000,38000,55000], borderColor: '#43A047', backgroundColor: 'rgba(67,160,71,0.1)', fill: true, tension: 0.4 },
-            { label: 'खर्च', data: [12000,18000,15000,22000,19000,25000], borderColor: '#E53935', backgroundColor: 'rgba(229,57,53,0.1)', fill: true, tension: 0.4 }
-        ]
-    },
-    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-});
-</script>
+        <a href="{{ url_for('disease') }}" class="pcard pcard--disease fade-in-up">
+            <div class="pcard__corner-badge">AI</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/crop_disease.png') }}" alt="Crop Disease" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">फसल रोग पहचान</h3>
+                <p class="pcard__desc">पत्ती की फोटो अपलोड करें और तुरंत रोग निदान व उपचार सलाह पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn">जांच करें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon"><i class="fa-solid fa-leaf"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('soil') }}" class="pcard pcard--soil fade-in-up delay-1">
+            <div class="pcard__corner-badge pcard__corner-badge--soil">Lab</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/soil_analysis.png') }}" alt="Soil Analysis" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मृदा स्वास्थ्य जाँच</h3>
+                <p class="pcard__desc">मिट्टी के प्रकार, पोषक तत्व जानें और उर्वरक सिफारिशें पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--soil">जांच करें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--soil"><i class="fa-solid fa-flask"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('pest') }}" class="pcard pcard--pest fade-in-up delay-2">
+            <div class="pcard__corner-badge pcard__corner-badge--pest">AI</div>
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/pest_detection.png') }}" alt="Pest Detection" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">कीट पहचान</h3>
+                <p class="pcard__desc">कीट पहचानने के लिए फसल की फोटो अपलोड करें और एआई समाधान पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--pest">पहचानें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--pest"><i class="fa-solid fa-bug"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('weather') }}" class="pcard pcard--weather fade-in-up delay-3">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/weather_forecast.png') }}" alt="Weather Forecast" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मौसम पूर्वानुमान</h3>
+                <p class="pcard__desc">खेत के स्थान के लिए लाइव मौसम और 5 दिनों का पूर्वानुमान देखें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--weather">मौसम देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--weather"><i class="fa-solid fa-location-dot"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('market') }}" class="pcard pcard--market fade-in-up">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/mandi_price.png') }}" alt="Mandi Market" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">मंडी बाजार भाव</h3>
+                <p class="pcard__desc">रियल-टाइम मंडी भाव, MSP और मूल्य प्रवृत्ति ट्रैक करें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--market">भाव देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--market"><i class="fa-solid fa-indian-rupee-sign"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('schemes') }}" class="pcard pcard--schemes fade-in-up delay-1">
+            <div class="pcard__img-wrap">
+                <img src="{{ url_for('static', filename='img/government_schemes.png') }}" alt="Government Schemes" class="pcard__img">
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">सरकारी योजनाएं</h3>
+                <p class="pcard__desc">PM-KISAN, KCC, PMFBY और अन्य सरकारी सब्सिडी योजनाएं देखें।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--schemes">योजनाएं देखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--schemes"><i class="fa-solid fa-landmark"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('voice') }}" class="pcard pcard--voice fade-in-up delay-2">
+            <div class="pcard__corner-badge pcard__corner-badge--voice">
+                <i class="fa-solid fa-microphone" style="font-size:0.6rem;"></i>
+            </div>
+            <div class="pcard__img-wrap pcard__img-wrap--svg">
+                <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" class="pcard__svg">
+                    <defs>
+                        <radialGradient id="vGd" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#9333ea" stop-opacity="0.35"/>
+                            <stop offset="100%" stop-color="#9333ea" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="mBd" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#c084fc"/><stop offset="100%" stop-color="#7c3aed"/>
+                        </linearGradient>
+                        <linearGradient id="mHd" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#e879f9"/><stop offset="100%" stop-color="#9333ea"/>
+                        </linearGradient>
+                        <filter id="glw"><feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <ellipse cx="140" cy="110" rx="80" ry="75" fill="url(#vGd)"/>
+                    <path d="M55 80 Q40 110 55 140" stroke="#a855f7" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.7" filter="url(#glw)"/>
+                    <path d="M225 80 Q240 110 225 140" stroke="#a855f7" stroke-width="3.5" fill="none" stroke-linecap="round" opacity="0.7" filter="url(#glw)"/>
+                    <rect x="130" y="148" width="20" height="30" rx="4" fill="url(#mBd)"/>
+                    <rect x="108" y="172" width="64" height="10" rx="5" fill="url(#mBd)"/>
+                    <rect x="114" y="50" width="52" height="100" rx="26" fill="url(#mHd)" filter="url(#glw)"/>
+                    <line x1="114" y1="85" x2="166" y2="85" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="114" y1="100" x2="166" y2="100" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                    <line x1="114" y1="115" x2="166" y2="115" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+                </svg>
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">ध्वनि सलाहकार</h3>
+                <p class="pcard__desc">हिंदी में बोलकर खेती के सवाल पूछें और तुरंत आवाज़ में जवाब पाएं।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--voice">बोलें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--voice"><i class="fa-solid fa-waveform-lines"></i></span>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ url_for('organic') }}" class="pcard pcard--organic fade-in-up delay-3">
+            <div class="pcard__corner-badge pcard__corner-badge--organic">
+                <i class="fa-solid fa-leaf" style="font-size:0.6rem;"></i>
+            </div>
+            <div class="pcard__img-wrap pcard__img-wrap--svg">
+                <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" class="pcard__svg">
+                    <defs>
+                        <radialGradient id="oGl" cx="50%" cy="60%" r="55%">
+                            <stop offset="0%" stop-color="#10b981" stop-opacity="0.4"/>
+                            <stop offset="100%" stop-color="#10b981" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="pGn" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#34d399"/><stop offset="100%" stop-color="#059669"/>
+                        </linearGradient>
+                        <filter id="pGw"><feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                            <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <ellipse cx="140" cy="130" rx="90" ry="70" fill="url(#oGl)"/>
+                    <ellipse cx="140" cy="145" rx="65" ry="18" fill="#78350f"/>
+                    <path d="M140 145 L140 70" stroke="url(#pGn)" stroke-width="7" stroke-linecap="round" filter="url(#pGw)"/>
+                    <path d="M140 95 Q95 55 112 108 Q126 108 140 95Z" fill="url(#pGn)" filter="url(#pGw)"/>
+                    <path d="M140 80 Q185 40 168 92 Q154 92 140 80Z" fill="url(#pGn)" filter="url(#pGw)"/>
+                    <circle cx="90" cy="100" r="3.5" fill="#34d399" opacity="0.8" filter="url(#pGw)"/>
+                    <circle cx="195" cy="85" r="2.5" fill="#6ee7b7" opacity="0.7" filter="url(#pGw)"/>
+                </svg>
+            </div>
+            <div class="pcard__body">
+                <h3 class="pcard__title">जैविक खेती संवर्धन</h3>
+                <p class="pcard__desc">प्रमाणन गाइड, जैविक खाद रेसिपी और बेहतर पैदावार के सर्वोत्तम तरीके।</p>
+                <div class="pcard__footer">
+                    <span class="pcard__btn pcard__btn--organic">सीखें <i class="fa-solid fa-arrow-right"></i></span>
+                    <span class="pcard__icon pcard__icon--organic"><i class="fa-solid fa-seedling"></i></span>
+                </div>
+            </div>
+        </a>
+
+    </div>
+</section>
 {% endblock %}
